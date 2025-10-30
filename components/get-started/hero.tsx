@@ -16,6 +16,11 @@ import {
   Search,
 } from "lucide-react";
 
+interface GetStartedHeroProps {
+  isAuthenticated?: boolean;
+  user?: any;
+}
+
 const benefits = [
   { icon: Shield, text: "Verified providers" },
   { icon: Zap, text: "Fast booking" },
@@ -71,7 +76,7 @@ const itemVariants = {
   },
 };
 
-export function GetStartedHero() {
+export function GetStartedHero({ isAuthenticated = false, user }: GetStartedHeroProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-primary-50/50 via-white to-white">
       {/* Decorative background elements */}
@@ -100,35 +105,60 @@ export function GetStartedHero() {
             <motion.h1
               variants={itemVariants}
               className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6 leading-tight">
-              Réservez des services de confiance{" "}
-              <span className="text-primary-600">en quelques minutes</span>
+              {isAuthenticated ? (
+                <>
+                  Bienvenue {user?.firstName ? user.firstName : 'cher client'},{" "}
+                  <span className="text-primary-600">réservez votre service</span>
+                </>
+              ) : (
+                <>
+                  Réservez des services de confiance{" "}
+                  <span className="text-primary-600">en quelques minutes</span>
+                </>
+              )}
             </motion.h1>
 
             <motion.p
               variants={itemVariants}
               className="text-gray-600 text-lg sm:text-xl leading-relaxed max-w-xl mb-8">
-              Rejoignez des milliers d’utilisateurs qui font confiance à Tawa
-              pour comparer les prestataires, voir des prix transparents et
-              planifier instantanément.
+              {isAuthenticated ? (
+                "Explorez notre sélection de prestataires vérifiés et réservez le service qui vous convient en quelques clics."
+              ) : (
+                "Rejoignez des milliers d'utilisateurs qui font confiance à Tawa pour comparer les prestataires, voir des prix transparents et planifier instantanément."
+              )}
             </motion.p>
 
             <motion.div
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-3 mb-8">
-              <Link href="/register/customer">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="group relative overflow-hidden">
-                  Créer un compte
-                  <ArrowRight className="ml-2 h-4 w-4 inline-block transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost" size="sm">
-                  J’ai déjà un compte
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/services">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="group relative overflow-hidden">
+                    Réserver un service
+                    <ArrowRight className="ml-2 h-4 w-4 inline-block transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/register/customer">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="group relative overflow-hidden">
+                      Créer un compte
+                      <ArrowRight className="ml-2 h-4 w-4 inline-block transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm">
+                      J'ai déjà un compte
+                    </Button>
+                  </Link>
+                </>
+              )}
             </motion.div>
 
             <motion.ul

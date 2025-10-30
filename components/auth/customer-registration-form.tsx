@@ -35,13 +35,14 @@ interface FormErrors {
   [key: string]: string;
 }
 
-export default function CustomerRegistrationForm() {
+export function CustomerRegistrationForm() {
   const router = useRouter();
   const { login } = useAuth();
   const { setSelectedLocation } = useLocationData();
   const isMobile = useMobile();
   
   const [step, setStep] = useState(1);
+  const [currentLocation, setCurrentLocation] = useState(null);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -224,8 +225,8 @@ export default function CustomerRegistrationForm() {
   };
 
   const steps = [
-    { number: 1, title: "Informations personnelles", icon: User },
-    { number: 2, title: "Adresse", icon: MapPin },
+    { number: 1, title: "Informations personnelles", shortTitle: "Infos", icon: User },
+    { number: 2, title: "Adresse", shortTitle: "Adresse", icon: MapPin },
   ];
 
   return (

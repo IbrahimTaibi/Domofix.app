@@ -62,27 +62,48 @@ export default function LoginForm() {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, this would be an API call that returns user data
-      const userData = {
-        id: "user-123",
-        email: formData.email,
-        name: "User Name",
-        userType: "customer" as const,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
+      // Call the authentication API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        // Show specific error message from API
+        setErrors(prev => ({
+          ...prev,
+          email: result.error === 'Identifiants invalides' ? result.message : '',
+          password: result.error === 'Identifiants invalides' ? result.message : ''
+        }));
+        return;
+      }
+
       // Use our Zustand store through the hook
-      login(userData);
+      login(result.data);
       
-      // Redirect to dashboard based on role
-      router.push("/get-started");
+      // Redirect based on user type
+      const redirectPath = result.data.userType === 'provider' 
+        ? '/get-started/provider' 
+        : result.data.userType === 'admin'
+        ? '/admin'
+        : '/get-started/customer';
+      
+      router.push(redirectPath);
     } catch (error) {
       console.error("Login error:", error);
-      alert("Erreur de connexion. Veuillez réessayer.");
+      setErrors(prev => ({
+        ...prev,
+        email: "Erreur de connexion. Veuillez réessayer.",
+        password: ""
+      }));
     } finally {
       setIsLoading(false);
     }
