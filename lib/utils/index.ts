@@ -5,3 +5,6 @@
 export * from './formatting'
 export * from './dom'
 export * from './styles'
+export * from './rate-limit'
+export * from './audit-logger'
+export * from './csrf-protection'

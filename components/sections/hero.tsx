@@ -10,7 +10,7 @@ export default function HeroSection() {
   const isMobile = useMobile();
   
   return (
-    <section className="pt-24 pb-20 md:pt-28 md:pb-28 lg:pt-32 lg:pb-32 px-4 sm:px-6 lg:px-8 relative">
+    <section className="page-content pb-20 md:pb-28 lg:pb-32 px-4 sm:px-6 lg:px-8 relative">
       {/* Mobile: simple white background */}
       {isMobile && <div className="absolute inset-0 bg-white"></div>}
       

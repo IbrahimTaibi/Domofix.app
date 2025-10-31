@@ -12,6 +12,17 @@
   }
 }
 
+@layer components {
+  /* Page layout utilities */
+  .page-container {
+    @apply min-h-screen;
+  }
+  
+  .page-content {
+    @apply pt-4 sm:pt-6 md:pt-8;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

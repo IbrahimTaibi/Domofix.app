@@ -193,26 +193,36 @@ export function CustomerRegistrationForm() {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, this would be an API call that returns user data
-      const userData = {
-        id: `user-${Date.now()}`,
-        email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
-        userType: "customer" as const,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
+      // Call the registration API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          role: 'customer'
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        alert(result.message || 'Erreur lors de l\'inscription');
+        return;
+      }
+
       // Save location data if available
       if (currentLocation) {
         setSelectedLocation(currentLocation);
       }
       
       // Use our Zustand store through the hook
-      login(userData);
+      login(result.data);
       
       // Redirect to dashboard
       router.push("/get-started/customer");
@@ -352,6 +362,7 @@ export function CustomerRegistrationForm() {
                   onChange={(e) => updateField("password", e.target.value)}
                   error={errors.password}
                   helperText="Minimum 8 caractères"
+                  autoComplete="new-password"
                   required
                 />
                 <Input
@@ -360,6 +371,7 @@ export function CustomerRegistrationForm() {
                   value={formData.confirmPassword}
                   onChange={(e) => updateField("confirmPassword", e.target.value)}
                   error={errors.confirmPassword}
+                  autoComplete="new-password"
                   required
                 />
               </div>

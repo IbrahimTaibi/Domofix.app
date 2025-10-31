@@ -1,13 +1,54 @@
 // User Types
 export interface User {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
   phone?: string
   avatar?: string
-  userType: 'customer' | 'provider' | 'admin'
-  createdAt: Date
-  updatedAt: Date
+  profilePicture?: string
+  bio?: string
+  socialMedia?: {
+    facebook?: string
+    twitter?: string
+    instagram?: string
+    linkedin?: string
+    website?: string
+  }
+  notificationPreferences?: {
+    email: {
+      marketing: boolean
+      security: boolean
+      updates: boolean
+      bookings: boolean
+    }
+    push: {
+      messages: boolean
+      bookings: boolean
+      reminders: boolean
+      marketing: boolean
+    }
+    sms: {
+      bookings: boolean
+      reminders: boolean
+      security: boolean
+    }
+  }
+  privacySettings?: {
+    profileVisibility: 'public' | 'private' | 'contacts'
+    showEmail: boolean
+    showPhone: boolean
+    allowMessages: boolean
+    allowBookings: boolean
+    dataCollection: boolean
+    marketingEmails: boolean
+    thirdPartySharing: boolean
+    activityTracking: boolean
+  }
+  role: 'customer' | 'provider' | 'admin'
+  isEmailVerified: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 // Location Types

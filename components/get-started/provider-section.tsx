@@ -66,7 +66,7 @@ const steps = [
 
 export function GetStartedProviderSection() {
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto">
         {/* Header with Free Offer */}
         <motion.div

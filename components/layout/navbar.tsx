@@ -100,14 +100,14 @@ export default function Navbar() {
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
       scrolled 
-        ? 'bg-white shadow-md py-2' 
-        : 'bg-white/80 backdrop-blur-md py-4'
+        ? 'bg-white shadow-md py-1 sm:py-1.5' 
+        : 'bg-white/80 backdrop-blur-md py-2 sm:py-3'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Logo size="lg" />
+            <Logo size={isMobile ? "sm" : "md"} />
           </div>
 
           {/* Desktop Navigation - Centered */}
@@ -133,10 +133,10 @@ export default function Navbar() {
                     aria-haspopup="true"
                   >
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      {user?.firstName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <span className="text-sm font-medium text-gray-700">
-                      {user?.name || 'Utilisateur'}
+                      {user ? `${user.firstName} ${user.lastName}` : 'Utilisateur'}
                     </span>
                     <svg 
                       className={`w-4 h-4 text-gray-500 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} 
@@ -155,7 +155,7 @@ export default function Navbar() {
                       className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
                     >
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.name || 'Utilisateur'}</p>
+                        <p className="text-sm font-medium text-gray-900">{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur'}</p>
                         <p className="text-xs text-gray-500">{user?.email}</p>
                       </div>
                       <Link 
@@ -257,7 +257,7 @@ export default function Navbar() {
                 // Authenticated user mobile menu
                 <>
                   <div className="text-center text-sm text-gray-600 pb-2">
-                    Bonjour, {user?.name || 'Utilisateur'}
+                    Bonjour, {user ? `${user.firstName} ${user.lastName}` : 'Utilisateur'}
                   </div>
                   <Link href="/dashboard" className="block">
                     <Button variant="ghost" size="sm" className="w-full justify-center">Tableau de bord</Button>

@@ -85,7 +85,7 @@ export function GetStartedHero({ isAuthenticated = false, user }: GetStartedHero
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-100 rounded-full blur-3xl opacity-20" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <motion.div
           initial="hidden"
           animate="visible"

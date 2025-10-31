@@ -68,19 +68,52 @@ export default function LoginForm() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Important for cookies
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
         }),
       });
 
-      const result = await response.json();
+      // Check if response is ok before parsing
+      if (!response.ok) {
+        let errorMessage = 'Erreur de connexion. Veuillez réessayer.';
+        
+        try {
+          const errorResult = await response.json();
+          errorMessage = errorResult.message || errorResult.error || errorMessage;
+        } catch (parseError) {
+          // If JSON parsing fails, use default error message
+          console.error('Failed to parse error response:', parseError);
+        }
+        
+        setErrors(prev => ({
+          ...prev,
+          email: errorMessage,
+          password: ''
+        }));
+        return;
+      }
 
-      if (!result.success) {
+      // Parse successful response
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse success response:', parseError);
+        setErrors(prev => ({
+          ...prev,
+          email: "Erreur de connexion. Réponse invalide du serveur.",
+          password: ""
+        }));
+        return;
+      }
+
+      if (!result.success || !result.data) {
         // Show specific error message from API
         setErrors(prev => ({
           ...prev,
-          email: result.error === 'Identifiants invalides' ? result.message : '',
+          email: result.error === 'Identifiants invalides' ? result.message : (result.message || 'Erreur de connexion'),
           password: result.error === 'Identifiants invalides' ? result.message : ''
         }));
         return;
@@ -89,19 +122,24 @@ export default function LoginForm() {
       // Use our Zustand store through the hook
       login(result.data);
       
-      // Redirect based on user type
-      const redirectPath = result.data.userType === 'provider' 
+      // Determine redirect path
+      const redirectPath = result.data.role === 'provider' 
         ? '/get-started/provider' 
-        : result.data.userType === 'admin'
+        : result.data.role === 'admin'
         ? '/admin'
         : '/get-started/customer';
+      
+      // The cookie is set by the server in the response headers
+      // Give browser a moment to process the Set-Cookie header
+      // then redirect - this ensures the cookie is available for subsequent requests
+      await new Promise(resolve => setTimeout(resolve, 50));
       
       router.push(redirectPath);
     } catch (error) {
       console.error("Login error:", error);
       setErrors(prev => ({
         ...prev,
-        email: "Erreur de connexion. Veuillez réessayer.",
+        email: error instanceof Error ? error.message : "Erreur de connexion. Veuillez réessayer.",
         password: ""
       }));
     } finally {
@@ -138,6 +176,7 @@ export default function LoginForm() {
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
+                autoComplete="username"
               />
             </div>
 
@@ -154,6 +193,7 @@ export default function LoginForm() {
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
+                autoComplete="current-password"
               />
             </div>
 

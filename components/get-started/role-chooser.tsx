@@ -34,7 +34,7 @@ export function RoleChooser() {
   ];
 
   return (
-    <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative page-content pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Subtle animated background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <motion.div

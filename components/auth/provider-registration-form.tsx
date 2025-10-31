@@ -268,6 +268,7 @@ export function ProviderRegistrationForm() {
                   onChange={(e) => updateField("password", e.target.value)}
                   error={errors.password}
                   helperText="Minimum 8 caractères"
+                  autoComplete="new-password"
                   required
                 />
                 <Input
@@ -276,6 +277,7 @@ export function ProviderRegistrationForm() {
                   value={formData.confirmPassword}
                   onChange={(e) => updateField("confirmPassword", e.target.value)}
                   error={errors.confirmPassword}
+                  autoComplete="new-password"
                   required
                 />
               </div>

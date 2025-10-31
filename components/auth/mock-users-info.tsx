@@ -65,19 +65,19 @@ export default function MockUsersInfo() {
               {user.avatar && (
                 <img
                   src={user.avatar}
-                  alt={user.name}
+                  alt={`${user.firstName} ${user.lastName}`}
                   className="w-10 h-10 rounded-full object-cover"
                 />
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">{user.name}</span>
+                  <span className="font-medium text-gray-900">{user.firstName} {user.lastName}</span>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded-full ${getUserTypeColor(
-                      user.userType
+                      user.role
                     )}`}
                   >
-                    {user.userType}
+                    {user.role}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">

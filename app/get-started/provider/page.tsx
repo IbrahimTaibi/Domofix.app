@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function GetStartedProviderPage() {
   return (
-    <main className="pt-20">
+    <main className="page-content">
       <GetStartedProviderSection />
     </main>
   )

@@ -11,7 +11,7 @@ export default function CustomerGetStartedPage() {
   const { isAuthenticated, user } = useAuth();
 
   return (
-    <main className="pt-20">
+    <main className="page-content">
       <GetStartedHero isAuthenticated={isAuthenticated} user={user} />
       <Suspense fallback={<div className="py-20 text-center text-gray-500">Loading steps…</div>}>
         <HowItWorksSection />
