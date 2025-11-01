@@ -52,7 +52,6 @@ C:\Users\1\Darigo/
 │   ├── 📁 auth/                     # Authentication components
 │   │   ├── customer-registration-form.tsx
 │   │   ├── login-form.tsx
-│   │   ├── mock-users-info.tsx
 │   │   └── provider-registration-form.tsx
 │   ├── 📁 features/                 # Feature-specific components
 │   │   └── search-preview.tsx
@@ -97,8 +96,6 @@ C:\Users\1\Darigo/
 │   │   └── utils/                   # Utility tests
 │   ├── 📁 api/                      # API client utilities
 │   │   └── client.ts
-│   ├── 📁 mock-data/                # Mock data for development
-│   │   └── users.ts
 │   ├── 📁 models/                   # Database models
 │   │   └── User.ts
 │   ├── 📁 utils/                    # Utility functions

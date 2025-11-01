@@ -1,0 +1,26 @@
+{
+  "name": "@darigo/shared-utils",
+  "version": "0.1.0",
+  "description": "Shared utilities for the Darigo monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist"
+  },
+  "keywords": ["utils", "utilities", "shared"],
+  "author": "Darigo Team",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "rimraf": "^5.0.0",
+    "@types/bcryptjs": "^2.4.6"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}
