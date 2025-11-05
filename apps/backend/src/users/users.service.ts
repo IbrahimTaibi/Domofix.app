@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as bcrypt from 'bcryptjs';
+import { hashPassword, comparePassword } from '@darigo/shared-utils';
 import { User, UserDocument, Address } from './schemas/user.schema';
 
 export interface CreateUserDto {
@@ -23,7 +23,7 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await hashPassword(createUserDto.password);
     
     const createdUser = new this.userModel({
       ...createUserDto,
@@ -46,7 +46,10 @@ export class UsersService {
         emailVerified: false,
       },
       status: 'active',
-      role: createUserDto.role || 'customer',
+      // Always start as a standard customer regardless of provided role
+      role: 'customer',
+      // Provider application lifecycle starts at 'none'
+      providerStatus: 'none',
       profileCompleted: false,
       onboardingCompleted: false,
       timezone: createUserDto.timezone || 'UTC',
@@ -65,7 +68,7 @@ export class UsersService {
   }
 
   async validatePassword(user: User, password: string): Promise<boolean> {
-    return bcrypt.compare(password, user.password);
+    return comparePassword(password, user.password);
   }
 
   sanitizeUser(user: User): Omit<User, 'password'> {
@@ -156,7 +159,7 @@ export class UsersService {
   }
 
   async resetPassword(token: string, newPassword: string): Promise<User | null> {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await hashPassword(newPassword);
     
     return this.userModel.findOneAndUpdate(
       {

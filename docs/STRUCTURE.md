@@ -1,185 +1,279 @@
-# Tawa Project Structure
+# Project Structure
 
-## Overview
+This document provides a detailed overview of the Darigo project structure and organization principles.
 
-This document outlines the complete project structure for Tawa, a hyperlocal services platform built with Next.js 14, TypeScript, and Tailwind CSS.
+## 🏗️ Monorepo Architecture
 
-## Directory Structure
+Darigo uses a monorepo structure with npm workspaces to manage multiple applications and shared packages.
 
 ```
-tawa/
-├── 📁 app/                          # Next.js App Router
-│   ├── 📁 (auth)/                   # Auth route group
-│   │   ├── login/
-│   │   ├── register/
-│   │   └── layout.tsx
-│   ├── 📁 (customer)/               # Customer dashboard routes
-│   │   ├── bookings/
-│   │   ├── search/
-│   │   └── layout.tsx
-│   ├── 📁 (provider)/               # Provider dashboard routes
-│   │   ├── dashboard/
-│   │   ├── services/
-│   │   ├── bookings/
-│   │   └── layout.tsx
-│   ├── 📁 api/                      # API routes
-│   │   ├── auth/
-│   │   ├── services/
-│   │   ├── bookings/
-│   │   ├── reviews/
-│   │   └── health/
-│   ├── layout.tsx                   # Root layout
-│   ├── page.tsx                     # Home page
-│   ├── globals.css                  # Global styles
-│   └── favicon.ico
-│
-├── 📁 components/                    # React components
-│   ├── 📁 ui/                       # Reusable UI components
-│   │   ├── button.tsx
-│   │   ├── input.tsx
-│   │   ├── card.tsx
-│   │   ├── modal.tsx
-│   │   ├── badge.tsx
-│   │   └── index.ts
-│   ├── 📁 features/                 # Feature-specific components
-│   │   ├── 📁 services/
-│   │   ├── 📁 bookings/
-│   │   ├── 📁 providers/
-│   │   └── 📁 search/
-│   ├── 📁 layout/                   # Layout components
-│   │   ├── navbar.tsx
-│   │   ├── footer.tsx
-│   │   └── sidebar.tsx
-│   └── index.ts
-│
-├── 📁 lib/                          # Utility functions & helpers
-│   ├── 📁 api/                      # API clients
-│   │   ├── client.ts
-│   │   ├── services.ts
-│   │   ├── bookings.ts
-│   │   └── auth.ts
-│   ├── utils.ts                     # Helper functions
-│   ├── constants.ts                 # App constants
-│   └── validations.ts               # Zod schemas
-│
-├── 📁 hooks/                        # Custom React hooks
-│   ├── use-location.ts
-│   ├── use-debounce.ts
-│   ├── use-services.ts
-│   ├── use-bookings.ts
-│   └── index.ts
-│
-├── 📁 store/                        # Zustand state management
-│   ├── auth-store.ts
-│   ├── location-store.ts
-│   ├── booking-store.ts
-│   └── index.ts
-│
-├── 📁 types/                        # TypeScript definitions
-│   ├── index.ts                    # All type definitions
-│   └── schemas.ts                   # Shared schemas
-│
-├── 📁 public/                       # Static assets
-│   ├── images/
-│   ├── icons/
-│   └── fonts/
-│
-├── 📄 Configuration Files
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── next.config.js
-│   ├── tailwind.config.js
-│   ├── postcss.config.js
-│   ├── .eslintrc.json
-│   ├── .gitignore
-│   └── README.md
+Darigo/
+├── apps/                  # Applications
+├── packages/              # Shared packages
+├── docs/                  # Documentation
+├── package.json           # Root workspace configuration
+└── .gitignore            # Git ignore rules
 ```
 
-## Key Files Explained
+## 📱 Applications (`/apps`)
 
-### Configuration Files
+### Frontend (`/apps/frontend`)
 
-- **`package.json`**: Project dependencies and scripts
-- **`tsconfig.json`**: TypeScript configuration with path aliases
-- **`next.config.js`**: Next.js configuration (images, server actions, etc.)
-- **`tailwind.config.js`**: Tailwind CSS theme configuration
-- **`.eslintrc.json`**: ESLint configuration
+Next.js 14 application with App Router and feature-based architecture.
 
-### Core Files
+```
+frontend/
+├── app/                   # Next.js App Router
+│   ├── (auth)/           # Route groups
+│   ├── get-started/      # Get started pages
+│   ├── profile/          # Profile pages
+│   ├── register/         # Registration pages
+│   ├── globals.css       # Global styles
+│   ├── layout.tsx        # Root layout
+│   └── page.tsx          # Home page
+├── features/             # Feature-based modules
+│   ├── auth/            # Authentication feature
+│   ├── get-started/     # Onboarding feature
+│   ├── profile/         # Profile management
+│   ├── providers/       # Provider management
+│   └── search/          # Search functionality
+├── shared/              # Shared resources
+│   ├── components/      # Reusable UI components
+│   ├── hooks/          # Custom React hooks
+│   ├── store/          # Global state management
+│   ├── types/          # TypeScript type definitions
+│   └── utils/          # Utility functions
+├── jest.config.js       # Jest configuration
+├── next.config.js       # Next.js configuration
+├── tailwind.config.js   # Tailwind CSS configuration
+└── tsconfig.json        # TypeScript configuration
+```
 
-#### `/app`
-- **`layout.tsx`**: Root layout with metadata and global styles
-- **`page.tsx`**: Home page
-- **`globals.css`**: Global Tailwind imports and CSS variables
-- **`/api`**: RESTful API routes for backend operations
+#### Feature Structure
 
-#### `/types`
-- **`index.ts`**: All TypeScript interfaces and types:
-  - User, Provider, Service types
-  - Booking, Review types
-  - Location, Search types
-  - API response types
+Each feature follows a consistent structure:
 
-#### `/lib`
-- **`utils.ts`**: Utility functions (cn, formatCurrency, calculateDistance, etc.)
-- **`constants.ts`**: App constants, categories, API endpoints
-- **`validations.ts`**: Zod validation schemas
-- **`api/client.ts`**: Centralized API client for all requests
+```
+feature-name/
+├── components/          # Feature-specific components
+├── hooks/              # Feature-specific hooks
+├── services/           # API services and business logic
+├── store/              # Feature-specific state
+├── tests/              # Feature tests
+└── types/              # Feature-specific types
+```
 
-#### `/components`
-- **`ui/`**: Reusable UI components (Button, Input, Card, etc.)
-- **`features/`**: Feature-specific components grouped by domain
-- **`layout/`**: Layout components (Navbar, Footer, Sidebar)
+#### Shared Resources
 
-#### `/hooks`
-- **`use-location.ts`**: Geolocation hook
-- **`use-debounce.ts`**: Debounce hook for search
+```
+shared/
+├── components/
+│   ├── layout/         # Layout components (navbar, footer)
+│   ├── sections/       # Page sections (hero, features)
+│   ├── button.tsx      # Button component
+│   ├── input.tsx       # Input component
+│   └── index.ts        # Component exports
+├── hooks/
+│   ├── use-debounce.ts # Debounce hook
+│   ├── use-form.ts     # Form management hook
+│   ├── use-mobile.ts   # Mobile detection hook
+│   └── index.ts        # Hook exports
+├── store/
+│   ├── location-store.ts # Location state
+│   └── index.ts        # Store exports
+├── types/
+│   ├── globals.d.ts    # Global type definitions
+│   └── index.ts        # Type exports
+└── utils/
+    ├── api.ts          # API utilities
+    ├── constants.ts    # Application constants
+    ├── validations.ts  # Validation schemas
+    └── index.ts        # Utility exports
+```
 
-#### `/store`
-- **`auth-store.ts`**: Authentication state management
-- **`location-store.ts`**: Location state management
+### Backend (`/apps/backend`)
 
-## Architecture Principles
+NestJS application with modular architecture.
 
-### 1. Separation of Concerns
-- **UI**: Components focus only on presentation
-- **Logic**: Custom hooks handle business logic
-- **State**: Zustand manages global state
-- **Data**: Types ensure type safety across the app
+```
+backend/
+├── src/
+│   ├── auth/           # Authentication module
+│   │   ├── decorators/ # Custom decorators
+│   │   ├── dto/        # Data Transfer Objects
+│   │   ├── guards/     # Authentication guards
+│   │   └── strategies/ # Passport strategies
+│   ├── users/          # User management module
+│   │   ├── entities/   # Database entities
+│   │   └── schemas/    # Mongoose schemas
+│   ├── app.module.ts   # Root application module
+│   └── main.ts         # Application entry point
+├── test/               # End-to-end tests
+├── nest-cli.json       # Nest CLI configuration
+└── tsconfig.json       # TypeScript configuration
+```
 
-### 2. Scalability
-- Route groups for feature separation
-- Modular components that can be easily extended
-- Centralized API client for consistent data fetching
-- Reusable utility functions
+## 📦 Packages (`/packages`)
+
+Shared packages used across applications.
+
+### Shared Types (`/packages/shared-types`)
+
+Common TypeScript type definitions.
+
+```
+shared-types/
+├── src/
+│   ├── api.ts          # API-related types
+│   ├── auth.ts         # Authentication types
+│   └── index.ts        # Type exports
+├── package.json
+└── tsconfig.json
+```
+
+### Shared Utils (`/packages/shared-utils`)
+
+Common utility functions.
+
+```
+shared-utils/
+├── src/
+│   ├── auth.ts         # Authentication utilities
+│   ├── date.ts         # Date utilities
+│   ├── validation.ts   # Validation utilities
+│   └── index.ts        # Utility exports
+├── package.json
+└── tsconfig.json
+```
+
+### ESLint Config (`/packages/eslint-config`)
+
+Shared ESLint configuration for consistent code style.
+
+## 🎯 Design Principles
+
+### 1. Feature-Based Organization
+
+- Each feature is self-contained with its own components, hooks, services, and types
+- Promotes modularity and maintainability
+- Easy to locate and modify feature-specific code
+
+### 2. Shared Resources
+
+- Common components, hooks, and utilities are centralized in `/shared`
+- Prevents code duplication
+- Ensures consistency across features
 
 ### 3. Type Safety
-- Comprehensive TypeScript types
-- Zod validation schemas
-- Path aliases for clean imports
 
-### 4. Developer Experience
-- Clear folder structure
-- Consistent naming conventions
-- Helpful comments and documentation
-- Easy-to-use utility functions
+- Full TypeScript coverage across all applications
+- Shared types in dedicated packages
+- Strict type checking enabled
 
-## Next Steps
+### 4. Separation of Concerns
 
-1. **Install Dependencies**: `npm install`
-2. **Run Development Server**: `npm run dev`
-3. **Build Features**: Start building features in their respective directories
-4. **Extend Types**: Add more types as features grow
-5. **Add Components**: Build UI components as needed
+- Clear separation between UI components, business logic, and data access
+- Services handle API calls and business logic
+- Components focus on presentation
+- Hooks manage component state and side effects
 
-## Best Practices
+### 5. Scalability
 
-1. **Keep components small and focused**
-2. **Use TypeScript strictly**
-3. **Follow the existing folder structure**
-4. **Add comments for complex logic**
-5. **Keep the store minimal (only global state)**
-6. **Use API client for all data fetching**
-7. **Validate forms with Zod**
-8. **Keep styles in Tailwind classes**
+- Monorepo structure allows for easy addition of new applications
+- Feature-based architecture supports team scaling
+- Shared packages promote code reuse
 
+## 📁 File Naming Conventions
+
+### Components
+- PascalCase for component files: `UserProfile.tsx`
+- kebab-case for component directories: `user-profile/`
+- Index files for clean imports: `index.ts`
+
+### Hooks
+- Prefix with `use`: `useAuth.ts`, `useForm.ts`
+- kebab-case for multi-word hooks: `use-local-storage.ts`
+
+### Utilities
+- kebab-case: `api-client.ts`, `date-utils.ts`
+- Descriptive names: `validations.ts`, `constants.ts`
+
+### Types
+- PascalCase for interfaces and types: `User`, `ApiResponse`
+- Suffix with appropriate descriptor: `UserDto`, `AuthState`
+
+## 🔄 Import Patterns
+
+### Path Aliases
+
+TypeScript path aliases are configured for clean imports:
+
+```typescript
+// Frontend aliases
+import { Button } from '@/shared/components'
+import { useAuth } from '@/features/auth/hooks'
+import { UserProfile } from '@/features/profile/components'
+
+// Shared package imports
+import { User } from '@darigo/shared-types'
+import { validateEmail } from '@darigo/shared-utils'
+```
+
+### Import Organization
+
+Imports should be organized in the following order:
+
+1. External libraries (React, Next.js, etc.)
+2. Internal shared packages
+3. Shared resources
+4. Feature-specific imports
+5. Relative imports
+
+```typescript
+// External
+import React from 'react'
+import { NextPage } from 'next'
+
+// Shared packages
+import { User } from '@darigo/shared-types'
+
+// Shared resources
+import { Button } from '@/shared/components'
+import { useAuth } from '@/shared/hooks'
+
+// Feature-specific
+import { ProfileForm } from '@/features/profile/components'
+
+// Relative
+import './styles.css'
+```
+
+## 🧪 Testing Structure
+
+Tests are co-located with their respective features:
+
+```
+feature/
+├── components/
+│   ├── UserForm.tsx
+│   └── UserForm.test.tsx
+├── hooks/
+│   ├── useUser.ts
+│   └── useUser.test.ts
+└── tests/
+    └── integration.test.tsx
+```
+
+## 📝 Configuration Files
+
+### Root Level
+- `package.json` - Workspace configuration and scripts
+- `.gitignore` - Git ignore patterns
+- `README.md` - Project overview
+
+### Application Level
+- `package.json` - Application dependencies and scripts
+- `tsconfig.json` - TypeScript configuration
+- Configuration files specific to the framework (Next.js, NestJS)
+
+This structure promotes maintainability, scalability, and developer experience while ensuring clear separation of concerns and code organization.

@@ -1,0 +1,221 @@
+Project Directory Tree (max depth 5)
+
+c:\Users\1\Darigo
+├── .gitignore
+├── .turbo\
+│   ├── cache\
+│   ├── cookies\
+│   └── daemon\
+│       ├── d37b57d5ef3401df-turbo.log.2025-11-04
+│       └── d37b57d5ef3401df-turbo.log.2025-11-05
+├── apps\
+│   ├── backend\
+│   │   ├── .env.example
+│   │   ├── .prettierrc
+│   │   ├── .turbo\
+│   │   ├── README.md
+│   │   ├── eslint.config.mjs
+│   │   ├── nest-cli.json
+│   │   ├── package.json
+│   │   ├── src\
+│   │   │   ├── app.controller.ts
+│   │   │   ├── app.module.ts
+│   │   │   ├── app.service.ts
+│   │   │   ├── auth\
+│   │   │   │   ├── auth.controller.ts
+│   │   │   │   ├── auth.module.ts
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── decorators\
+│   │   │   │   ├── dto\
+│   │   │   │   ├── guards\
+│   │   │   │   └── strategies\
+│   │   │   ├── main.ts
+│   │   │   ├── provider-applications\
+│   │   │   │   ├── dto\
+│   │   │   │   ├── provider-applications.controller.ts
+│   │   │   │   ├── provider-applications.module.ts
+│   │   │   │   ├── provider-applications.service.ts
+│   │   │   │   └── schemas\
+│   │   │   └── users\
+│   │   │       ├── entities\
+│   │   │       ├── schemas\
+│   │   │       ├── users.module.ts
+│   │   │       └── users.service.ts
+│   │   ├── test\
+│   │   │   └── app.e2e-spec.ts
+│   │   ├── tsconfig.build.json
+│   │   └── tsconfig.json
+│   └── frontend\
+│       ├── .env.local.example
+│       ├── .eslintrc.json
+│       ├── .turbo\
+│       ├── app\
+│       │   ├── api\
+│       │   │   └── auth\
+│       │   ├── auth\
+│       │   │   ├── page.tsx
+│       │   │   └── popup-close\
+│       │   │       └── page.tsx
+│       │   ├── dashboard\
+│       │   │   └── page.tsx
+│       │   ├── demander-un-service\
+│       │   │   └── page.tsx
+│       │   ├── get-started\
+│       │   │   ├── customer\
+│       │   │   │   └── page.tsx
+│       │   │   ├── page.tsx
+│       │   │   └── provider\
+│       │   │       └── page.tsx
+│       │   ├── globals.css
+│       │   ├── historique\
+│       │   │   └── page.tsx
+│       │   ├── layout.tsx
+│       │   ├── loading-demo\
+│       │   ├── messages\
+│       │   │   └── page.tsx
+│       │   ├── notifications\
+│       │   │   └── page.tsx
+│       │   ├── page.tsx
+│       │   ├── profile\
+│       │   │   └── page.tsx
+│       │   ├── providers.tsx
+│       │   └── register\
+│       │       ├── customer\
+│       │       │   └── page.tsx
+│       │       ├── layout.tsx
+│       │       ├── page.tsx
+│       │       └── provider\
+│       │           └── page.tsx
+│       ├── features\
+│       │   ├── auth\
+│       │   │   ├── components\
+│       │   │   │   ├── auth-form.tsx
+│       │   │   │   ├── customer-registration-form.tsx
+│       │   │   │   ├── provider-registration-form.tsx
+│       │   │   │   └── providers\
+│       │   │   │       └── auth-provider.tsx
+│       │   │   ├── hooks\
+│       │   │   │   └── useAuth.ts
+│       │   │   └── store\
+│       │   │       └── auth-store.ts
+│       │   ├── get-started\
+│       │   │   ├── components\
+│       │   │   │   ├── hero.tsx
+│       │   │   │   ├── provider-section.tsx
+│       │   │   │   └── role-chooser.tsx
+│       │   │   ├── hooks\
+│       │   │   ├── services\
+│       │   │   ├── tests\
+│       │   │   └── types\
+│       │   ├── profile\
+│       │   │   ├── components\
+│       │   │   │   ├── account-settings.tsx
+│       │   │   │   ├── change-password-modal.tsx
+│       │   │   │   ├── notification-settings.tsx
+│       │   │   │   ├── privacy-settings.tsx
+│       │   │   │   ├── profile-header.tsx
+│       │   │   │   ├── profile-info.tsx
+│       │   │   │   └── profile-skeleton.tsx
+│       │   │   ├── hooks\
+│       │   │   ├── services\
+│       │   │   └── types\
+│       │   ├── providers\
+│       │   │   ├── components\
+│       │   │   ├── hooks\
+│       │   │   ├── services\
+│       │   │   ├── tests\
+│       │   │   └── types\
+│       │   └── search\
+│       │       ├── components\
+│       │       ├── hooks\
+│       │       ├── services\
+│       │       ├── tests\
+│       │       └── types\
+│       ├── jest.setup.js
+│       ├── next.config.js
+│       ├── package-lock.json
+│       ├── package.json
+│       ├── postcss.config.js
+│       ├── shared\
+│       │   ├── components\
+│       │   │   ├── button.tsx
+│       │   │   ├── index.ts
+│       │   │   ├── input.tsx
+│       │   │   ├── layout\
+│       │   │   │   ├── footer.tsx
+│       │   │   │   ├── logo.tsx
+│       │   │   │   ├── navbar.tsx
+│       │   │   │   ├── nav-links.tsx
+│       │   │   │   └── secondary-navbar.tsx
+│       │   │   ├── search-preview.tsx
+│       │   │   ├── sections\
+│       │   │   │   ├── features.tsx
+│       │   │   │   ├── hero.tsx
+│       │   │   │   ├── how-it-works.tsx
+│       │   │   │   ├── providers.tsx
+│       │   │   │   └── stats.tsx
+│       │   │   └── textarea.tsx
+│       │   ├── contexts\
+│       │   ├── hooks\
+│       │   │   ├── index.ts
+│       │   │   ├── tests\
+│       │   │   ├── use-debounce.ts
+│       │   │   ├── use-form.ts
+│       │   │   ├── use-local-storage.ts
+│       │   │   ├── use-location-data.ts
+│       │   │   ├── use-location.ts
+│       │   │   ├── use-mobile.ts
+│       │   │   ├── use-multi-step-form.ts
+│       │   │   └── use-validation.ts
+│       │   ├── store\
+│       │   │   ├── index.ts
+│       │   │   └── location-store.ts
+│       │   ├── types\
+│       │   │   └── globals.d.ts
+│       │   └── utils\
+│       │       ├── api.ts
+│       │       ├── constants.ts
+│       │       ├── dom.ts
+│       │       ├── fonts.ts
+│       │       ├── formatting.ts
+│       │       ├── index.ts
+│       │       ├── styles.ts
+│       │       ├── tests\
+│       │       ├── theme.ts
+│       │       ├── utils.ts
+│       │       └── validations.ts
+│       ├── tailwind.config.js
+│       └── tsconfig.json
+├── docs\
+│   ├── API.md
+│   ├── COMPONENTS.md
+│   ├── CONTRIBUTING.md
+│   ├── DEPLOYMENT.md
+│   ├── README.md
+│   ├── STRUCTURE.md
+│   └── TESTING.md
+├── jest.config.js
+├── package-lock.json
+├── package.json
+├── packages\
+│   ├── eslint-config\
+│   ├── shared-types\
+│   │   ├── .turbo\
+│   │   ├── package.json
+│   │   ├── src\
+│   │   │   ├── api.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── index.ts
+│   │   │   └── service.ts
+│   │   └── tsconfig.json
+│   └── shared-utils\
+│       ├── .turbo\
+│       ├── package.json
+│       ├── src\
+│       │   ├── auth.ts
+│       │   ├── date.ts
+│       │   ├── index.ts
+│       │   └── validation.ts
+│       └── tsconfig.json
+├── tsconfig.base.json
+└── turbo.json

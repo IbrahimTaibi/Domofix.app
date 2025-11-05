@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get, UseGuards, Request, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, Req, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto';
+import { RegisterDto, LoginDto, OAuthLoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
@@ -22,5 +22,15 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Post('oauth/:provider')
+  async oauthLogin(
+    @Param('provider') provider: 'facebook' | 'google',
+    @Body() body: OAuthLoginDto,
+    @Req() req: any,
+  ) {
+    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    return this.authService.oauthLogin(provider, body, clientIp);
   }
 }

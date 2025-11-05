@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { CustomerRegistrationForm } from '@/components/auth/customer-registration-form'
+import { CustomerRegistrationForm } from '@/features/auth/components/customer-registration-form'
 
 export const metadata: Metadata = {
-  title: 'Inscription client — Tawa',
+  title: 'Inscription client — Domofix',
   description: 'Créez votre compte client et accédez à des milliers de prestataires près de chez vous.',
 }
 

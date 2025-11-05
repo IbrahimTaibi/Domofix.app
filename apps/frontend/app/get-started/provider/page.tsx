@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { GetStartedProviderSection } from '@/components/get-started/provider-section'
+import { GetStartedProviderSection } from '@/features/get-started/components/provider-section'
 
 export const metadata: Metadata = {
-  title: 'Commencer en tant que prestataire — Tawa',
+  title: 'Commencer en tant que prestataire — Domofix',
   description: "Profitez d'un mois gratuit et gérez votre activité depuis un tableau de bord unifié.",
 }
 

@@ -151,6 +151,10 @@ export class User {
   @Prop({ default: 'customer', enum: ['customer', 'provider', 'admin'] })
   role: string;
 
+  // Provider application lifecycle status
+  @Prop({ default: 'none', enum: ['none', 'pending', 'approved', 'rejected', 'needs_info'] })
+  providerStatus: string;
+
   // Profile completion and onboarding
   @Prop({ default: false })
   profileCompleted: boolean;
@@ -179,3 +183,4 @@ UserSchema.index({ 'security.emailVerificationToken': 1 });
 UserSchema.index({ 'security.passwordResetToken': 1 });
 UserSchema.index({ status: 1 });
 UserSchema.index({ role: 1 });
+UserSchema.index({ providerStatus: 1 });

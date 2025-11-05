@@ -18,8 +18,9 @@
     @apply min-h-screen;
   }
   
+  /* Ensure content sits below the fixed navbars using CSS variables */
   .page-content {
-    @apply pt-4 sm:pt-6 md:pt-8;
+    padding-top: calc(var(--navbar-height, 4rem) + var(--secondary-navbar-height, 0px));
   }
 }
 

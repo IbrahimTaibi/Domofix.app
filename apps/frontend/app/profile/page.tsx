@@ -1,31 +1,24 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { 
   ProfileHeader, 
   ProfileInfo, 
   AccountSettings, 
   ProfileSkeleton 
-} from '@/components/profile';
+} from '@/features/profile/components';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
+  // While auth state hydrates or profile fetch runs, show a skeleton
   if (isLoading) {
     return <ProfileSkeleton />;
   }
 
+  // If user not yet loaded but session exists, keep skeleton to avoid white screen
   if (!isAuthenticated || !user) {
-    return null;
+    return <ProfileSkeleton />;
   }
 
   return (

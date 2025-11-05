@@ -25,6 +25,7 @@ export class User implements Omit<SharedUser, 'createdAt' | 'updatedAt'> {
   // User status and role
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   role: 'customer' | 'provider' | 'admin';
+  providerStatus: 'none' | 'pending' | 'approved' | 'rejected' | 'needs_info';
   
   // Profile completion and onboarding
   profileCompleted: boolean;

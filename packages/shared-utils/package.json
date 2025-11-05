@@ -7,13 +7,14 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "type-check": "tsc --noEmit"
   },
   "keywords": ["utils", "utilities", "shared"],
   "author": "Darigo Team",
   "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^3.0.2"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

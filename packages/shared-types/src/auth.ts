@@ -69,6 +69,7 @@ export interface User {
   // User status and role
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   role: 'customer' | 'provider' | 'admin';
+  providerStatus: ProviderStatus;
   
   // Profile completion and onboarding
   profileCompleted: boolean;
@@ -80,6 +81,28 @@ export interface User {
   
   createdAt: string;
   updatedAt: string;
+}
+
+export type ProviderStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'needs_info';
+
+export interface ProviderApplication {
+  id: string;
+  userId: string;
+  businessName: string;
+  phone: string;
+  category: string;
+  documentUrl: string;
+  notes?: string;
+  status: Exclude<ProviderStatus, 'none'>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProviderApplicationRequest {
+  businessName: string;
+  phone: string;
+  category: string;
+  notes?: string;
 }
 
 export interface AuthResponse {

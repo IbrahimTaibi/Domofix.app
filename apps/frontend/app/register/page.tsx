@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Inscription — Tawa',
-  description: 'Créez votre compte sur Tawa et rejoignez notre communauté.',
+  title: 'Inscription — Domofix',
+  description: 'Créez votre compte sur Domofix et rejoignez notre communauté.',
 }
 
 export default function RegisterPage() {
@@ -12,7 +12,7 @@ export default function RegisterPage() {
     <div className="container mx-auto max-w-4xl page-content pb-16 px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Rejoignez Tawa
+          Rejoignez Domofix
         </h1>
         <p className="mt-4 text-lg text-gray-600">
           Choisissez le type de compte que vous souhaitez créer

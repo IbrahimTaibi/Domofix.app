@@ -4,7 +4,7 @@ import {
   HowItWorksSection,
   StatsSection,
   ProvidersSection,
-} from "@/components/sections";
+} from "@/shared/components/sections";
 
 export default function Home() {
   return (

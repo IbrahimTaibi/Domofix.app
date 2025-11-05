@@ -1,0 +1,23 @@
+/* Initial load animation for the hero image */
+.heroImageEnter {
+  animation: heroImageIn 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes heroImageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroImageEnter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

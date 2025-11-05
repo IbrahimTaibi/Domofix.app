@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Address } from '../users/schemas/user.schema';
+import { OAuthLoginDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +30,11 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Create new user
-    const user = await this.usersService.create(userData);
+    // Create new user (force standard customer role at registration)
+    const user = await this.usersService.create({
+      ...userData,
+      role: 'customer',
+    });
     
     // Generate JWT token
     const payload = { 
@@ -96,5 +100,84 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  /**
+   * OAuth login/link: find existing user by email or create one, then issue JWT.
+   */
+  async oauthLogin(provider: 'facebook' | 'google', payload: OAuthLoginDto, ip?: string) {
+    // Normalize email: if provider didn't supply email, synthesize one from providerId
+    const normalizedEmail = payload.email || (payload.providerId ? `${provider}_${payload.providerId}@social.local` : undefined);
+    if (!normalizedEmail) {
+      // Without email or providerId we cannot link/create; reject gracefully
+      throw new UnauthorizedException('OAuth payload missing email and providerId');
+    }
+    // Try find user by normalized email
+    const existing = await this.usersService.findByEmail(normalizedEmail);
+
+    let user = existing;
+    if (!existing) {
+      const { firstName, lastName } = this.extractNames(payload.firstName, payload.lastName);
+      const randomPassword = this.generateRandomPassword();
+      user = await this.usersService.create({
+        email: normalizedEmail,
+        password: randomPassword,
+        firstName,
+        lastName,
+        avatar: payload.avatar,
+        // Always start as standard customer
+        role: 'customer',
+      });
+      // Optionally mark email verified or store provider metadata later
+    } else {
+      // If user exists and we received an avatar, update when missing or when current is a Facebook CDN URL (refresh to higher-res)
+      const currentAvatar = (existing as any).avatar as string | undefined;
+      const isFacebookAvatar = (url?: string) => !!url && /(facebook\.com|fbcdn\.net|fbsbx\.com)/i.test(url);
+      const shouldUpdateAvatar = !!payload.avatar && (!currentAvatar || isFacebookAvatar(currentAvatar));
+      if (shouldUpdateAvatar) {
+        user = await this.usersService.updateUser(
+          (existing as any)._id.toString(),
+          { avatar: payload.avatar } as any,
+        ) as any;
+      }
+    }
+
+    // Update last login info
+    if (ip && user) {
+      await this.usersService.updateLastLogin((user as any)._id.toString(), ip);
+      await this.usersService.resetFailedLoginAttempts((user as any)._id.toString());
+    }
+
+    const jwtPayload = {
+      sub: (user as any)._id.toString(),
+      email: (user as any).email,
+    };
+
+    return {
+      access_token: this.jwtService.sign(jwtPayload),
+      user: this.usersService.sanitizeUser(user as any),
+      provider,
+    };
+  }
+
+  private extractNames(firstName?: string, lastName?: string) {
+    if (firstName || lastName) {
+      return {
+        firstName: firstName || 'Utilisateur',
+        lastName: lastName || 'Social',
+      };
+    }
+    // Fallback when only full name available or missing
+    return { firstName: 'Utilisateur', lastName: 'Social' };
+  }
+
+  private generateRandomPassword() {
+    // 32-char random string as placeholder password for OAuth-created users
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
+    let pwd = '';
+    for (let i = 0; i < 32; i++) {
+      pwd += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return pwd;
   }
 }

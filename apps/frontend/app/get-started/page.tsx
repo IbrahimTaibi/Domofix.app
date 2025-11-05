@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { RoleChooser } from "@/components/get-started/role-chooser";
+import { RoleChooser } from "@/features/get-started/components/role-chooser";
 
 export const metadata: Metadata = {
-  title: "Commencer — Tawa",
-  description: "Choisissez comment vous souhaitez commencer sur Tawa.",
+  title: "Commencer — Domofix",
+  description: "Choisissez comment vous souhaitez commencer sur Domofix.",
 };
 
 export default function GetStartedPage() {
