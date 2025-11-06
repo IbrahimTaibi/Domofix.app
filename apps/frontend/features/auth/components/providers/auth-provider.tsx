@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { getSession, signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@darigo/shared-types';
 import { apiClient } from '@/shared/utils/api';
 import { useRouter } from 'next/navigation';
@@ -32,6 +32,11 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
   const setLoading = useAuthStore((s) => s.setLoading)
   const setError = useAuthStore((s) => s.setError)
   const setBackendToken = useAuthStore((s) => s.setBackendToken)
+  const storeLogin = useAuthStore((s) => s.login)
+  const storeRegister = useAuthStore((s) => s.register)
+  const storeLogout = useAuthStore((s) => s.logout)
+  const storeApplyProvider = useAuthStore((s) => s.applyProvider)
+  const storeCheckAuth = useAuthStore((s) => s.checkAuth)
 
   // Seed backend token immediately if provided from SSR session
   useEffect(() => {
@@ -45,61 +50,10 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
   }, [initialBackendToken, initialUser, setBackendToken, setUser]);
 
   useEffect(() => {
-    // Check for existing session on mount
-    const checkAuth = async () => {
-      // 1) Try syncing NextAuth session-backed token to our backend client
-      try {
-        const session = await getSession();
-        const backendToken = (session as any)?.backendAccessToken;
-        if (backendToken) {
-          apiClient.setAuthToken(backendToken);
-          const instantUser = (session as any)?.backendUser;
-          if (instantUser) {
-            // Prefill user state from session to show avatar immediately
-            setUser(instantUser as User);
-          }
-        }
-
-        // Fallback: if NextAuth session exists but backend token missing, link via email
-        const provider = (session as any)?.provider as 'facebook' | 'google' | undefined;
-        const providerId = (session as any)?.providerId as string | undefined;
-        const email = session?.user?.email;
-        const name = session?.user?.name || '';
-        if (!backendToken && provider && (email || providerId)) {
-          try {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-            const [firstName, ...rest] = name.split(' ');
-            const lastName = rest.join(' ') || undefined;
-            const res = await fetch(`${apiBase}/auth/oauth/${provider}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ provider, providerId, email, firstName, lastName, avatar: session?.user?.image }),
-            });
-            if (res.ok) {
-              const data = await res.json();
-              apiClient.setAuthToken(data.access_token);
-            }
-          } catch (e) {
-            // Ignore and continue; user can still use email/password
-          }
-        }
-      } catch {}
-
-      // 2) If we have a backend token (from localStorage or NextAuth), fetch profile
-      if (apiClient.isAuthenticated()) {
-        try {
-          const userData = await apiClient.getProfile();
-          setUser(userData);
-        } catch (err) {
-          // Token might be invalid, remove it
-          apiClient.logout();
-        }
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, []);
+    // Unified check via store
+    storeCheckAuth()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // React to NextAuth session changes (e.g., after OAuth in a popup)
   useEffect(() => {
@@ -160,72 +114,43 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
 
   const login = async (data: LoginRequest, redirectTo = '/profile') => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await apiClient.login(data);
-      setUser(response.user);
-      
-      // Refresh the UI to update components that depend on auth state
-      router.refresh();
-      
-      // Redirect after successful login
-      if (redirectTo) {
-        router.push(redirectTo);
-      }
+      setError(null)
+      await storeLogin(data)
+      router.refresh()
+      if (redirectTo) router.push(redirectTo)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-      throw err;
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Login failed')
+      throw err
     }
-  };
+  }
 
   const logout = (redirectTo = '/auth') => {
-    apiClient.logout();
-    setUser(null);
-    setBackendToken(null)
-    setError(null);
-    // End NextAuth session and let NextAuth redirect after cookie is cleared
+    storeLogout()
+    setError(null)
     try { signOut({ redirect: true, callbackUrl: redirectTo }); } catch {}
   };
 
   const register = async (data: RegisterRequest, redirectTo = '/profile') => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await apiClient.register(data);
-      setUser(response.user);
-      
-      // Refresh the UI to update components that depend on auth state
-      router.refresh();
-      
-      // Redirect after successful registration
-      if (redirectTo) {
-        router.push(redirectTo);
-      }
+      setError(null)
+      await storeRegister(data)
+      router.refresh()
+      if (redirectTo) router.push(redirectTo)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-      throw err;
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'Registration failed')
+      throw err
     }
   };
 
   const applyProvider = async (data: CreateProviderApplicationRequest, document: File) => {
     try {
-      setLoading(true);
-      setError(null);
-      const application = await apiClient.applyProviderWithDocument(data, document);
-      // Refresh user profile to reflect providerStatus changes
-      const userData = await apiClient.getProfile();
-      setUser(userData);
-      router.refresh();
-      return application;
+      setError(null)
+      const application = await storeApplyProvider(data, document)
+      router.refresh()
+      return application
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Échec de l'application prestataire");
-      throw err;
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : "Échec de l'application prestataire")
+      throw err
     }
   };
 

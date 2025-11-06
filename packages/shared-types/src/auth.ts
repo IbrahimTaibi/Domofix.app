@@ -51,6 +51,7 @@ export interface User {
   firstName: string;
   lastName: string;
   avatar?: string;
+  bio?: string;
   
   // Phone and SMS fields
   phoneNumber?: string;
@@ -138,9 +139,11 @@ export interface JwtPayload {
 
 // Additional interfaces for user management
 export interface UpdateUserRequest {
+  email?: string;
   firstName?: string;
   lastName?: string;
   avatar?: string;
+  bio?: string;
   phoneNumber?: string;
   countryCode?: string;
   timezone?: string;

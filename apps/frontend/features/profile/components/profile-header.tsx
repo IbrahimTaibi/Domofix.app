@@ -13,16 +13,16 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
   const [isEditingPicture, setIsEditingPicture] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
       {/* Cover Photo */}
-      <div className="h-24 sm:h-32 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+      <div className="h-16 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
       {/* Profile Content */}
-      <div className="relative px-4 sm:px-6 pb-6">
+      <div className="relative px-3 sm:px-4 pb-4">
         {/* Profile Picture */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-12 sm:-mt-16">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-10 sm:-mt-12">
           <div className="relative mb-4 sm:mb-0">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-lg mx-auto sm:mx-0">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-lg mx-auto sm:mx-0">
               {user.avatar ? (
                 <img
                   src={user.avatar}
@@ -30,7 +30,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-xl sm:text-3xl font-bold">
+                <div className="w-full h-full bg-blue-500 flex items-center justify-center text-white text-lg sm:text-2xl font-bold">
                   {user.firstName?.charAt(0)}
                   {user.lastName?.charAt(0)}
                 </div>
@@ -66,7 +66,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           {/* Edit Profile Button */}
           <Button
             variant="outline"
-            className="mb-4 w-full sm:w-auto"
+            className="mb-3 w-full sm:w-auto"
             aria-label="Edit profile information">
             <svg
               className="w-4 h-4 mr-2"
@@ -85,17 +85,17 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
         </div>
 
         {/* User Info */}
-        <div className="mt-4 text-center sm:text-left">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+        <div className="mt-3 text-center sm:text-left">
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
             {user.firstName} {user.lastName}
           </h1>
-          <p className="text-gray-600 capitalize text-sm sm:text-base">
+          <p className="text-gray-600 capitalize text-xs sm:text-sm">
             {user.role}
           </p>
           {/* Bio is not part of the User type, so removing this section */}
 
           {/* Contact Info */}
-          <div className="mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-gray-600">
+          <div className="mt-3 flex flex-col sm:flex-row sm:flex-wrap gap-1.5 sm:gap-3 text-sm text-gray-600">
             <div className="flex items-center justify-center sm:justify-start">
               <svg
                 className="w-4 h-4 mr-2 flex-shrink-0"

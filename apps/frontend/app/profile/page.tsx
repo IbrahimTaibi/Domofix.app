@@ -1,15 +1,15 @@
 "use client";
 
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useProfile } from '@/features/profile/hooks';
 import { 
-  ProfileHeader, 
-  ProfileInfo, 
-  AccountSettings, 
-  ProfileSkeleton 
+  ProfileHero,
+  ProfileTabs,
+  SummaryCard,
+  ProfileSkeleton
 } from '@/features/profile/components';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useProfile();
 
   // While auth state hydrates or profile fetch runs, show a skeleton
   if (isLoading) {
@@ -22,20 +22,20 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 page-content pb-4 sm:pb-8">
+    <div className="min-h-screen bg-gray-50 pb-4 sm:pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Profile Header */}
-        <ProfileHeader user={user} />
+        {/* Slim Hero */}
+        <ProfileHero user={user} />
         
         <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* User Information Section */}
+          {/* Tabs + Content */}
           <div className="lg:col-span-2 order-2 lg:order-1">
-            <ProfileInfo user={user} />
+            <ProfileTabs user={user} />
           </div>
-          
-          {/* Account Settings */}
+
+          {/* Sticky Summary */}
           <div className="lg:col-span-1 order-1 lg:order-2">
-            <AccountSettings user={user} />
+            <SummaryCard user={user} />
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ export interface CreateUserDto {
   firstName: string;
   lastName: string;
   avatar?: string;
+  bio?: string;
   phoneNumber?: string;
   countryCode?: string;
   timezone?: string;

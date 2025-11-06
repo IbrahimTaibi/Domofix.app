@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { User } from '@darigo/shared-types';
 import { Button, Input } from '@/shared/components';
+import { useProfile } from '@/features/profile/hooks';
 
 interface EditProfileFormProps {
   user: User;
@@ -26,12 +27,13 @@ interface FormErrors {
 }
 
 export default function EditProfileForm({ user, onClose }: EditProfileFormProps) {
+  const { updateLocal, updateProfile, refresh } = useProfile();
   const [formData, setFormData] = useState<FormData>({
     firstName: user.firstName || '',
     lastName: user.lastName || '',
     email: user.email || '',
     phone: user.phoneNumber || '',
-    bio: '', // bio is not part of the User type, so default to empty
+    bio: user.bio || '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -84,16 +86,30 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
     setIsSubmitting(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real frontend-only app, you might save to localStorage
-      const updatedUser = { ...user, ...formData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
+      // Optimistically update local user state using profile hook
+      const sanitizedPhone = formData.phone.replace(/\s/g, '');
+      updateLocal({
+        email: formData.email.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        phoneNumber: sanitizedPhone,
+        bio: formData.bio.trim(),
+      });
+
+      // Persist to backend
+      await updateProfile({
+        email: formData.email.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        phoneNumber: sanitizedPhone,
+        bio: formData.bio.trim(),
+      });
+
       onClose();
     } catch (error) {
       console.error('Error updating profile:', error);
+      // Re-sync with server state if persistence failed
+      await refresh();
       alert('Failed to update profile. Please try again.');
     } finally {
       setIsSubmitting(false);

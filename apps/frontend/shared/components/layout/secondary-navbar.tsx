@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { LayoutGrid, History, Plus, MessageSquare, Bell } from "lucide-react";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function SecondaryNavbar() {
   // Height of the secondary navbar used by layout padding
@@ -11,22 +10,16 @@ export default function SecondaryNavbar() {
   const secondaryHeight = "3rem"; // 48px
   const mobileHeight = "3.5rem"; // 56px
 
-  const { isAuthenticated } = useAuth();
-
   // Set CSS variables at :root when the secondary navbar is mounted
   useEffect(() => {
-    if (isAuthenticated) {
-      document.documentElement.style.setProperty("--secondary-navbar-height", secondaryHeight);
-      document.documentElement.style.setProperty("--secondary-navbar-mobile-height", mobileHeight);
-    }
+    document.documentElement.style.setProperty("--secondary-navbar-height", secondaryHeight);
+    document.documentElement.style.setProperty("--secondary-navbar-mobile-height", mobileHeight);
 
     return () => {
       document.documentElement.style.removeProperty("--secondary-navbar-height");
       document.documentElement.style.removeProperty("--secondary-navbar-mobile-height");
     };
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) return null;
+  }, []);
 
   return (
     <>

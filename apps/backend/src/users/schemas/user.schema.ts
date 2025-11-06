@@ -122,6 +122,9 @@ export class User {
   @Prop({ default: null })
   avatar: string;
 
+  @Prop({ default: null })
+  bio: string;
+
   // Phone and SMS fields
   @Prop({ default: null })
   phoneNumber: string;

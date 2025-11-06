@@ -7,6 +7,7 @@ export class User implements Omit<SharedUser, 'createdAt' | 'updatedAt'> {
   firstName: string;
   lastName: string;
   avatar?: string;
+  bio?: string;
   
   // Phone and SMS fields
   phoneNumber?: string;
