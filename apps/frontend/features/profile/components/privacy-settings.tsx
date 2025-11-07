@@ -62,11 +62,11 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
       // In a real frontend-only app, you might save to localStorage
       localStorage.setItem('privacySettings', JSON.stringify(preferences));
       
-      alert('Privacy settings updated successfully!');
+      alert('Paramètres de confidentialité mis à jour avec succès !');
       onClose();
     } catch (error) {
       console.error('Error updating privacy settings:', error);
-      alert('Failed to update privacy settings. Please try again.');
+      alert('Échec de la mise à jour des paramètres de confidentialité. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +136,7 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Privacy Settings</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Paramètres de confidentialité</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -156,7 +156,7 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">Profile Visibility</h3>
+              <h3 className="text-lg font-medium text-gray-900">Visibilité du profil</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <RadioOption
@@ -164,21 +164,21 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
                 checked={preferences.profileVisibility === 'public'}
                 onChange={() => handleVisibilityChange('public')}
                 label="Public"
-                description="Anyone can view your profile and basic information"
+                description="Tout le monde peut voir votre profil et vos informations de base"
               />
               <RadioOption
                 value="contacts"
                 checked={preferences.profileVisibility === 'contacts'}
                 onChange={() => handleVisibilityChange('contacts')}
-                label="Contacts Only"
-                description="Only people you've interacted with can view your profile"
+                label="Contacts uniquement"
+                description="Seules les personnes avec qui vous avez interagi peuvent voir votre profil"
               />
               <RadioOption
                 value="private"
                 checked={preferences.profileVisibility === 'private'}
                 onChange={() => handleVisibilityChange('private')}
-                label="Private"
-                description="Your profile is hidden from search and public view"
+                label="Privé"
+                description="Votre profil est masqué des recherches et de la vue publique"
               />
             </div>
           </div>
@@ -189,22 +189,22 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
               <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
+              <h3 className="text-lg font-medium text-gray-900">Informations de contact</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <ToggleSwitch
                 checked={preferences.showEmail}
                 onChange={() => handleToggle('showEmail')}
-                label="Show Email Address"
-                description="Display your email address on your public profile"
-                warning={preferences.showEmail ? "Your email will be visible to others" : undefined}
+                label="Afficher l’adresse e‑mail"
+                description="Afficher votre adresse e‑mail sur votre profil public"
+                warning={preferences.showEmail ? "Votre e‑mail sera visible des autres" : undefined}
               />
               <ToggleSwitch
                 checked={preferences.showPhone}
                 onChange={() => handleToggle('showPhone')}
-                label="Show Phone Number"
-                description="Display your phone number on your public profile"
-                warning={preferences.showPhone ? "Your phone number will be visible to others" : undefined}
+                label="Afficher le numéro de téléphone"
+                description="Afficher votre numéro de téléphone sur votre profil public"
+                warning={preferences.showPhone ? "Votre numéro de téléphone sera visible des autres" : undefined}
               />
             </div>
           </div>
@@ -221,14 +221,14 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
               <ToggleSwitch
                 checked={preferences.allowMessages}
                 onChange={() => handleToggle('allowMessages')}
-                label="Allow Direct Messages"
-                description="Let other users send you direct messages"
+                label="Autoriser les messages directs"
+                description="Permettre aux autres utilisateurs de vous envoyer des messages directs"
               />
               <ToggleSwitch
                 checked={preferences.allowBookings}
                 onChange={() => handleToggle('allowBookings')}
-                label="Allow Booking Requests"
-                description="Allow customers to send you booking requests"
+                label="Autoriser les demandes de réservation"
+                description="Permettre aux clients de vous envoyer des demandes de réservation"
               />
             </div>
           </div>
@@ -239,27 +239,27 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
               <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">Data & Privacy</h3>
+              <h3 className="text-lg font-medium text-gray-900">Données et confidentialité</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <ToggleSwitch
                 checked={preferences.dataCollection}
                 onChange={() => handleToggle('dataCollection')}
-                label="Analytics & Improvement"
-                description="Help us improve our service by sharing usage data"
+                label="Analyses et amélioration"
+                description="Aidez‑nous à améliorer notre service en partageant des données d’utilisation"
               />
               <ToggleSwitch
                 checked={preferences.activityTracking}
                 onChange={() => handleToggle('activityTracking')}
-                label="Activity Tracking"
-                description="Track your activity to provide personalized recommendations"
+                label="Suivi d’activité"
+                description="Suivez votre activité pour fournir des recommandations personnalisées"
               />
               <ToggleSwitch
                 checked={preferences.thirdPartySharing}
                 onChange={() => handleToggle('thirdPartySharing')}
-                label="Third-Party Data Sharing"
-                description="Share anonymized data with trusted partners for service improvement"
-                warning={preferences.thirdPartySharing ? "Data may be shared with partners" : undefined}
+                label="Partage de données avec des tiers"
+                description="Partager des données anonymisées avec des partenaires de confiance pour améliorer le service"
+                warning={preferences.thirdPartySharing ? "Les données peuvent être partagées avec des partenaires" : undefined}
               />
             </div>
           </div>
@@ -276,31 +276,31 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
               <ToggleSwitch
                 checked={preferences.marketingEmails}
                 onChange={() => handleToggle('marketingEmails')}
-                label="Marketing Communications"
-                description="Receive promotional emails and special offers"
+                label="Communications marketing"
+                description="Recevoir des e‑mails promotionnels et des offres spéciales"
               />
             </div>
           </div>
           
           {/* Data Rights */}
           <div className="mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Your Data Rights</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Vos droits sur les données</h3>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start">
                 <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div className="text-sm">
-                  <p className="text-blue-800 font-medium mb-2">You have the right to:</p>
+                  <p className="text-blue-800 font-medium mb-2">Vous avez le droit de :</p>
                   <ul className="text-blue-700 space-y-1 list-disc list-inside">
-                    <li>Access your personal data</li>
-                    <li>Correct inaccurate information</li>
-                    <li>Delete your account and data</li>
-                    <li>Export your data</li>
-                    <li>Restrict data processing</li>
+                    <li>Accéder à vos données personnelles</li>
+                    <li>Corriger les informations inexactes</li>
+                    <li>Supprimer votre compte et vos données</li>
+                    <li>Exporter vos données</li>
+                    <li>Limiter le traitement des données</li>
                   </ul>
                   <p className="text-blue-700 mt-3">
-                    To exercise these rights, contact our support team or use the account settings options.
+                    Pour exercer ces droits, contactez notre équipe d’assistance ou utilisez les options des paramètres du compte.
                   </p>
                 </div>
               </div>
@@ -316,7 +316,7 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
               disabled={isSubmitting}
               className="sm:order-1"
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               type="submit"
@@ -329,10 +329,10 @@ export default function PrivacySettings({ user, onClose }: PrivacySettingsProps)
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Saving...
+                  Enregistrement en cours...
                 </>
               ) : (
-                'Save Settings'
+                'Enregistrer les paramètres'
               )}
             </Button>
           </div>

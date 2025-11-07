@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { LayoutGrid, History, Plus, MessageSquare, Bell } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function SecondaryNavbar() {
+  const { isAuthenticated, user } = useAuth();
   // Height of the secondary navbar used by layout padding
   // We expose it as a CSS variable so the main content can account for it on desktop
   const secondaryHeight = "3rem"; // 48px
@@ -33,8 +35,11 @@ export default function SecondaryNavbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-12 flex items-center justify-center">
             <div className="flex items-center space-x-8">
-              <Link href="/dashboard" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
-                Dashboard
+              <Link
+                href={isAuthenticated && user && user.role !== "provider" ? "/profile" : "/dashboard"}
+                className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium"
+              >
+                {isAuthenticated && user && user.role !== "provider" ? "Profil" : "Dashboard"}
               </Link>
               <Link href="/historique" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Historique

@@ -152,7 +152,7 @@ export class User {
   status: string;
 
   @Prop({ default: 'customer', enum: ['customer', 'provider', 'admin'] })
-  role: string;
+  role: 'customer' | 'provider' | 'admin';
 
   // Provider application lifecycle status
   @Prop({ default: 'none', enum: ['none', 'pending', 'approved', 'rejected', 'needs_info'] })

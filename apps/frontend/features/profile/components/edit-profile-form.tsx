@@ -43,25 +43,25 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
     const newErrors: FormErrors = {};
     
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = 'Le prénom est obligatoire';
     }
     
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = 'Le nom de famille est obligatoire';
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = 'L’e‑mail est obligatoire';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Veuillez saisir une adresse e‑mail valide';
     }
     
     if (formData.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Please enter a valid phone number';
+      newErrors.phone = 'Veuillez saisir un numéro de téléphone valide';
     }
     
     if (formData.bio && formData.bio.length > 500) {
-      newErrors.bio = 'Bio must be less than 500 characters';
+      newErrors.bio = 'La biographie doit contenir moins de 500 caractères';
     }
     
     setErrors(newErrors);
@@ -110,7 +110,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
       console.error('Error updating profile:', error);
       // Re-sync with server state if persistence failed
       await refresh();
-      alert('Failed to update profile. Please try again.');
+      alert('Échec de la mise à jour du profil. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +121,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Edit Profile</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Modifier le profil</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -138,7 +138,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
             {/* First Name */}
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                First Name *
+                Prénom *
               </label>
               <Input
                 id="firstName"
@@ -146,7 +146,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
                 className={errors.firstName ? 'border-red-500' : ''}
-                placeholder="Enter your first name"
+                placeholder="Saisissez votre prénom"
               />
               {errors.firstName && (
                 <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
@@ -156,7 +156,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
             {/* Last Name */}
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                Last Name *
+                Nom de famille *
               </label>
               <Input
                 id="lastName"
@@ -164,7 +164,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
                 className={errors.lastName ? 'border-red-500' : ''}
-                placeholder="Enter your last name"
+                placeholder="Saisissez votre nom de famille"
               />
               {errors.lastName && (
                 <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
@@ -174,7 +174,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
+                Adresse e‑mail *
               </label>
               <Input
                 id="email"
@@ -182,7 +182,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className={errors.email ? 'border-red-500' : ''}
-                placeholder="Enter your email address"
+                placeholder="Saisissez votre adresse e‑mail"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -192,7 +192,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
             {/* Phone */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
+                Numéro de téléphone
               </label>
               <Input
                 id="phone"
@@ -200,7 +200,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 className={errors.phone ? 'border-red-500' : ''}
-                placeholder="Enter your phone number"
+                placeholder="Saisissez votre numéro de téléphone"
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
@@ -211,7 +211,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
           {/* Bio */}
           <div className="mt-6">
             <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
-              Bio
+              Biographie
             </label>
             <textarea
               id="bio"
@@ -221,7 +221,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
               className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 errors.bio ? 'border-red-500' : ''
               }`}
-              placeholder="Tell us about yourself..."
+              placeholder="Parlez-nous de vous..."
               maxLength={500}
             />
             <div className="mt-1 flex justify-between">
@@ -229,7 +229,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                 <p className="text-sm text-red-600">{errors.bio}</p>
               )}
               <p className="text-sm text-gray-500 ml-auto">
-                {formData.bio.length}/500 characters
+                {formData.bio.length}/500 caractères
               </p>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
               disabled={isSubmitting}
               className="sm:order-1"
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               type="submit"
@@ -256,10 +256,10 @@ export default function EditProfileForm({ user, onClose }: EditProfileFormProps)
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Saving...
+                  Enregistrement...
                 </>
               ) : (
-                'Save Changes'
+                'Enregistrer les modifications'
               )}
             </Button>
           </div>

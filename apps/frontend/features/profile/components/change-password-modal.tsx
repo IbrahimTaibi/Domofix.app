@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useProfile } from '@/features/profile/hooks/use-profile';
 import { Button, Input } from '@/shared/components';
+import { apiClient } from '@/shared/utils/api';
+import type { UpdatePasswordRequest } from '@darigo/shared-types';
 
 interface ChangePasswordModalProps {
   onClose: () => void;
@@ -20,6 +23,7 @@ interface FormErrors {
 }
 
 export default function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
+  const { user } = useProfile();
   const [formData, setFormData] = useState<FormData>({
     currentPassword: '',
     newPassword: '',
@@ -33,14 +37,14 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
     new: false,
     confirm: false,
   });
+  const [formError, setFormError] = useState<string>('');
 
   const validatePassword = (password: string): string[] => {
-    const issues = [];
-    if (password.length < 8) issues.push('At least 8 characters');
-    if (!/[A-Z]/.test(password)) issues.push('One uppercase letter');
-    if (!/[a-z]/.test(password)) issues.push('One lowercase letter');
-    if (!/\d/.test(password)) issues.push('One number');
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) issues.push('One special character');
+    const issues: string[] = [];
+    if (password.length < 8) issues.push('Au moins 8 caractères');
+    if (!/[A-Z]/.test(password)) issues.push('Une majuscule');
+    if (!/[a-z]/.test(password)) issues.push('Une minuscule');
+    if (!/\d/.test(password)) issues.push('Un chiffre');
     return issues;
   };
 
@@ -48,22 +52,22 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
     const newErrors: FormErrors = {};
     
     if (!formData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
+      newErrors.currentPassword = 'Le mot de passe actuel est obligatoire';
     }
     
     if (!formData.newPassword) {
-      newErrors.newPassword = 'New password is required';
+      newErrors.newPassword = 'Le nouveau mot de passe est obligatoire';
     } else {
       const passwordIssues = validatePassword(formData.newPassword);
       if (passwordIssues.length > 0) {
-        newErrors.newPassword = `Password must have: ${passwordIssues.join(', ')}`;
+        newErrors.newPassword = `Le mot de passe doit contenir : ${passwordIssues.join(', ')}`;
       }
     }
     
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your new password';
+      newErrors.confirmPassword = 'Veuillez confirmer votre nouveau mot de passe';
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
     
     setErrors(newErrors);
@@ -90,42 +94,52 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
     }
     
     setIsSubmitting(true);
+    setFormError('');
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a frontend-only app, you might validate against stored credentials
-      // For now, we'll just simulate success
-      
+      const payload: UpdatePasswordRequest = {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      };
+      await apiClient.changePassword(payload);
+
       // Reset form
       setFormData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
-      
+
       onClose();
-      // You might want to show a success message here
-      alert('Password changed successfully!');
+      alert('Mot de passe modifié avec succès !');
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Failed to change password. Please try again.');
+      const message = (error as any)?.message?.toString?.() ?? 'Échec du changement de mot de passe';
+      const lower = message.toLowerCase();
+      if (lower.includes('current password')) {
+        setErrors(prev => ({ ...prev, currentPassword: message }));
+      } else if (lower.includes('password')) {
+        setErrors(prev => ({ ...prev, newPassword: message }));
+      } else {
+        setFormError(message);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const getPasswordStrength = (password: string): { strength: number; label: string; color: string } => {
+    const totalCriteria = 4; // length, uppercase, lowercase, number
     const issues = validatePassword(password);
-    const strength = Math.max(0, 5 - issues.length);
-    
-    if (strength === 0) return { strength: 0, label: 'Very Weak', color: 'bg-red-500' };
-    if (strength === 1) return { strength: 20, label: 'Weak', color: 'bg-red-400' };
-    if (strength === 2) return { strength: 40, label: 'Fair', color: 'bg-yellow-500' };
-    if (strength === 3) return { strength: 60, label: 'Good', color: 'bg-yellow-400' };
-    if (strength === 4) return { strength: 80, label: 'Strong', color: 'bg-green-400' };
-    return { strength: 100, label: 'Very Strong', color: 'bg-green-500' };
+    const satisfied = Math.max(0, totalCriteria - issues.length);
+    const strengthMap = [0, 25, 50, 75, 100];
+    const strength = strengthMap[satisfied];
+
+    if (strength === 0) return { strength, label: 'Très faible', color: 'bg-red-500' };
+    if (strength === 25) return { strength, label: 'Faible', color: 'bg-red-400' };
+    if (strength === 50) return { strength, label: 'Moyenne', color: 'bg-yellow-500' };
+    if (strength === 75) return { strength, label: 'Bonne', color: 'bg-yellow-400' };
+    return { strength, label: 'Forte', color: 'bg-green-500' };
   };
 
   const passwordStrength = getPasswordStrength(formData.newPassword);
@@ -134,7 +148,7 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Change Password</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Changer le mot de passe</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -146,20 +160,33 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Hidden username for accessibility and password managers */}
+          <input
+            type="text"
+            name="username"
+            autoComplete="username"
+            value={user?.email ?? ''}
+            readOnly
+            className="sr-only"
+            aria-hidden="true"
+            tabIndex={-1}
+          />
           {/* Current Password */}
           <div>
             <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Current Password
+              Mot de passe actuel
             </label>
             <div className="relative">
               <Input
                 id="currentPassword"
                 type={showPasswords.current ? 'text' : 'password'}
+                name="currentPassword"
                 value={formData.currentPassword}
                 onChange={(e) => handleInputChange('currentPassword', e.target.value)}
                 className={errors.currentPassword ? 'border-red-500 pr-10' : 'pr-10'}
-                placeholder="Enter your current password"
+                placeholder="Saisissez votre mot de passe actuel"
                 autoComplete="current-password"
+                aria-invalid={Boolean(errors.currentPassword)}
               />
               <button
                 type="button"
@@ -186,17 +213,19 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
           {/* New Password */}
           <div>
             <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              New Password
+              Nouveau mot de passe
             </label>
             <div className="relative">
               <Input
                 id="newPassword"
                 type={showPasswords.new ? 'text' : 'password'}
+                name="newPassword"
                 value={formData.newPassword}
                 onChange={(e) => handleInputChange('newPassword', e.target.value)}
                 className={errors.newPassword ? 'border-red-500 pr-10' : 'pr-10'}
-                placeholder="Enter your new password"
+                placeholder="Saisissez votre nouveau mot de passe"
                 autoComplete="new-password"
+                aria-invalid={Boolean(errors.newPassword)}
               />
               <button
                 type="button"
@@ -220,7 +249,7 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
             {formData.newPassword && (
               <div className="mt-2">
                 <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>Password Strength</span>
+                  <span>Force du mot de passe</span>
                   <span>{passwordStrength.label}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -240,17 +269,19 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
           {/* Confirm Password */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm New Password
+              Confirmer le nouveau mot de passe
             </label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showPasswords.confirm ? 'text' : 'password'}
+                name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
-                placeholder="Confirm your new password"
+                placeholder="Confirmez votre nouveau mot de passe"
                 autoComplete="new-password"
+                aria-invalid={Boolean(errors.confirmPassword)}
               />
               <button
                 type="button"
@@ -283,7 +314,7 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
               disabled={isSubmitting}
               className="flex-1"
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               type="submit"
@@ -296,13 +327,17 @@ export default function ChangePasswordModal({ onClose }: ChangePasswordModalProp
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Changing...
+                  Modification...
                 </>
               ) : (
-                'Change Password'
+                'Changer le mot de passe'
               )}
             </Button>
           </div>
+          {/* Server/form error */}
+          {formError && (
+            <p className="text-sm text-red-600" aria-live="assertive">{formError}</p>
+          )}
         </form>
       </div>
     </div>

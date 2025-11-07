@@ -1,4 +1,5 @@
-import { User, RegisterRequest, LoginRequest, AuthResponse, ApiError, ProviderApplication, CreateProviderApplicationRequest } from '@darigo/shared-types';
+import { User, RegisterRequest, LoginRequest, AuthResponse, ApiError, ProviderApplication, CreateProviderApplicationRequest, UpdatePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest } from '@darigo/shared-types';
+import { HttpError } from './errors'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -42,7 +43,7 @@ class ApiClient {
           message: 'An error occurred',
           statusCode: response.status,
         }));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        throw new HttpError(errorData.message || `HTTP error! status: ${response.status}` , response.status, errorData);
       }
 
       return await response.json();
@@ -50,7 +51,7 @@ class ApiClient {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error('An unexpected error occurred');
+      throw new HttpError('An unexpected error occurred', 500);
     }
   }
 
@@ -124,6 +125,28 @@ class ApiClient {
 
   async getMyProviderApplication(): Promise<ProviderApplication | null> {
     return this.request<ProviderApplication | null>('/provider-applications/me');
+  }
+
+  // Account endpoints
+  async changePassword(payload: UpdatePasswordRequest): Promise<User> {
+    return this.request<User>('/auth/change-password', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async forgotPassword(payload: ForgotPasswordRequest): Promise<{ ok: boolean }>{
+    return this.request<{ ok: boolean }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async resetPassword(payload: ResetPasswordRequest): Promise<User>{
+    return this.request<User>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   // Utility methods

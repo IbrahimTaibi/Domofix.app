@@ -72,7 +72,7 @@ export default function ProfilePictureUpload({
       window.location.reload();
     } catch (error) {
       console.error("Error uploading profile picture:", error);
-      alert("Failed to upload profile picture. Please try again.");
+      alert("Échec du téléchargement de la photo de profil. Veuillez réessayer.");
     } finally {
       setIsUploading(false);
     }
@@ -91,7 +91,7 @@ export default function ProfilePictureUpload({
       window.location.reload();
     } catch (error) {
       console.error("Error removing profile picture:", error);
-      alert("Failed to remove profile picture. Please try again.");
+      alert("Échec de la suppression de la photo de profil. Veuillez réessayer.");
     } finally {
       setIsUploading(false);
     }
@@ -102,7 +102,7 @@ export default function ProfilePictureUpload({
       <div className="bg-white rounded-lg max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900">
-            Update Profile Picture
+            Mettre à jour la photo de profil
           </h2>
           <button
             onClick={onClose}
@@ -125,13 +125,13 @@ export default function ProfilePictureUpload({
         {/* Current Picture */}
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-700 mb-3">
-            Current Picture
+            Photo actuelle
           </p>
           <div className="w-24 h-24 rounded-full mx-auto overflow-hidden bg-gray-200">
             {user.avatar ? (
               <img
                 src={user.avatar}
-                alt="Current profile"
+                alt="Profil actuel"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -146,7 +146,7 @@ export default function ProfilePictureUpload({
         {/* Upload Area */}
         <div className="mb-6">
           <p className="text-sm font-medium text-gray-700 mb-3">
-            Upload New Picture
+            Télécharger une nouvelle photo
           </p>
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -162,7 +162,7 @@ export default function ProfilePictureUpload({
               <div className="space-y-4">
                 <img
                   src={previewUrl}
-                  alt="Preview"
+                  alt="Aperçu"
                   className="w-24 h-24 rounded-full mx-auto object-cover"
                 />
                 <p className="text-sm text-gray-600">{selectedFile?.name}</p>
@@ -183,16 +183,16 @@ export default function ProfilePictureUpload({
                 </svg>
                 <div>
                   <p className="text-gray-600">
-                    Drag and drop an image here, or
+                    Glissez-déposez une image ici, ou
                   </p>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="text-blue-600 hover:text-blue-700 font-medium">
-                    browse files
+                    parcourir les fichiers
                   </button>
                 </div>
-                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                <p className="text-xs text-gray-500">PNG, JPG, GIF jusqu’à 5 Mo</p>
               </div>
             )}
           </div>
@@ -232,10 +232,10 @@ export default function ProfilePictureUpload({
                       fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Uploading...
+                  Téléchargement en cours...
                 </>
               ) : (
-                "Upload Picture"
+                "Télécharger la photo"
               )}
             </Button>
           )}
@@ -246,7 +246,7 @@ export default function ProfilePictureUpload({
               onClick={handleRemove}
               disabled={isUploading}
               className="w-full text-red-600 border-red-200 hover:bg-red-50">
-              Remove Current Picture
+              Supprimer la photo actuelle
             </Button>
           )}
 
@@ -255,7 +255,7 @@ export default function ProfilePictureUpload({
             onClick={onClose}
             disabled={isUploading}
             className="w-full">
-            Cancel
+            Annuler
           </Button>
         </div>
       </div>

@@ -195,13 +195,8 @@ export function AuthForm() {
         </div>
       </div>
 
-      {/* Social Auth: Facebook */}
+      {/* Social Auth: Facebook & Google */}
       <div className="mb-6 space-y-3">
-        <div className="relative flex items-center">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="mx-3 text-xs text-gray-500">Ou continuer avec</span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
         <Button
           type="button"
           aria-label="Continuer avec Facebook"
@@ -223,6 +218,12 @@ export function AuthForm() {
           <FcGoogle className="h-5 w-5 mr-2" aria-hidden="true" />
           Continuer avec Google
         </Button>
+
+        <div className="relative flex items-center">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="mx-3 text-xs text-gray-500">Ou continuer avec</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
       </div>
 
       {/* Error Display */}
@@ -266,14 +267,20 @@ export function AuthForm() {
               error={loginForm.formState.errors.password?.message}
             />
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
-            </Button>
-          </motion.form>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? 'Connexion...' : 'Se connecter'}
+          </Button>
+
+          <div className="mt-3 text-center">
+            <a href="/auth/forgot-password" className="text-sm text-primary-600 hover:text-primary-800">
+              Mot de passe oublié ?
+            </a>
+          </div>
+        </motion.form>
         ) : (
           <motion.form
             key="register"

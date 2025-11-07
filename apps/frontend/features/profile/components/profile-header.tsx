@@ -11,9 +11,16 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ user }: ProfileHeaderProps) {
   const [isEditingPicture, setIsEditingPicture] = useState(false);
+  const roleLabel = user.role === 'customer'
+    ? 'Client'
+    : user.role === 'provider'
+    ? 'Prestataire'
+    : user.role === 'admin'
+    ? 'Administrateur'
+    : user.role
 
   return (
-    <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
+    <div className="mt-4 sm:mt-6 bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
       {/* Cover Photo */}
       <div className="h-16 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600"></div>
 
@@ -26,7 +33,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
               {user.avatar ? (
                 <img
                   src={user.avatar}
-                  alt={`Profile picture of ${user.firstName} ${user.lastName}`}
+                  alt={`Photo de profil de ${user.firstName} ${user.lastName}`}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -41,7 +48,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
             <button
               onClick={() => setIsEditingPicture(true)}
               className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full shadow-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-              aria-label="Edit profile picture">
+              aria-label="Modifier la photo de profil">
               <svg
                 className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600"
                 fill="none"
@@ -67,7 +74,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
           <Button
             variant="outline"
             className="mb-3 w-full sm:w-auto"
-            aria-label="Edit profile information">
+            aria-label="Modifier les informations du profil">
             <svg
               className="w-4 h-4 mr-2"
               fill="none"
@@ -80,7 +87,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
               />
             </svg>
-            Edit Profile
+            Modifier le profil
           </Button>
         </div>
 
@@ -90,7 +97,7 @@ export default function ProfileHeader({ user }: ProfileHeaderProps) {
             {user.firstName} {user.lastName}
           </h1>
           <p className="text-gray-600 capitalize text-xs sm:text-sm">
-            {user.role}
+            {roleLabel}
           </p>
           {/* Bio is not part of the User type, so removing this section */}
 

@@ -1,12 +1,20 @@
 'use client'
 
 import { User } from '@darigo/shared-types'
+import { formatDate, formatTimeAgo } from '@/shared/utils'
 
 type SummaryCardProps = {
   user: User
 }
 
 export default function SummaryCard({ user }: SummaryCardProps) {
+  const roleLabel = user.role === 'customer'
+    ? 'Client'
+    : user.role === 'provider'
+    ? 'Prestataire'
+    : user.role === 'admin'
+    ? 'Administrateur'
+    : user.role
   return (
     <div className="bg-white rounded-md shadow-sm border border-gray-200 p-4 sticky top-[calc(var(--navbar-height,4rem)+var(--secondary-navbar-height,0px)+0.75rem)]">
       <div className="flex items-center gap-3 mb-3">
@@ -18,36 +26,18 @@ export default function SummaryCard({ user }: SummaryCardProps) {
           <div className="text-sm font-semibold text-gray-900 truncate">
             {user.firstName} {user.lastName}
           </div>
-          <div className="text-xs text-gray-600 capitalize">{user.role}</div>
+          <div className="text-xs text-gray-600 capitalize">{roleLabel}</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center mb-3">
+      <div className="grid grid-cols-1 gap-4 text-center mb-3">
         <div className="rounded-md bg-gray-50 border border-gray-200 p-2 min-w-0">
-          <div className="text-xs text-gray-500">Joined</div>
+          <div className="text-xs text-gray-500">Inscription</div>
           <div
             className="text-sm font-medium text-gray-900 truncate"
-            title={user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
+            title={user.createdAt ? formatDate(user.createdAt, 'long') : '—'}
           >
-            {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
-          </div>
-        </div>
-        <div className="rounded-md bg-gray-50 border border-gray-200 p-2 min-w-0">
-          <div className="text-xs text-gray-500">Updated</div>
-          <div
-            className="text-sm font-medium text-gray-900 truncate"
-            title={user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : '—'}
-          >
-            {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : '—'}
-          </div>
-        </div>
-        <div className="rounded-md bg-gray-50 border border-gray-200 p-2 min-w-0">
-          <div className="text-xs text-gray-500">Status</div>
-          <div
-            className="text-sm font-medium text-gray-900 capitalize truncate"
-            title={user.providerStatus || 'active'}
-          >
-            {user.providerStatus || 'active'}
+            {user.createdAt ? formatTimeAgo(user.createdAt) : '—'}
           </div>
         </div>
       </div>

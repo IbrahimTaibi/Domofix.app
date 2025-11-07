@@ -28,7 +28,8 @@ export function isValidEmail(email: string): boolean {
  */
 export function isValidPassword(password: string): boolean {
   // At least 8 characters, one uppercase, one lowercase, one number
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+  // Allow any characters (including punctuation like '.') while enforcing character classes
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   return passwordRegex.test(password);
 }
 

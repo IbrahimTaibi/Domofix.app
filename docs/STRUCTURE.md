@@ -88,7 +88,30 @@ shared/
     ├── api.ts          # API utilities
     ├── constants.ts    # Application constants
     ├── validations.ts  # Validation schemas
+    ├── error-tracking.ts # Lightweight error tracking utility
     └── index.ts        # Utility exports
+
+### Error Handling Flow (Frontend)
+
+The frontend uses Next.js App Router error boundaries and shared components/utilities to provide consistent error UX:
+
+- Pages
+  - `app/not-found.tsx`: Global 404 page for unmatched routes
+  - `app/error.tsx`: Route-level error boundary rendering a friendly error view with retry
+  - `app/global-error.tsx`: Root error boundary for initial render failures
+  - `app/403/page.tsx`: Explicit 403 forbidden page
+  - `app/500/page.tsx`: Explicit 500 internal error page
+
+- Shared Component
+  - `shared/components/error/error-view.tsx`: Reusable error presentation component (icon, title, description, actions) using shared `Button`
+
+- Error Tracking
+  - `shared/utils/error-tracking.ts`: Logs errors to console and optionally posts to `NEXT_PUBLIC_ERROR_TRACKING_URL`
+
+- API Client Errors
+  - `shared/utils/api.ts`: Throws a typed `HttpError` with `statusCode` for non-OK responses, enabling error boundaries and UI to react based on HTTP status.
+
+This approach keeps error UI modular, reusable, and aligned with the existing design system while covering both client-side routing errors and server-side HTTP failures.
 ```
 
 ### Backend (`/apps/backend`)

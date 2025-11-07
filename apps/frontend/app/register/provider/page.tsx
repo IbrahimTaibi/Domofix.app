@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function ProviderRegisterPage() {
   return (
-    <div className="mx-auto pt-8 pb-16">
-      <section className="page-content px-4 sm:px-6 lg:px-8 relative">
+    <div className="mx-auto pt-2 pb-16">
+      <section className="px-4 sm:px-6 lg:px-8 relative">
         <div className="relative z-10 w-full mx-auto max-w-[80rem]">
           <div className="grid lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 items-center">
           <div className="lg:col-span-6">
@@ -58,12 +58,12 @@ export default function ProviderRegisterPage() {
               Commencer ma demande
             </a>
           </div>
-          <div className={`lg:col-span-6 relative mx-auto h-72 w-full max-w-[240px] sm:h-80 sm:max-w-[280px] md:h-80 md:max-w-[320px] lg:h-96 lg:max-w-[360px] transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] will-change-transform ${styles.heroImageEnter}`}>
+          <div className={`lg:col-span-6 relative mx-auto h-72 w-full max-w-[240px] sm:h-80 sm:max-w-[280px] md:h-80 md:max-w-[320px] lg:h-96 lg:max-w-[360px] transition-transform duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] will-change-transform`}>
             <Image
               src="/assets/images/hero.png"
                 alt="Prestataire heureux utilisant Domofix"
               fill
-              className="object-contain rounded-xl"
+              className="object-contain rounded-xl transform -scale-x-100"
               priority
             />
           </div>

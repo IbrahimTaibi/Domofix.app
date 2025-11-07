@@ -73,11 +73,11 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
       // In a real frontend-only app, you might save to localStorage
       localStorage.setItem('notificationSettings', JSON.stringify(preferences));
       
-      alert('Notification preferences updated successfully!');
+      alert('Préférences de notification mises à jour avec succès !');
       onClose();
     } catch (error) {
       console.error('Error updating notification preferences:', error);
-      alert('Failed to update notification preferences. Please try again.');
+      alert('Échec de la mise à jour des préférences de notification. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -117,7 +117,7 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Notification Settings</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Paramètres de notification</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -136,32 +136,32 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
               <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">Email Notifications</h3>
+              <h3 className="text-lg font-medium text-gray-900">Notifications par e‑mail</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <ToggleSwitch
                 checked={preferences.email.bookings}
                 onChange={() => handleToggle('email', 'bookings')}
-                label="Booking Updates"
-                description="Receive emails about booking confirmations, changes, and cancellations"
+                label="Mises à jour des réservations"
+                description="Recevoir des e‑mails sur les confirmations, modifications et annulations de réservation"
               />
               <ToggleSwitch
                 checked={preferences.email.security}
                 onChange={() => handleToggle('email', 'security')}
-                label="Security Alerts"
-                description="Important security notifications about your account"
+                label="Alertes de sécurité"
+                description="Notifications de sécurité importantes concernant votre compte"
               />
               <ToggleSwitch
                 checked={preferences.email.updates}
                 onChange={() => handleToggle('email', 'updates')}
-                label="Product Updates"
-                description="New features, improvements, and platform updates"
+                label="Mises à jour du produit"
+                description="Nouvelles fonctionnalités, améliorations et mises à jour de la plateforme"
               />
               <ToggleSwitch
                 checked={preferences.email.marketing}
                 onChange={() => handleToggle('email', 'marketing')}
-                label="Marketing & Promotions"
-                description="Special offers, tips, and promotional content"
+                label="Marketing et promotions"
+                description="Offres spéciales, conseils et contenus promotionnels"
               />
             </div>
           </div>
@@ -172,32 +172,32 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
               <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.868 19.718A8.97 8.97 0 003 15a9 9 0 0118 0 8.97 8.97 0 00-1.868 4.718M12 9v4" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">Push Notifications</h3>
+              <h3 className="text-lg font-medium text-gray-900">Notifications push</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <ToggleSwitch
                 checked={preferences.push.messages}
                 onChange={() => handleToggle('push', 'messages')}
                 label="Messages"
-                description="New messages from customers or service providers"
+                description="Nouveaux messages de clients ou prestataires"
               />
               <ToggleSwitch
                 checked={preferences.push.bookings}
                 onChange={() => handleToggle('push', 'bookings')}
-                label="Booking Updates"
-                description="Real-time updates about your bookings"
+                label="Mises à jour des réservations"
+                description="Mises à jour en temps réel de vos réservations"
               />
               <ToggleSwitch
                 checked={preferences.push.reminders}
                 onChange={() => handleToggle('push', 'reminders')}
-                label="Reminders"
-                description="Upcoming appointment and booking reminders"
+                label="Rappels"
+                description="Rappels pour vos rendez-vous et réservations à venir"
               />
               <ToggleSwitch
                 checked={preferences.push.marketing}
                 onChange={() => handleToggle('push', 'marketing')}
-                label="Promotional Offers"
-                description="Special deals and limited-time offers"
+                label="Offres promotionnelles"
+                description="Offres spéciales et promotions limitées dans le temps"
               />
             </div>
           </div>
@@ -208,41 +208,41 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
               <svg className="w-5 h-5 text-gray-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900">SMS Notifications</h3>
+              <h3 className="text-lg font-medium text-gray-900">Notifications SMS</h3>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <ToggleSwitch
                 checked={preferences.sms.bookings}
                 onChange={() => handleToggle('sms', 'bookings')}
-                label="Booking Confirmations"
-                description="SMS confirmations for new bookings"
+                label="Confirmations de réservation"
+                description="Confirmations par SMS pour les nouvelles réservations"
               />
               <ToggleSwitch
                 checked={preferences.sms.reminders}
                 onChange={() => handleToggle('sms', 'reminders')}
-                label="Appointment Reminders"
-                description="SMS reminders before your appointments"
+                label="Rappels de rendez-vous"
+                description="Rappels SMS avant vos rendez-vous"
               />
               <ToggleSwitch
                 checked={preferences.sms.security}
                 onChange={() => handleToggle('sms', 'security')}
-                label="Security Codes"
-                description="Two-factor authentication and security codes"
+                label="Codes de sécurité"
+                description="Authentification à deux facteurs et codes de sécurité"
               />
             </div>
           </div>
           
           {/* Quiet Hours */}
           <div className="mb-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quiet Hours</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Heures silencieuses</h3>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-4">
-                Set quiet hours to pause non-urgent notifications during specific times.
+                Définissez des heures silencieuses pour suspendre les notifications non urgentes à des moments précis.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Time
+                    Heure de début
                   </label>
                   <input
                     type="time"
@@ -252,7 +252,7 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Time
+                    Heure de fin
                   </label>
                   <input
                     type="time"
@@ -273,7 +273,7 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
               disabled={isSubmitting}
               className="sm:order-1"
             >
-              Cancel
+              Annuler
             </Button>
             <Button
               type="submit"
@@ -286,10 +286,10 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Saving...
+                  Enregistrement en cours...
                 </>
               ) : (
-                'Save Preferences'
+                'Enregistrer les préférences'
               )}
             </Button>
           </div>

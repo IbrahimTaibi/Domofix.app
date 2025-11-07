@@ -9,6 +9,13 @@ type ProfileHeroProps = {
 }
 
 export default function ProfileHero({ user, onEdit }: ProfileHeroProps) {
+  const roleLabel = user.role === 'customer'
+    ? 'Client'
+    : user.role === 'provider'
+    ? 'Prestataire'
+    : user.role === 'admin'
+    ? 'Administrateur'
+    : user.role
   return (
     <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
       {/* Slim cover */}
@@ -20,7 +27,7 @@ export default function ProfileHero({ user, onEdit }: ProfileHeroProps) {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-md -mt-8">
               {user.avatar ? (
-                <img src={user.avatar} alt={user.firstName || ''} className="w-full h-full object-cover" />
+                <img src={user.avatar} alt={user.firstName ? `Photo de profil de ${user.firstName}` : 'Photo de profil'} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-primary-600 flex items-center justify-center text-white text-base sm:text-lg font-semibold">
                   {(user.firstName?.charAt(0) || '').toUpperCase()}
@@ -32,7 +39,7 @@ export default function ProfileHero({ user, onEdit }: ProfileHeroProps) {
               <div className="text-base sm:text-lg font-semibold text-gray-900">
                 {user.firstName} {user.lastName}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600 capitalize">{user.role}</div>
+              <div className="text-xs sm:text-sm text-gray-600 capitalize">{roleLabel}</div>
             </div>
           </div>
 
@@ -41,7 +48,7 @@ export default function ProfileHero({ user, onEdit }: ProfileHeroProps) {
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            Edit Profile
+            Modifier le profil
           </Button>
         </div>
 

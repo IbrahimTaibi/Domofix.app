@@ -164,6 +164,44 @@ Authorization: Bearer <your-jwt-token>
 - **Error Responses:**
   - **401 Unauthorized:** Invalid or missing token
 
+### Forgot Password
+
+#### POST /auth/forgot-password
+- **Description:** Initiate password reset by sending an email with a reset link.
+- **Authentication:** Not required
+- **Request Body:**
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+- **Success Response (200):**
+  ```json
+  { "message": "If an account exists, an email has been sent." }
+  ```
+- **Error Responses:**
+  - **400 Bad Request:** Invalid email format
+
+### Reset Password
+
+#### POST /auth/reset-password
+- **Description:** Reset password using token from email.
+- **Authentication:** Not required
+- **Request Body:**
+  ```json
+  {
+    "token": "<reset-token>",
+    "newPassword": "NewPass123"
+  }
+  ```
+- **Success Response (200):**
+  ```json
+  { "message": "Password reset successful." }
+  ```
+- **Error Responses:**
+  - **400 Bad Request:** New password does not meet policy requirements
+  - **404 Not Found:** Invalid or expired token
+
 ---
 
 ## Data Models
@@ -387,4 +425,15 @@ curl -X POST http://localhost:3001/auth/login \
 ```bash
 curl -X GET http://localhost:3001/auth/profile \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Change password (with token):
+```bash
+curl -X PATCH http://localhost:3001/auth/change-password \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "currentPassword": "OldPassword123",
+    "newPassword": "NewStrongPassword123"
+  }'
 ```

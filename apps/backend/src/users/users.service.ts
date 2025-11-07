@@ -209,4 +209,13 @@ export class UsersService {
       { new: true }
     ).exec();
   }
+
+  async updatePassword(id: string, newPassword: string): Promise<User | null> {
+    const hashedPassword = await hashPassword(newPassword);
+    return this.userModel.findByIdAndUpdate(
+      id,
+      { $set: { password: hashedPassword } },
+      { new: true }
+    ).exec();
+  }
 }

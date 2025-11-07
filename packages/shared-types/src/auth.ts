@@ -57,34 +57,39 @@ export interface User {
   phoneNumber?: string;
   countryCode?: string;
   phoneVerification: PhoneVerification;
-  
+
   // Address and location fields
   address?: Address;
-  
+
   // Notification preferences
   notificationPreferences: NotificationPreferences;
-  
+
   // Security settings
   security: SecuritySettings;
-  
+
   // User status and role
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
-  role: 'customer' | 'provider' | 'admin';
+  status: "active" | "inactive" | "suspended" | "pending";
+  role: "customer" | "provider" | "admin";
   providerStatus: ProviderStatus;
-  
+
   // Profile completion and onboarding
   profileCompleted: boolean;
   onboardingCompleted: boolean;
-  
+
   // Timezone and locale
   timezone: string;
   locale: string;
-  
+
   createdAt: string;
   updatedAt: string;
 }
 
-export type ProviderStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'needs_info';
+export type ProviderStatus =
+  | "none"
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "needs_info";
 
 export interface ProviderApplication {
   id: string;
@@ -94,7 +99,7 @@ export interface ProviderApplication {
   category: string;
   documentUrl: string;
   notes?: string;
-  status: Exclude<ProviderStatus, 'none'>;
+  status: Exclude<ProviderStatus, "none">;
   createdAt: string;
   updatedAt: string;
 }
@@ -117,11 +122,12 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   avatar?: string;
+  bio?: string;
   phoneNumber?: string;
   countryCode?: string;
   timezone?: string;
   locale?: string;
-  role?: 'customer' | 'provider';
+  role?: "customer" | "provider";
   address?: Address;
 }
 

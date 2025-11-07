@@ -1,14 +1,18 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Address } from '../users/schemas/user.schema';
 import { OAuthLoginDto } from './dto';
+import { EmailService } from '../email/email.service';
+import * as crypto from 'crypto';
+import { isValidPassword } from '@darigo/shared-utils';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async register(userData: {
@@ -35,6 +39,13 @@ export class AuthService {
       ...userData,
       role: 'customer',
     });
+
+    // Fire-and-forget welcome email (do not block registration on send failures)
+    try {
+      await this.emailService.sendWelcomeEmail(user.email, (user as any).firstName);
+    } catch (err) {
+      // Intentionally swallow errors here to avoid breaking registration
+    }
     
     // Generate JWT token
     const payload = { 
@@ -46,6 +57,55 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       user: this.usersService.sanitizeUser(user),
     };
+  }
+
+  /**
+   * Issue a verification token and email it to the current user.
+   */
+  async requestEmailVerification(userId: string): Promise<{ ok: boolean }> {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    const token = crypto.randomBytes(32).toString('hex');
+    await this.usersService.setEmailVerificationToken((user as any)._id.toString(), token);
+    await this.emailService.sendVerificationEmail(user.email, token);
+    return { ok: true };
+  }
+
+  /**
+   * Verify email using token (from link).
+   */
+  async verifyEmail(token: string) {
+    const updated = await this.usersService.verifyEmail(token);
+    if (!updated) throw new NotFoundException('Invalid or expired token');
+    return this.usersService.sanitizeUser(updated);
+  }
+
+  /**
+   * Send password reset email to provided address.
+   */
+  async forgotPassword(email: string): Promise<{ ok: boolean }> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Do not reveal existence; respond OK
+      return { ok: true };
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await this.usersService.setPasswordResetToken(email, token, expires);
+    await this.emailService.sendPasswordResetEmail(email, token);
+    return { ok: true };
+  }
+
+  /**
+   * Reset password using token and new password.
+   */
+  async resetPassword(token: string, newPassword: string) {
+    if (!isValidPassword(newPassword)) {
+      throw new BadRequestException('New password does not meet policy requirements');
+    }
+    const updated = await this.usersService.resetPassword(token, newPassword);
+    if (!updated) throw new NotFoundException('Invalid or expired token');
+    return this.usersService.sanitizeUser(updated);
   }
 
   async login(email: string, password: string, ip?: string) {
@@ -179,5 +239,30 @@ export class AuthService {
       pwd += chars[Math.floor(Math.random() * chars.length)];
     }
     return pwd;
+  }
+
+  /**
+   * Change password for an authenticated user.
+   */
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCurrentValid = await this.usersService.validatePassword(user as any, currentPassword);
+    if (!isCurrentValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    if (!isValidPassword(newPassword)) {
+      throw new BadRequestException('New password does not meet policy requirements');
+    }
+
+    const updated = await this.usersService.updatePassword((user as any)._id.toString(), newPassword);
+    if (!updated) {
+      throw new NotFoundException('Unable to update password');
+    }
+    return this.usersService.sanitizeUser(updated);
   }
 }
