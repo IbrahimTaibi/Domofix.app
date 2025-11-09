@@ -13,6 +13,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RequestsModule } from './requests/requests.module';
 import { MonitoringService } from '@/common/monitoring/monitoring.service';
 import { OrdersModule } from './orders/orders.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { OrdersModule } from './orders/orders.module';
     UsersModule,
     ProviderApplicationsModule,
     RequestsModule,
+    NotificationsModule,
     OrdersModule,
   ],
   controllers: [AppController],

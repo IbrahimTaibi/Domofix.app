@@ -2,11 +2,11 @@
 
 import { useProfile } from '@/features/profile/hooks';
 import { 
-  ProfileHero,
   ProfileTabs,
   SummaryCard,
   ProfileSkeleton
 } from '@/features/profile/components';
+import ProfileHeaderPanel from '@/features/profile/components/profile-header-panel'
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useProfile();
@@ -24,8 +24,8 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-4 sm:pt-8 pb-4 sm:pb-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Slim Hero */}
-        <ProfileHero user={user} />
+        {/* Header Panel */}
+        <ProfileHeaderPanel user={user} />
         
         <div className="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Tabs + Content */}

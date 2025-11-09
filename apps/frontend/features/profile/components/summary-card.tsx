@@ -16,9 +16,9 @@ export default function SummaryCard({ user }: SummaryCardProps) {
     ? 'Administrateur'
     : user.role
   return (
-    <div className="bg-white rounded-md shadow-sm border border-gray-200 p-4 sticky top-[calc(var(--navbar-height,4rem)+var(--secondary-navbar-height,0px)+0.75rem)]">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-[calc(var(--navbar-height,4rem)+var(--secondary-navbar-height,0px)+0.75rem)]">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-semibold">
+        <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-semibold ring-4 ring-primary-100">
           {(user.firstName?.charAt(0) || '').toUpperCase()}
           {(user.lastName?.charAt(0) || '').toUpperCase()}
         </div>
@@ -31,7 +31,7 @@ export default function SummaryCard({ user }: SummaryCardProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 text-center mb-3">
-        <div className="rounded-md bg-gray-50 border border-gray-200 p-2 min-w-0">
+        <div className="rounded-md bg-gray-50 border border-gray-200 p-3 min-w-0">
           <div className="text-xs text-gray-500">Inscription</div>
           <div
             className="text-sm font-medium text-gray-900 truncate"

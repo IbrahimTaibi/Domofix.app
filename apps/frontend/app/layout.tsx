@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import Providers from '@/app/providers'
 import OfflineBanner from '@/shared/components/error/offline-banner'
+import ToastContainer from '@/shared/components/toast-container'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -38,6 +39,10 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer />
+          {/* Global toasts */}
+          <ToastContainer />
+          {/* Portal target for toasts to avoid hydration mismatch */}
+          <div id="toast-root" />
           <OfflineBanner />
         </Providers>
       </body>

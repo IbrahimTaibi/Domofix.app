@@ -9,3 +9,6 @@ export * from './service';
 
 // Request types
 export * from './request';
+
+// Notification types
+export * from './notifications';

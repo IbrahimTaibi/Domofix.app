@@ -1,11 +1,15 @@
 import { httpRequest } from '@/shared/utils/http'
+import { useAuthStore } from '@/features/auth/store/auth-store'
 import { ServiceCategory, CreateRequestRequest, ApplyForRequestRequest, AcceptProviderRequest, Request, RequestStatus } from '@darigo/shared-types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
 function getAuthHeaders(): HeadersInit {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('auth_token')
+    // Prefer latest token from localStorage; fall back to auth store
+    const lsToken = localStorage.getItem('auth_token')
+    const storeToken = useAuthStore.getState().backendToken
+    const token = lsToken || storeToken || null
     if (token) return { Authorization: `Bearer ${token}` }
   }
   return {}

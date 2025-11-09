@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { LayoutGrid, History, Plus, MessageSquare, Bell } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useNotificationsStore } from "@/shared/store/notifications-store";
 
 export default function SecondaryNavbar() {
   const { isAuthenticated, user } = useAuth();
+  const unreadCount = useNotificationsStore((s) => s.unreadCount);
   // Height of the secondary navbar used by layout padding
   // We expose it as a CSS variable so the main content can account for it on desktop
   const secondaryHeight = "3rem"; // 48px
@@ -53,8 +55,20 @@ export default function SecondaryNavbar() {
               <Link href="/messages" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Messages
               </Link>
-              <Link href="/notifications" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
+              <Link href="/notifications" className="relative px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Notifications
+                {unreadCount > 0 && (
+                  <span
+                    className="ml-2 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] leading-none"
+                    style={{
+                      width: 'var(--notif-badge-size, 18px)',
+                      height: 'var(--notif-badge-size, 18px)',
+                      minWidth: 'var(--notif-badge-size, 18px)',
+                    }}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
@@ -86,9 +100,25 @@ export default function SecondaryNavbar() {
             <Link href="/messages" aria-label="Messages" className="flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
               <MessageSquare className="w-5 h-5" />
             </Link>
-            <Link href="/notifications" aria-label="Notifications" className="flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
-              <Bell className="w-5 h-5" />
-            </Link>
+            <div className="relative flex items-center justify-center">
+              <Link href="/notifications" aria-label="Notifications" className="relative flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span
+                    className="absolute bg-red-600 text-white text-[10px] leading-none rounded-full flex items-center justify-center"
+                    style={{
+                      top: '-6px',
+                      right: '-8px',
+                      width: 'var(--notif-badge-size, 16px)',
+                      height: 'var(--notif-badge-size, 16px)',
+                      minWidth: 'var(--notif-badge-size, 16px)',
+                    }}
+                  >
+                    {Math.min(unreadCount, 9)}
+                  </span>
+                )}
+              </Link>
+            </div>
           </div>
         </div>
       </nav>

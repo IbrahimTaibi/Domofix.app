@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Input from '@/shared/components/input'
 import Textarea from '@/shared/components/textarea'
 import Button from '@/shared/components/button'
@@ -15,6 +15,8 @@ import { useAuth } from '@/features/auth/components/providers/auth-provider'
 import { useLocationData } from '@/shared/hooks/use-location-data'
 import DateTimePicker from '@/shared/components/date-time-picker'
 import PhotoUploader from '@/shared/components/photo-uploader'
+import { useToast } from '@/shared/hooks/use-toast'
+import { useRouter } from 'next/navigation'
 
 export interface RequestServiceFormProps {
   className?: string
@@ -43,6 +45,8 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
 
   const { errors, validateField, validateForm, clearErrors } = useValidation(schema as any)
   const [formError, setFormError] = useState<string | null>(null)
+  const { success: showSuccess, error: showError, info: showInfo, warning: showWarning } = useToast()
+  const router = useRouter()
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -61,12 +65,14 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
     if (useGeo) {
       if (!selectedLocation && !currentLocation) {
         setFormError('Sélectionnez votre position ou désactivez la localisation pour saisir une adresse.')
+        showWarning('Sélectionnez votre position ou saisissez votre adresse.', { title: 'Adresse requise' })
         return
       }
     } else {
       const hasAddress = !!(formValues.street || formValues.city || formValues.state || formValues.postalCode || formValues.country)
       if (!hasAddress) {
         setFormError('Renseignez votre adresse (au moins la rue et la ville) ou activez la localisation.')
+        showWarning('Renseignez votre adresse ou activez la localisation.', { title: 'Adresse requise' })
         return
       }
     }
@@ -114,6 +120,12 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
       setLastRequest(updated)
       clearDraft()
       setPhotos([])
+      showSuccess('Votre demande a été envoyée avec succès.', {
+        title: 'Demande créée',
+        action: { label: 'Voir l’historique', onClick: () => router.push('/history') },
+      })
+    } else if (error) {
+      showError(error, { title: 'Échec de la demande', duration: 6000 })
     }
   }
 
@@ -133,9 +145,54 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
   // Geolocation data hooks
   const { currentLocation, selectedLocation, isLoading: geoLoading, error: geoError, useCurrentAsSelected, clearLocation } = useLocationData()
   const [photos, setPhotos] = useState<File[]>([])
+  const [formKey, setFormKey] = useState(0)
+  const geoActiveToastShown = useRef(false)
+
+  const handleClearDraft = () => {
+    clearDraft()
+    setPhotos([])
+    setFormKey((k) => k + 1) // force remount to reset uncontrolled inputs
+  }
+
+  // If geolocation fails while enabled, automatically disable it and guide the user to use address fields
+  useEffect(() => {
+    if (useGeo && geoError) {
+      // eslint-disable-next-line no-console
+      console.warn('Geolocation failed, reverting to manual address entry:', geoError)
+      setUseGeo(false)
+      clearLocation()
+      setFormError('La localisation a échoué. Veuillez saisir votre adresse manuellement.')
+      showError(geoError || 'La localisation a échoué. Veuillez saisir votre adresse.', { title: 'Localisation', duration: 6000 })
+    }
+  }, [useGeo, geoError, clearLocation])
+
+  // When geolocation is active and a location is available, show a one-time informational toast
+  useEffect(() => {
+    if (useGeo && (selectedLocation || currentLocation) && !geoLoading && !geoError && !geoActiveToastShown.current) {
+      showInfo('Votre localisation est utilisée — l’adresse n’est pas nécessaire.', { title: 'Localisation activée' })
+      geoActiveToastShown.current = true
+    }
+    if (!useGeo) {
+      geoActiveToastShown.current = false
+    }
+  }, [useGeo, selectedLocation, currentLocation, geoLoading, geoError, showInfo])
+
+  const handleUseCurrent = () => {
+    const ok = useCurrentAsSelected()
+    if (ok) {
+      showSuccess('Position actuelle sélectionnée.', { title: 'Localisation' })
+    } else {
+      showWarning('Aucune position détectée pour le moment.', { title: 'Localisation' })
+    }
+  }
+
+  const handleDisableLocation = () => {
+    clearLocation()
+    showInfo('Localisation désactivée. Vous pouvez saisir votre adresse.', { title: 'Localisation' })
+  }
 
   return (
-    <form aria-label="Demander un service" onSubmit={onSubmit} className={className}>
+    <form key={formKey} aria-label="Demander un service" onSubmit={onSubmit} className={className}>
       {formError && (
         <div className="mb-4 rounded-md bg-red-50 p-4" role="alert">
           <div className="flex">
@@ -240,60 +297,75 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
         />
       </div>
 
-      {/* Géolocalisation sous le bloc principal pour préserver l’alignement */}
-      <div className="mt-4">
-        <label className="flex items-center gap-3 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            checked={useGeo}
-            onChange={(e) => setUseGeo(e.target.checked)}
-            disabled={!isAuthed}
-          />
-          Utiliser ma localisation
-        </label>
-        {useGeo && (
-          <div className="mt-3 rounded-lg border border-primary-100 bg-primary-50 p-3 text-sm text-primary-900">
-            <div className="flex items-center justify-between">
-              <div>
-                {geoLoading && <span>Détection de la position…</span>}
-                {!geoLoading && !geoError && currentLocation && !selectedLocation && (
-                  <span>Position détectée. Sélectionnez-la pour l’utiliser.</span>
-                )}
-                {geoError && <span className="text-red-700">{geoError}</span>}
-                {/* Backend location validation error */}
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {(error && (error.toLowerCase().includes('location') || error.toLowerCase().includes('address'))) && (
-                  <span className="text-red-700 block mt-1">Vérifiez la localisation ou l’adresse saisie.</span>
-                )}
-                {selectedLocation && (
-                  <span>
-                    Utilisation de la position: lat {selectedLocation.latitude.toFixed(5)}, lon {selectedLocation.longitude.toFixed(5)}
-                  </span>
-                )}
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold text-gray-900">Adresse</h3>
+        {(error && (error.toLowerCase().includes('address') || error.toLowerCase().includes('location'))) && (
+          <p className="mt-1 text-sm text-red-600">Renseignez l’adresse ou activez la localisation.</p>
+        )}
+        {useGeo && (selectedLocation || currentLocation) && !geoError && (
+          <p className="mt-1 text-sm text-primary-700">
+            Votre localisation est activée. Les champs d’adresse sont désactivés.
+          </p>
+        )}
+        {/* Localisation — inviting card inside address section */}
+        <div className="mt-4">
+          <div className="rounded-xl border border-primary-200 bg-gradient-to-r from-primary-50 to-primary-100 p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-200 text-primary-700">
+                  <MapPin className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-primary-900">Utiliser ma localisation</p>
+                  <p className="text-xs text-primary-800">Détecter automatiquement votre position pour remplir l’adresse.</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {!selectedLocation && (
-                  <Button type="button" variant="secondary" size="sm" onClick={useCurrentAsSelected} disabled={geoLoading}>
+              <label className="flex items-center gap-2 text-sm text-primary-900">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 rounded border-primary-300 text-primary-600 focus:ring-primary-500"
+                  checked={useGeo}
+                  onChange={(e) => setUseGeo(e.target.checked)}
+                  disabled={!isAuthed}
+                  aria-label="Activer la localisation"
+                />
+                <span>{useGeo ? 'Activée' : 'Activer'}</span>
+              </label>
+            </div>
+            <div className="mt-3">
+              {geoLoading && <span className="text-sm text-primary-800">Détection de la position…</span>}
+              {!geoLoading && !geoError && currentLocation && !selectedLocation && (
+                <span className="text-sm text-primary-800">Position détectée. Sélectionnez-la pour l’utiliser.</span>
+              )}
+              {geoError && <span className="text-sm text-red-700">{geoError}</span>}
+              {(error && (error.toLowerCase().includes('location') || error.toLowerCase().includes('address'))) && (
+                <span className="text-sm text-red-700 block mt-1">Vérifiez la localisation ou l’adresse saisie.</span>
+              )}
+              {selectedLocation && (
+                <span className="text-sm text-primary-900">
+                  Utilisation de la position: lat {selectedLocation.latitude.toFixed(5)}, lon {selectedLocation.longitude.toFixed(5)}
+                </span>
+              )}
+              {useGeo && (selectedLocation || currentLocation) && !geoError && (
+                <p className="mt-2 text-sm font-medium text-primary-900" aria-live="polite">
+                  Votre localisation est utilisée — l’adresse n’est pas nécessaire.
+                </p>
+              )}
+              <div className="mt-3 flex items-center gap-2">
+                {!selectedLocation && useGeo && (
+                  <Button type="button" variant="secondary" size="sm" onClick={handleUseCurrent} disabled={geoLoading}>
                     Utiliser ma position
                   </Button>
                 )}
-                {selectedLocation && (
-                  <Button type="button" variant="outline" size="sm" onClick={clearLocation}>
+                {selectedLocation && useGeo && (
+                  <Button type="button" variant="outline" size="sm" onClick={handleDisableLocation}>
                     Désactiver
                   </Button>
                 )}
               </div>
             </div>
           </div>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold text-gray-900">Adresse</h3>
-        {(error && (error.toLowerCase().includes('address') || error.toLowerCase().includes('location'))) && (
-          <p className="mt-1 text-sm text-red-600">Renseignez l’adresse ou activez la localisation.</p>
-        )}
+        </div>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <Input name="street" label="Rue" onChange={onChangeDraft} defaultValue={(draft as any).street || ''} disabled={!isAuthed || useGeo} />
@@ -323,7 +395,7 @@ export default function RequestServiceForm({ className }: RequestServiceFormProp
         <Button type="submit" variant="primary" size="lg" isLoading={loading} disabled={!isAuthed}>
           Envoyer la demande
         </Button>
-        <Button type="button" variant="ghost" onClick={clearDraft} disabled={!isAuthed}>
+        <Button type="button" variant="ghost" onClick={handleClearDraft} disabled={!isAuthed}>
           Effacer le brouillon
         </Button>
       </div>

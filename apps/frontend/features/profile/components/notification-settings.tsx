@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { User } from '@darigo/shared-types';
 import { Button } from '@/shared/components';
+import { useToast } from '@/shared/hooks/use-toast';
 
 interface NotificationSettingsProps {
   user: User;
@@ -51,6 +52,7 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { success: showSuccess, error: showError } = useToast();
 
   const handleToggle = (category: keyof NotificationPreferences, setting: string) => {
     setPreferences(prev => ({
@@ -73,11 +75,15 @@ export default function NotificationSettings({ user, onClose }: NotificationSett
       // In a real frontend-only app, you might save to localStorage
       localStorage.setItem('notificationSettings', JSON.stringify(preferences));
       
-      alert('Préférences de notification mises à jour avec succès !');
+      showSuccess('Préférences de notification mises à jour avec succès !', { title: 'Préférences enregistrées' });
       onClose();
-    } catch (error) {
-      console.error('Error updating notification preferences:', error);
-      alert('Échec de la mise à jour des préférences de notification. Veuillez réessayer.');
+    } catch (err) {
+      console.error('Error updating notification preferences:', err);
+      
+      // Show an error toast instead of alert
+      const message = 'Échec de la mise à jour des préférences de notification. Veuillez réessayer.';
+      // Use a slightly longer duration for errors
+      showError(message, { title: 'Erreur', duration: 6000 });
     } finally {
       setIsSubmitting(false);
     }

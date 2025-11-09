@@ -8,11 +8,13 @@ import { AppLogger } from '@/common/logging/logger.service';
 import { AuthModule } from '../auth/auth.module';
 import { RequestEventsListener } from './listeners/request-events.listener';
 import { RequestExpirationService } from './expiration.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
+    NotificationsModule,
     MongooseModule.forFeature([{ name: Request.name, schema: RequestSchema }]),
   ],
   controllers: [RequestsController],
