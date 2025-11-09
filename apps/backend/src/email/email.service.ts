@@ -76,6 +76,94 @@ export class EmailService {
     await this.sendEmail(toEmail, subject, html);
   }
 
+  async sendRequestCreatedEmail(toEmail: string, requestId: string) {
+    const url = `${this.appUrl}/requests/${encodeURIComponent(requestId)}`;
+    const subject = 'Confirmation de votre demande';
+    const html = `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+        <h2>Votre demande a été créée ✅</h2>
+        <p>Merci d'avoir soumis une demande sur Darigo. Notre équipe et les prestataires disponibles vont l'examiner.</p>
+        <p>Vous pouvez consulter les détails de votre demande ici :</p>
+        <p><a href="${url}" style="background:#2563eb;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">Voir ma demande</a></p>
+        <p>Identifiant de la demande : <strong>${requestId}</strong></p>
+        <p>À tout moment, vous pouvez suivre l'évolution depuis votre espace.</p>
+        <p>Merci,</p>
+        <p>L'équipe Darigo</p>
+      </div>
+    `;
+    await this.sendEmail(toEmail, subject, html);
+  }
+
+  async sendRequestExpiredEmail(toEmail: string, requestId: string) {
+    const url = `${this.appUrl}/requests/${encodeURIComponent(requestId)}`;
+    const subject = 'Votre demande a expiré';
+    const html = `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+        <h2>Votre demande a expiré ⏳</h2>
+        <p>La date prévue de service est dépassée et la demande n'a pas été acceptée ni complétée.</p>
+        <p>Vous pouvez créer une nouvelle demande ou ajuster vos informations si nécessaire.</p>
+        <p><a href="${url}" style="background:#6b7280;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">Voir la demande</a></p>
+        <p>Identifiant de la demande : <strong>${requestId}</strong></p>
+        <p>Merci,</p>
+        <p>L'équipe Darigo</p>
+      </div>
+    `;
+    await this.sendEmail(toEmail, subject, html);
+  }
+
+  async sendRequestExpiringSoonEmail(toEmail: string, requestId: string) {
+    const url = `${this.appUrl}/requests/${encodeURIComponent(requestId)}`;
+    const subject = 'Votre demande expire dans 1 heure';
+    const html = `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+        <h2>Votre demande arrive à échéance ⏰</h2>
+        <p>La date de service prévue est atteinte. Sans acceptation ou finalisation, la demande sera automatiquement clôturée dans une heure.</p>
+        <p>Vous pouvez mettre à jour la demande ou en créer une nouvelle si nécessaire.</p>
+        <p><a href="${url}" style="background:#2563eb;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">Voir la demande</a></p>
+        <p>Identifiant de la demande : <strong>${requestId}</strong></p>
+        <p>Merci,</p>
+        <p>L'équipe Darigo</p>
+      </div>
+    `;
+    await this.sendEmail(toEmail, subject, html);
+  }
+
+  async sendRequestNewApplicationEmail(toEmail: string, requestId: string, providerName?: string) {
+    const url = `${this.appUrl}/requests/${encodeURIComponent(requestId)}`;
+    const subject = 'Nouveau prestataire a postulé à votre demande';
+    const providerText = providerName ? `Le prestataire <strong>${providerName}</strong> a postulé.` : `Un prestataire a postulé.`;
+    const html = `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+        <h2>Nouvelle candidature reçue 📬</h2>
+        <p>${providerText}</p>
+        <p>Consultez les candidatures et sélectionnez le prestataire qui vous convient :</p>
+        <p><a href="${url}" style="background:#2563eb;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">Voir ma demande</a></p>
+        <p>Identifiant de la demande : <strong>${requestId}</strong></p>
+        <p>Merci,</p>
+        <p>L'équipe Darigo</p>
+      </div>
+    `;
+    await this.sendEmail(toEmail, subject, html);
+  }
+
+  async sendProviderApplicationReceivedEmail(toEmail: string, applicationId: string) {
+    const url = `${this.appUrl}/get-started`;
+    const subject = 'Votre candidature prestataire a été reçue';
+    const html = `
+      <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+        <h2>Merci pour votre candidature 🙌</h2>
+        <p>Nous avons bien reçu votre candidature pour devenir prestataire sur Darigo.</p>
+        <p>Notre équipe va l'examiner et vous informer dès qu'une décision sera prise.</p>
+        <p>Identifiant de candidature : <strong>${applicationId}</strong></p>
+        <p>Vous pouvez consulter votre espace et compléter votre profil si nécessaire :</p>
+        <p><a href="${url}" style="background:#16a34a;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none;display:inline-block">Aller à mon espace</a></p>
+        <p>Merci,</p>
+        <p>L'équipe Darigo</p>
+      </div>
+    `;
+    await this.sendEmail(toEmail, subject, html);
+  }
+
   private async sendEmail(toEmail: string, subject: string, html: string) {
     try {
       if (!this.isConfigured) {

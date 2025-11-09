@@ -25,6 +25,14 @@ module.exports = {
       transform: {
         '^.+\\.(t|j)s$': 'ts-jest'
       },
+      globals: {
+        'ts-jest': {
+          tsconfig: '<rootDir>/apps/backend/tsconfig.json',
+        },
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/apps/backend/src/$1',
+      },
       collectCoverageFrom: [
         'apps/backend/src/**/*.{js,ts}',
         '!apps/backend/src/**/*.d.ts',
@@ -37,6 +45,14 @@ module.exports = {
       testEnvironment: 'node',
       transform: {
         '^.+\\.(t|j)s$': 'ts-jest'
+      },
+      globals: {
+        'ts-jest': {
+          tsconfig: '<rootDir>/apps/backend/tsconfig.json',
+        },
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/apps/backend/src/$1',
       },
     },
     {

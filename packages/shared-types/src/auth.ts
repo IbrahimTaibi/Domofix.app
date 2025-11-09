@@ -113,6 +113,8 @@ export interface CreateProviderApplicationRequest {
 
 export interface AuthResponse {
   access_token: string;
+  // Optional refresh_token for clients that implement token rotation
+  refresh_token?: string;
   user: User;
 }
 

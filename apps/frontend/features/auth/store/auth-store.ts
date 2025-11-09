@@ -101,16 +101,14 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
           const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
           const [firstName, ...rest] = name.split(' ')
           const lastName = rest.join(' ') || undefined
-          const res = await fetch(`${apiBase}/auth/oauth/${provider}`, {
+          const { httpRequest } = await import('@/shared/utils/http')
+          const data = await httpRequest<any>(`${apiBase}/auth/oauth/${provider}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ provider, providerId, email, firstName, lastName, avatar: session?.user?.image }),
           })
-          if (res.ok) {
-            const data = await res.json()
             apiClient.setAuthToken(data.access_token)
             set({ backendToken: data.access_token })
-          }
         } catch {
           // Ignore and continue; user can still use email/password
         }
@@ -124,8 +122,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       try {
         const userData = await apiClient.getProfile()
         set({ user: userData })
-      } catch {
-        // Token might be invalid, remove it
+      } catch (err) {
+        const { trackError } = await import('@/shared/utils/error-tracking')
+        trackError(err, { source: 'auth-store.checkAuth.getProfile' })
         apiClient.logout()
         set({ backendToken: null })
       }

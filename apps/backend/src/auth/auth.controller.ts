@@ -1,8 +1,10 @@
 import { Controller, Post, Body, Get, UseGuards, Request, Req, Param, Query, Patch } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, OAuthLoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RefreshDto, LogoutDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -52,6 +54,7 @@ export class AuthController {
   }
 
   @Post('oauth/:provider')
+  @SkipThrottle()
   async oauthLogin(
     @Param('provider') provider: 'facebook' | 'google',
     @Body() body: OAuthLoginDto,
@@ -67,5 +70,19 @@ export class AuthController {
   async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
     return this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
+  }
+
+  @Post('refresh')
+  async refresh(@Body() dto: RefreshDto, @Req() req: any) {
+    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
+    const ua = req.headers['user-agent'] || '';
+    return this.authService.refresh(dto.refreshToken, ip, ua);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@Req() req: any, @Body() dto: LogoutDto) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    return this.authService.logout(userId, dto?.refreshToken);
   }
 }

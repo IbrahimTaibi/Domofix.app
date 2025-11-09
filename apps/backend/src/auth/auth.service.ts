@@ -4,8 +4,11 @@ import { UsersService } from '../users/users.service';
 import { Address } from '../users/schemas/user.schema';
 import { OAuthLoginDto } from './dto';
 import { EmailService } from '../email/email.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as crypto from 'crypto';
 import { isValidPassword } from '@darigo/shared-utils';
+import { ConfigService } from '@nestjs/config';
+import { RefreshTokensService } from './refresh-tokens.service';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +16,78 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private configService: ConfigService,
+    private refreshTokensService: RefreshTokensService,
+    private readonly events: EventEmitter2,
   ) {}
+
+  private getAccessSecret(): string {
+    return (
+      this.configService.get<string>('JWT_ACCESS_SECRET') ||
+      this.configService.get<string>('JWT_SECRET') ||
+      'your-secret-key'
+    );
+  }
+
+  private getRefreshSecret(): string {
+    return (
+      this.configService.get<string>('JWT_REFRESH_SECRET') ||
+      this.configService.get<string>('JWT_SECRET') ||
+      'your-secret-key'
+    );
+  }
+
+  private getAccessTtl(): string {
+    return (
+      this.configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
+      this.configService.get<string>('JWT_EXPIRES_IN') ||
+      '24h'
+    );
+  }
+
+  private getRefreshTtl(): string {
+    return this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '30d';
+  }
+
+  private ttlToMs(ttl: string): number {
+    const match = ttl.match(/^(\d+)\s*(ms|s|m|h|d)$/);
+    if (!match) {
+      // default to 24h
+      return 24 * 60 * 60 * 1000;
+    }
+    const num = parseInt(match[1], 10);
+    const unit = match[2] as 'ms' | 's' | 'm' | 'h' | 'd';
+    const table = { ms: 1, s: 1000, m: 60000, h: 3600000, d: 86400000 };
+    return num * table[unit];
+  }
+
+  private ttlToSeconds(ttl: string): number {
+    const ms = this.ttlToMs(ttl);
+    return Math.max(1, Math.floor(ms / 1000));
+  }
+
+  private async issueTokens(user: any, meta?: { ip?: string; userAgent?: string }) {
+    const payload = { sub: (user as any)._id.toString(), email: user.email };
+
+    const access_token = this.jwtService.sign(payload, {
+      secret: this.getAccessSecret(),
+      expiresIn: this.ttlToSeconds(this.getAccessTtl()),
+    });
+
+    const jti = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    const refreshExpiresAt = new Date(Date.now() + this.ttlToMs(this.getRefreshTtl()));
+    await this.refreshTokensService.create(payload.sub, jti, refreshExpiresAt, {
+      ip: meta?.ip,
+      userAgent: meta?.userAgent,
+    });
+
+    const refresh_token = this.jwtService.sign({ sub: payload.sub, jti }, {
+      secret: this.getRefreshSecret(),
+      expiresIn: this.ttlToSeconds(this.getRefreshTtl()),
+    });
+
+    return { access_token, refresh_token };
+  }
 
   async register(userData: {
     email: string;
@@ -40,12 +114,12 @@ export class AuthService {
       role: 'customer',
     });
 
-    // Fire-and-forget welcome email (do not block registration on send failures)
-    try {
-      await this.emailService.sendWelcomeEmail(user.email, (user as any).firstName);
-    } catch (err) {
-      // Intentionally swallow errors here to avoid breaking registration
-    }
+    // Emit event for welcome email (handled by listener; non-blocking)
+    this.events.emit('user.registered', {
+      id: (user as any)._id.toString(),
+      email: user.email,
+      firstName: (user as any).firstName,
+    });
     
     // Generate JWT token
     const payload = { 
@@ -53,8 +127,9 @@ export class AuthService {
       email: user.email 
     };
     
+    const tokens = await this.issueTokens(user);
     return {
-      access_token: this.jwtService.sign(payload),
+      ...tokens,
       user: this.usersService.sanitizeUser(user),
     };
   }
@@ -67,7 +142,7 @@ export class AuthService {
     if (!user) throw new NotFoundException('User not found');
     const token = crypto.randomBytes(32).toString('hex');
     await this.usersService.setEmailVerificationToken((user as any)._id.toString(), token);
-    await this.emailService.sendVerificationEmail(user.email, token);
+    this.events.emit('user.verification.requested', { email: user.email, token });
     return { ok: true };
   }
 
@@ -127,8 +202,9 @@ export class AuthService {
       email: user.email 
     };
     
+    const tokens = await this.issueTokens(user, { ip });
     return {
-      access_token: this.jwtService.sign(payload),
+      ...tokens,
       user: this.usersService.sanitizeUser(user),
     };
   }
@@ -208,13 +284,9 @@ export class AuthService {
       await this.usersService.resetFailedLoginAttempts((user as any)._id.toString());
     }
 
-    const jwtPayload = {
-      sub: (user as any)._id.toString(),
-      email: (user as any).email,
-    };
-
+    const tokens = await this.issueTokens(user, { ip });
     return {
-      access_token: this.jwtService.sign(jwtPayload),
+      ...tokens,
       user: this.usersService.sanitizeUser(user as any),
       provider,
     };
@@ -264,5 +336,49 @@ export class AuthService {
       throw new NotFoundException('Unable to update password');
     }
     return this.usersService.sanitizeUser(updated);
+  }
+
+  async refresh(refreshToken: string, ip?: string, userAgent?: string) {
+    try {
+      const decoded: any = this.jwtService.verify(refreshToken, { secret: this.getRefreshSecret() });
+      const userId = decoded?.sub as string;
+      const jti = decoded?.jti as string;
+      if (!userId || !jti) throw new UnauthorizedException('Invalid refresh token');
+
+      const active = await this.refreshTokensService.findActive(userId, jti);
+      if (!active) throw new UnauthorizedException('Invalid or expired refresh token');
+
+      // rotate
+      await this.refreshTokensService.revokeByJti(userId, jti);
+
+      const user = await this.usersService.findById(userId);
+      if (!user) throw new UnauthorizedException('User not found');
+
+      const tokens = await this.issueTokens(user, { ip, userAgent });
+      return { ...tokens, user: this.usersService.sanitizeUser(user) };
+    } catch (e) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  async logout(userId: string, refreshToken?: string) {
+    if (refreshToken) {
+      try {
+        const decoded: any = this.jwtService.verify(refreshToken, { secret: this.getRefreshSecret() });
+        if (decoded?.sub !== userId) {
+          // If token does not belong to user, revoke all as a safety measure
+          await this.refreshTokensService.revokeAllForUser(userId);
+          return { ok: true };
+        }
+        await this.refreshTokensService.revokeByJti(userId, decoded.jti);
+        return { ok: true };
+      } catch {
+        // On verification failure, revoke all tokens for the user
+        await this.refreshTokensService.revokeAllForUser(userId);
+        return { ok: true };
+      }
+    }
+    await this.refreshTokensService.revokeAllForUser(userId);
+    return { ok: true };
   }
 }

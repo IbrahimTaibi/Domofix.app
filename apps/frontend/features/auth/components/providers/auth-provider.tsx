@@ -76,17 +76,26 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
         const name = sessionData?.user?.name || '';
         if (!backendToken && provider && (email || providerId)) {
           try {
-            const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-            const [firstName, ...rest] = name.split(' ');
-            const lastName = rest.join(' ') || undefined;
-            const res = await fetch(`${apiBase}/auth/oauth/${provider}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ provider, providerId, email, firstName, lastName, avatar: sessionData?.user?.image }),
-            });
-            if (res.ok) {
-              const data = await res.json();
-              apiClient.setAuthToken(data.access_token);
+            // Avoid repeated attempts: simple local cooldown (30s)
+            const key = 'backend_oauth_link_attempted_ts';
+            const now = Date.now();
+            const last = Number(typeof window !== 'undefined' ? localStorage.getItem(key) : '0') || 0;
+            if (now - last < 30_000) {
+              // Skip attempt if within cooldown
+            } else {
+              if (typeof window !== 'undefined') localStorage.setItem(key, String(now));
+              const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+              const [firstName, ...rest] = name.split(' ');
+              const lastName = rest.join(' ') || undefined;
+              const res = await fetch(`${apiBase}/auth/oauth/${provider}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider, providerId, email, firstName, lastName, avatar: sessionData?.user?.image }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                apiClient.setAuthToken(data.access_token);
+              }
             }
           } catch (e) {
             // Ignore and continue; user can still use email/password

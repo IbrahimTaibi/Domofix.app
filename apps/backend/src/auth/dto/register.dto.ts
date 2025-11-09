@@ -1,6 +1,6 @@
 import { IsEmail, IsString, MinLength, IsOptional, IsEnum, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
-import { RegisterRequest, Address } from '@darigo/shared-types';
+import type { RegisterRequest, Address } from '@darigo/shared-types';
 
 export class AddressDto implements Address {
   @IsOptional()

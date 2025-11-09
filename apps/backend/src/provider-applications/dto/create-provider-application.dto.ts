@@ -1,5 +1,5 @@
 import { IsString, IsOptional, MinLength } from 'class-validator';
-import { CreateProviderApplicationRequest } from '@darigo/shared-types';
+import type { CreateProviderApplicationRequest } from '@darigo/shared-types';
 
 export class CreateProviderApplicationDto implements CreateProviderApplicationRequest {
   @IsString()

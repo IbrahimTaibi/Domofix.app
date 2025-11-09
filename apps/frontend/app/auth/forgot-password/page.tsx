@@ -1,7 +1,7 @@
 import { ForgotPasswordForm } from '@/features/auth/components/forgot-password-form'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 export default async function ForgotPasswordPage() {
   const session = await getServerSession(authOptions)

@@ -1,192 +1,802 @@
-Project Directory Tree (max depth 5)
-
-c:\Users\1\Darigo
+﻿C:\Users\1\Darigo
+├── .env.local
 ├── .gitignore
-├── .turbo\
-│   ├── cache\
-│   ├── cookies\
-│   └── daemon\
-│       ├── d37b57d5ef3401df-turbo.log.2025-11-04
-│       └── d37b57d5ef3401df-turbo.log.2025-11-05
-├── apps\
-│   ├── backend\
+├── apps
+│   ├── backend
+│   │   ├── .env
 │   │   ├── .env.example
 │   │   ├── .prettierrc
-│   │   ├── .turbo\
-│   │   ├── README.md
+│   │   ├── ERRORS.md
 │   │   ├── eslint.config.mjs
 │   │   ├── nest-cli.json
 │   │   ├── package.json
-│   │   ├── src\
+│   │   ├── README.md
+│   │   ├── src
 │   │   │   ├── app.controller.ts
 │   │   │   ├── app.module.ts
 │   │   │   ├── app.service.ts
-│   │   │   ├── auth\
+│   │   │   ├── auth
 │   │   │   │   ├── auth.controller.ts
 │   │   │   │   ├── auth.module.ts
 │   │   │   │   ├── auth.service.ts
-│   │   │   │   ├── decorators\
-│   │   │   │   ├── dto\
-│   │   │   │   ├── guards\
-│   │   │   │   └── strategies\
+│   │   │   │   ├── decorators
+│   │   │   │   │   └── roles.decorator.ts
+│   │   │   │   ├── dto
+│   │   │   │   │   ├── change-password.dto.ts
+│   │   │   │   │   ├── forgot-password.dto.ts
+│   │   │   │   │   ├── index.ts
+│   │   │   │   │   ├── login.dto.ts
+│   │   │   │   │   ├── logout.dto.ts
+│   │   │   │   │   ├── oauth-login.dto.ts
+│   │   │   │   │   ├── refresh.dto.ts
+│   │   │   │   │   ├── register.dto.ts
+│   │   │   │   │   └── reset-password.dto.ts
+│   │   │   │   ├── guards
+│   │   │   │   │   ├── jwt-auth.guard.ts
+│   │   │   │   │   └── roles.guard.ts
+│   │   │   │   ├── listeners
+│   │   │   │   │   └── auth-events.listener.ts
+│   │   │   │   ├── refresh-tokens.service.ts
+│   │   │   │   ├── schemas
+│   │   │   │   │   └── refresh-token.schema.ts
+│   │   │   │   └── strategies
+│   │   │   │       └── jwt.strategy.ts
+│   │   │   ├── common
+│   │   │   │   ├── db
+│   │   │   │   │   ├── retry.util.ts
+│   │   │   │   │   ├── simple-backoff.ts
+│   │   │   │   │   └── transaction.util.ts
+│   │   │   │   ├── errors
+│   │   │   │   │   └── app-error.ts
+│   │   │   │   ├── filters
+│   │   │   │   │   └── global-exception.filter.ts
+│   │   │   │   ├── interceptors
+│   │   │   │   │   └── sanitize.interceptor.ts
+│   │   │   │   ├── logging
+│   │   │   │   │   └── logger.service.ts
+│   │   │   │   ├── monitoring
+│   │   │   │   │   └── monitoring.service.ts
+│   │   │   │   ├── utils
+│   │   │   │   │   └── redact.util.ts
+│   │   │   │   └── validators
+│   │   │   │       ├── future-date.validator.ts
+│   │   │   │       ├── phone-number.validator.ts
+│   │   │   │       └── require-one-of.validator.ts
+│   │   │   ├── email
+│   │   │   │   └── email.service.ts
 │   │   │   ├── main.ts
-│   │   │   ├── provider-applications\
-│   │   │   │   ├── dto\
+│   │   │   ├── orders
+│   │   │   │   ├── dto
+│   │   │   │   │   ├── cancel-order.dto.ts
+│   │   │   │   │   ├── complete-order.dto.ts
+│   │   │   │   │   ├── list-orders.query.ts
+│   │   │   │   │   └── start-order.dto.ts
+│   │   │   │   ├── listeners
+│   │   │   │   │   └── request-to-order.listener.ts
+│   │   │   │   ├── orders.controller.ts
+│   │   │   │   ├── orders.module.ts
+│   │   │   │   ├── orders.service.ts
+│   │   │   │   └── schemas
+│   │   │   │       └── order.schema.ts
+│   │   │   ├── provider-applications
+│   │   │   │   ├── dto
+│   │   │   │   │   ├── create-provider-application.dto.ts
+│   │   │   │   │   └── update-status.dto.ts
 │   │   │   │   ├── provider-applications.controller.ts
 │   │   │   │   ├── provider-applications.module.ts
 │   │   │   │   ├── provider-applications.service.ts
-│   │   │   │   └── schemas\
-│   │   │   └── users\
-│   │   │       ├── entities\
-│   │   │       ├── schemas\
+│   │   │   │   └── schemas
+│   │   │   │       └── provider-application.schema.ts
+│   │   │   ├── requests
+│   │   │   │   ├── dto
+│   │   │   │   │   ├── accept-provider.dto.ts
+│   │   │   │   │   ├── apply-for-request.dto.ts
+│   │   │   │   │   ├── complete-request.dto.ts
+│   │   │   │   │   └── create-request.dto.ts
+│   │   │   │   ├── expiration.service.ts
+│   │   │   │   ├── listeners
+│   │   │   │   │   └── request-events.listener.ts
+│   │   │   │   ├── requests.controller.spec.ts
+│   │   │   │   ├── requests.controller.ts
+│   │   │   │   ├── requests.module.ts
+│   │   │   │   ├── requests.service.spec.ts
+│   │   │   │   ├── requests.service.ts
+│   │   │   │   └── schemas
+│   │   │   │       └── request.schema.ts
+│   │   │   └── users
+│   │   │       ├── entities
+│   │   │       │   └── user.entity.ts
+│   │   │       ├── schemas
+│   │   │       │   └── user.schema.ts
+│   │   │       ├── users.controller.ts
 │   │   │       ├── users.module.ts
 │   │   │       └── users.service.ts
-│   │   ├── test\
-│   │   │   └── app.e2e-spec.ts
+│   │   ├── test
+│   │   │   ├── app.e2e-spec.ts
+│   │   │   ├── error-handling.e2e-spec.ts
+│   │   │   └── requests.e2e-spec.ts
 │   │   ├── tsconfig.build.json
 │   │   └── tsconfig.json
-│   └── frontend\
+│   └── frontend
+│       ├── .env.local
 │       ├── .env.local.example
 │       ├── .eslintrc.json
-│       ├── .turbo\
-│       ├── app\
-│       │   ├── api\
-│       │   │   └── auth\
-│       │   ├── auth\
-│       │   │   ├── page.tsx
-│       │   │   └── popup-close\
-│       │   │       └── page.tsx
-│       │   ├── dashboard\
+│       ├── __tests__
+│       │   ├── about-page.test.tsx
+│       │   ├── api-error.test.tsx
+│       │   ├── contact-page.test.tsx
+│       │   ├── error-pages.test.tsx
+│       │   ├── error-view.test.tsx
+│       │   └── http.test.ts
+│       ├── app
+│       │   ├── 403
 │       │   │   └── page.tsx
-│       │   ├── demander-un-service\
+│       │   ├── 500
 │       │   │   └── page.tsx
-│       │   ├── get-started\
-│       │   │   ├── customer\
+│       │   ├── about
+│       │   │   └── page.tsx
+│       │   ├── api
+│       │   │   └── auth
+│       │   │       └── [...nextauth]
+│       │   │           └── route.ts
+│       │   ├── auth
+│       │   │   ├── forgot-password
 │       │   │   │   └── page.tsx
 │       │   │   ├── page.tsx
-│       │   │   └── provider\
+│       │   │   ├── popup-close
+│       │   │   │   └── page.tsx
+│       │   │   └── reset-password
 │       │   │       └── page.tsx
+│       │   ├── contact
+│       │   │   └── page.tsx
+│       │   ├── dashboard
+│       │   │   └── page.tsx
+│       │   ├── error.tsx
+│       │   ├── get-started
+│       │   │   ├── customer
+│       │   │   │   └── page.tsx
+│       │   │   ├── page.tsx
+│       │   │   └── provider
+│       │   │       └── page.tsx
+│       │   ├── global-error.tsx
 │       │   ├── globals.css
-│       │   ├── historique\
+│       │   ├── history
 │       │   │   └── page.tsx
 │       │   ├── layout.tsx
-│       │   ├── loading-demo\
-│       │   ├── messages\
+│       │   ├── loading-demo
+│       │   ├── messages
 │       │   │   └── page.tsx
-│       │   ├── notifications\
+│       │   ├── not-found.tsx
+│       │   ├── notifications
 │       │   │   └── page.tsx
 │       │   ├── page.tsx
-│       │   ├── profile\
+│       │   ├── profile
 │       │   │   └── page.tsx
 │       │   ├── providers.tsx
-│       │   └── register\
-│       │       ├── customer\
-│       │       │   └── page.tsx
-│       │       ├── layout.tsx
-│       │       ├── page.tsx
-│       │       └── provider\
-│       │           └── page.tsx
-│       ├── features\
-│       │   ├── auth\
-│       │   │   ├── components\
+│       │   ├── register
+│       │   │   ├── customer
+│       │   │   │   └── page.tsx
+│       │   │   ├── layout.tsx
+│       │   │   ├── page.tsx
+│       │   │   └── provider
+│       │   │       ├── page.module.css
+│       │   │       └── page.tsx
+│       │   └── request-service
+│       │       └── page.tsx
+│       ├── features
+│       │   ├── about
+│       │   │   ├── components
+│       │   │   │   ├── about-hero.tsx
+│       │   │   │   ├── about-section.tsx
+│       │   │   │   ├── team-member-card.tsx
+│       │   │   │   └── value-item.tsx
+│       │   │   └── index.ts
+│       │   ├── auth
+│       │   │   ├── components
 │       │   │   │   ├── auth-form.tsx
 │       │   │   │   ├── customer-registration-form.tsx
+│       │   │   │   ├── forgot-password-form.tsx
+│       │   │   │   ├── index.ts
 │       │   │   │   ├── provider-registration-form.tsx
-│       │   │   │   └── providers\
-│       │   │   │       └── auth-provider.tsx
-│       │   │   ├── hooks\
+│       │   │   │   └── providers
+│       │   │   │       ├── auth-provider.tsx
+│       │   │   │       └── index.ts
+│       │   │   ├── hooks
 │       │   │   │   └── useAuth.ts
-│       │   │   └── store\
-│       │   │       └── auth-store.ts
-│       │   ├── get-started\
-│       │   │   ├── components\
+│       │   │   ├── store
+│       │   │   │   ├── auth-store.ts
+│       │   │   │   └── index.ts
+│       │   │   └── validation
+│       │   │       └── schemas.ts
+│       │   ├── contact
+│       │   │   ├── components
+│       │   │   │   ├── contact-form.tsx
+│       │   │   │   ├── contact-hero.tsx
+│       │   │   │   └── contact-methods.tsx
+│       │   │   └── index.ts
+│       │   ├── get-started
+│       │   │   ├── components
+│       │   │   │   ├── cta-panel.tsx
 │       │   │   │   ├── hero.tsx
 │       │   │   │   ├── provider-section.tsx
 │       │   │   │   └── role-chooser.tsx
-│       │   │   ├── hooks\
-│       │   │   ├── services\
-│       │   │   ├── tests\
-│       │   │   └── types\
-│       │   ├── profile\
-│       │   │   ├── components\
+│       │   │   ├── hooks
+│       │   │   ├── services
+│       │   │   ├── tests
+│       │   │   └── types
+│       │   ├── profile
+│       │   │   ├── components
 │       │   │   │   ├── account-settings.tsx
 │       │   │   │   ├── change-password-modal.tsx
+│       │   │   │   ├── edit-profile-form.tsx
+│       │   │   │   ├── index.ts
 │       │   │   │   ├── notification-settings.tsx
 │       │   │   │   ├── privacy-settings.tsx
 │       │   │   │   ├── profile-header.tsx
+│       │   │   │   ├── profile-hero.tsx
 │       │   │   │   ├── profile-info.tsx
-│       │   │   │   └── profile-skeleton.tsx
-│       │   │   ├── hooks\
-│       │   │   ├── services\
-│       │   │   └── types\
-│       │   ├── providers\
-│       │   │   ├── components\
-│       │   │   ├── hooks\
-│       │   │   ├── services\
-│       │   │   ├── tests\
-│       │   │   └── types\
-│       │   └── search\
-│       │       ├── components\
-│       │       ├── hooks\
-│       │       ├── services\
-│       │       ├── tests\
-│       │       └── types\
+│       │   │   │   ├── profile-picture-upload.tsx
+│       │   │   │   ├── profile-skeleton.tsx
+│       │   │   │   ├── profile-tabs.tsx
+│       │   │   │   └── summary-card.tsx
+│       │   │   ├── hooks
+│       │   │   │   ├── index.ts
+│       │   │   │   └── use-profile.ts
+│       │   │   ├── services
+│       │   │   │   ├── index.ts
+│       │   │   │   └── profile-service.ts
+│       │   │   └── types
+│       │   │       └── index.ts
+│       │   ├── providers
+│       │   │   ├── components
+│       │   │   │   └── index.ts
+│       │   │   ├── hooks
+│       │   │   ├── services
+│       │   │   ├── tests
+│       │   │   └── types
+│       │   ├── requests
+│       │   │   ├── components
+│       │   │   │   └── request-service-form.tsx
+│       │   │   ├── hooks
+│       │   │   │   └── useRequestService.ts
+│       │   │   ├── README.md
+│       │   │   ├── services
+│       │   │   │   └── requests-service.ts
+│       │   │   └── store
+│       │   │       └── request-store.ts
+│       │   └── search
+│       │       ├── components
+│       │       ├── hooks
+│       │       ├── services
+│       │       ├── tests
+│       │       └── types
 │       ├── jest.setup.js
+│       ├── lib
+│       │   └── auth.ts
 │       ├── next.config.js
-│       ├── package-lock.json
+│       ├── next-env.d.ts
 │       ├── package.json
+│       ├── package-lock.json
 │       ├── postcss.config.js
-│       ├── shared\
-│       │   ├── components\
+│       ├── public
+│       │   ├── .gitkeep
+│       │   ├── assets
+│       │   │   ├── icons
+│       │   │   │   ├── book.json
+│       │   │   │   ├── compare.json
+│       │   │   │   ├── done.json
+│       │   │   │   └── search.json
+│       │   │   └── images
+│       │   │       └── hero.png
+│       │   └── favicon.svg
+│       ├── shared
+│       │   ├── components
 │       │   │   ├── button.tsx
+│       │   │   ├── date-time-picker.tsx
+│       │   │   ├── error
+│       │   │   │   ├── error-banner.tsx
+│       │   │   │   ├── error-view.tsx
+│       │   │   │   ├── index.ts
+│       │   │   │   └── offline-banner.tsx
 │       │   │   ├── index.ts
 │       │   │   ├── input.tsx
-│       │   │   ├── layout\
+│       │   │   ├── layout
 │       │   │   │   ├── footer.tsx
+│       │   │   │   ├── index.ts
 │       │   │   │   ├── logo.tsx
 │       │   │   │   ├── navbar.tsx
 │       │   │   │   ├── nav-links.tsx
 │       │   │   │   └── secondary-navbar.tsx
+│       │   │   ├── photo-uploader.tsx
 │       │   │   ├── search-preview.tsx
-│       │   │   ├── sections\
+│       │   │   ├── sections
 │       │   │   │   ├── features.tsx
 │       │   │   │   ├── hero.tsx
 │       │   │   │   ├── how-it-works.tsx
+│       │   │   │   ├── index.ts
 │       │   │   │   ├── providers.tsx
 │       │   │   │   └── stats.tsx
 │       │   │   └── textarea.tsx
-│       │   ├── contexts\
-│       │   ├── hooks\
+│       │   ├── hooks
 │       │   │   ├── index.ts
-│       │   │   ├── tests\
+│       │   │   ├── tests
+│       │   │   │   ├── .gitkeep
+│       │   │   │   ├── use-form.test.tsx
+│       │   │   │   ├── use-local-storage.test.tsx
+│       │   │   │   ├── use-location.test.ts
+│       │   │   │   ├── use-mobile.test.ts
+│       │   │   │   ├── use-multi-step-form.test.tsx
+│       │   │   │   └── use-validation.test.tsx
 │       │   │   ├── use-debounce.ts
 │       │   │   ├── use-form.ts
 │       │   │   ├── use-local-storage.ts
-│       │   │   ├── use-location-data.ts
 │       │   │   ├── use-location.ts
+│       │   │   ├── use-location-data.ts
 │       │   │   ├── use-mobile.ts
 │       │   │   ├── use-multi-step-form.ts
+│       │   │   ├── useNetworkStatus.ts
 │       │   │   └── use-validation.ts
-│       │   ├── store\
+│       │   ├── store
 │       │   │   ├── index.ts
 │       │   │   └── location-store.ts
-│       │   ├── types\
+│       │   ├── types
 │       │   │   └── globals.d.ts
-│       │   └── utils\
+│       │   └── utils
 │       │       ├── api.ts
 │       │       ├── constants.ts
 │       │       ├── dom.ts
+│       │       ├── errors.ts
+│       │       ├── error-tracking.ts
+│       │       ├── error-types.ts
 │       │       ├── fonts.ts
 │       │       ├── formatting.ts
+│       │       ├── http.ts
 │       │       ├── index.ts
 │       │       ├── styles.ts
-│       │       ├── tests\
+│       │       ├── tests
+│       │       │   ├── .gitkeep
+│       │       │   ├── formatting.test.ts
+│       │       │   └── utils.test.ts
 │       │       ├── theme.ts
 │       │       ├── utils.ts
 │       │       └── validations.ts
 │       ├── tailwind.config.js
-│       └── tsconfig.json
-├── docs\
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── coverage
+│   ├── app
+│   │   ├── 403
+│   │   │   ├── index.html
+│   │   │   └── page.tsx.html
+│   │   ├── 500
+│   │   │   ├── index.html
+│   │   │   └── page.tsx.html
+│   │   ├── about
+│   │   │   ├── index.html
+│   │   │   └── page.tsx.html
+│   │   ├── contact
+│   │   │   ├── index.html
+│   │   │   └── page.tsx.html
+│   │   ├── index.html
+│   │   └── not-found.tsx.html
+│   ├── apps
+│   │   └── backend
+│   │       └── src
+│   │           ├── app.controller.ts.html
+│   │           ├── app.module.ts.html
+│   │           ├── app.service.ts.html
+│   │           ├── auth
+│   │           │   ├── auth.controller.ts.html
+│   │           │   ├── auth.module.ts.html
+│   │           │   ├── auth.service.ts.html
+│   │           │   ├── decorators
+│   │           │   │   ├── index.html
+│   │           │   │   └── roles.decorator.ts.html
+│   │           │   ├── dto
+│   │           │   │   ├── change-password.dto.ts.html
+│   │           │   │   ├── forgot-password.dto.ts.html
+│   │           │   │   ├── index.html
+│   │           │   │   ├── index.ts.html
+│   │           │   │   ├── login.dto.ts.html
+│   │           │   │   ├── logout.dto.ts.html
+│   │           │   │   ├── oauth-login.dto.ts.html
+│   │           │   │   ├── refresh.dto.ts.html
+│   │           │   │   ├── register.dto.ts.html
+│   │           │   │   └── reset-password.dto.ts.html
+│   │           │   ├── guards
+│   │           │   │   ├── index.html
+│   │           │   │   ├── jwt-auth.guard.ts.html
+│   │           │   │   └── roles.guard.ts.html
+│   │           │   ├── index.html
+│   │           │   ├── refresh-tokens.service.ts.html
+│   │           │   ├── schemas
+│   │           │   │   ├── index.html
+│   │           │   │   └── refresh-token.schema.ts.html
+│   │           │   └── strategies
+│   │           │       ├── index.html
+│   │           │       └── jwt.strategy.ts.html
+│   │           ├── common
+│   │           │   ├── db
+│   │           │   │   ├── index.html
+│   │           │   │   ├── retry.util.ts.html
+│   │           │   │   ├── simple-backoff.ts.html
+│   │           │   │   └── transaction.util.ts.html
+│   │           │   ├── errors
+│   │           │   │   ├── app-error.ts.html
+│   │           │   │   └── index.html
+│   │           │   ├── filters
+│   │           │   │   ├── global-exception.filter.ts.html
+│   │           │   │   └── index.html
+│   │           │   ├── logging
+│   │           │   │   ├── index.html
+│   │           │   │   └── logger.service.ts.html
+│   │           │   ├── monitoring
+│   │           │   │   ├── index.html
+│   │           │   │   └── monitoring.service.ts.html
+│   │           │   ├── utils
+│   │           │   │   ├── index.html
+│   │           │   │   └── redact.util.ts.html
+│   │           │   └── validators
+│   │           │       ├── future-date.validator.ts.html
+│   │           │       ├── index.html
+│   │           │       ├── phone-number.validator.ts.html
+│   │           │       └── require-one-of.validator.ts.html
+│   │           ├── email
+│   │           │   ├── email.service.ts.html
+│   │           │   └── index.html
+│   │           ├── index.html
+│   │           ├── provider-applications
+│   │           │   ├── dto
+│   │           │   │   ├── create-provider-application.dto.ts.html
+│   │           │   │   ├── index.html
+│   │           │   │   └── update-status.dto.ts.html
+│   │           │   ├── index.html
+│   │           │   ├── provider-applications.controller.ts.html
+│   │           │   ├── provider-applications.module.ts.html
+│   │           │   ├── provider-applications.service.ts.html
+│   │           │   └── schemas
+│   │           │       ├── index.html
+│   │           │       └── provider-application.schema.ts.html
+│   │           ├── requests
+│   │           │   ├── dto
+│   │           │   │   ├── accept-provider.dto.ts.html
+│   │           │   │   ├── apply-for-request.dto.ts.html
+│   │           │   │   ├── create-request.dto.ts.html
+│   │           │   │   └── index.html
+│   │           │   ├── index.html
+│   │           │   ├── requests.controller.ts.html
+│   │           │   ├── requests.module.ts.html
+│   │           │   ├── requests.service.ts.html
+│   │           │   └── schemas
+│   │           │       ├── index.html
+│   │           │       └── request.schema.ts.html
+│   │           └── users
+│   │               ├── index.html
+│   │               ├── schemas
+│   │               │   ├── index.html
+│   │               │   └── user.schema.ts.html
+│   │               ├── users.controller.ts.html
+│   │               ├── users.module.ts.html
+│   │               └── users.service.ts.html
+│   ├── base.css
+│   ├── block-navigation.js
+│   ├── clover.xml
+│   ├── coverage-final.json
+│   ├── favicon.png
+│   ├── features
+│   │   ├── about
+│   │   │   ├── components
+│   │   │   │   ├── about-hero.tsx.html
+│   │   │   │   ├── about-section.tsx.html
+│   │   │   │   ├── index.html
+│   │   │   │   ├── team-member-card.tsx.html
+│   │   │   │   └── value-item.tsx.html
+│   │   │   ├── index.html
+│   │   │   └── index.ts.html
+│   │   └── contact
+│   │       ├── components
+│   │       │   ├── contact-form.tsx.html
+│   │       │   ├── contact-hero.tsx.html
+│   │       │   ├── contact-methods.tsx.html
+│   │       │   └── index.html
+│   │       ├── index.html
+│   │       └── index.ts.html
+│   ├── hooks
+│   │   ├── index.html
+│   │   ├── use-form.ts.html
+│   │   ├── use-local-storage.ts.html
+│   │   ├── use-location.ts.html
+│   │   ├── use-mobile.ts.html
+│   │   ├── use-multi-step-form.ts.html
+│   │   └── use-validation.ts.html
+│   ├── index.html
+│   ├── lcov.info
+│   ├── lcov-report
+│   │   ├── app
+│   │   │   ├── 403
+│   │   │   │   ├── index.html
+│   │   │   │   └── page.tsx.html
+│   │   │   ├── 500
+│   │   │   │   ├── index.html
+│   │   │   │   └── page.tsx.html
+│   │   │   ├── about
+│   │   │   │   ├── index.html
+│   │   │   │   └── page.tsx.html
+│   │   │   ├── contact
+│   │   │   │   ├── index.html
+│   │   │   │   └── page.tsx.html
+│   │   │   ├── index.html
+│   │   │   └── not-found.tsx.html
+│   │   ├── apps
+│   │   │   └── backend
+│   │   │       └── src
+│   │   │           ├── app.controller.ts.html
+│   │   │           ├── app.module.ts.html
+│   │   │           ├── app.service.ts.html
+│   │   │           ├── auth
+│   │   │           │   ├── auth.controller.ts.html
+│   │   │           │   ├── auth.module.ts.html
+│   │   │           │   ├── auth.service.ts.html
+│   │   │           │   ├── decorators
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── roles.decorator.ts.html
+│   │   │           │   ├── dto
+│   │   │           │   │   ├── change-password.dto.ts.html
+│   │   │           │   │   ├── forgot-password.dto.ts.html
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   ├── index.ts.html
+│   │   │           │   │   ├── login.dto.ts.html
+│   │   │           │   │   ├── logout.dto.ts.html
+│   │   │           │   │   ├── oauth-login.dto.ts.html
+│   │   │           │   │   ├── refresh.dto.ts.html
+│   │   │           │   │   ├── register.dto.ts.html
+│   │   │           │   │   └── reset-password.dto.ts.html
+│   │   │           │   ├── guards
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   ├── jwt-auth.guard.ts.html
+│   │   │           │   │   └── roles.guard.ts.html
+│   │   │           │   ├── index.html
+│   │   │           │   ├── refresh-tokens.service.ts.html
+│   │   │           │   ├── schemas
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── refresh-token.schema.ts.html
+│   │   │           │   └── strategies
+│   │   │           │       ├── index.html
+│   │   │           │       └── jwt.strategy.ts.html
+│   │   │           ├── common
+│   │   │           │   ├── db
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   ├── retry.util.ts.html
+│   │   │           │   │   ├── simple-backoff.ts.html
+│   │   │           │   │   └── transaction.util.ts.html
+│   │   │           │   ├── errors
+│   │   │           │   │   ├── app-error.ts.html
+│   │   │           │   │   └── index.html
+│   │   │           │   ├── filters
+│   │   │           │   │   ├── global-exception.filter.ts.html
+│   │   │           │   │   └── index.html
+│   │   │           │   ├── logging
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── logger.service.ts.html
+│   │   │           │   ├── monitoring
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── monitoring.service.ts.html
+│   │   │           │   ├── utils
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── redact.util.ts.html
+│   │   │           │   └── validators
+│   │   │           │       ├── future-date.validator.ts.html
+│   │   │           │       ├── index.html
+│   │   │           │       ├── phone-number.validator.ts.html
+│   │   │           │       └── require-one-of.validator.ts.html
+│   │   │           ├── email
+│   │   │           │   ├── email.service.ts.html
+│   │   │           │   └── index.html
+│   │   │           ├── index.html
+│   │   │           ├── provider-applications
+│   │   │           │   ├── dto
+│   │   │           │   │   ├── create-provider-application.dto.ts.html
+│   │   │           │   │   ├── index.html
+│   │   │           │   │   └── update-status.dto.ts.html
+│   │   │           │   ├── index.html
+│   │   │           │   ├── provider-applications.controller.ts.html
+│   │   │           │   ├── provider-applications.module.ts.html
+│   │   │           │   ├── provider-applications.service.ts.html
+│   │   │           │   └── schemas
+│   │   │           │       ├── index.html
+│   │   │           │       └── provider-application.schema.ts.html
+│   │   │           ├── requests
+│   │   │           │   ├── dto
+│   │   │           │   │   ├── accept-provider.dto.ts.html
+│   │   │           │   │   ├── apply-for-request.dto.ts.html
+│   │   │           │   │   ├── create-request.dto.ts.html
+│   │   │           │   │   └── index.html
+│   │   │           │   ├── index.html
+│   │   │           │   ├── requests.controller.ts.html
+│   │   │           │   ├── requests.module.ts.html
+│   │   │           │   ├── requests.service.ts.html
+│   │   │           │   └── schemas
+│   │   │           │       ├── index.html
+│   │   │           │       └── request.schema.ts.html
+│   │   │           └── users
+│   │   │               ├── index.html
+│   │   │               ├── schemas
+│   │   │               │   ├── index.html
+│   │   │               │   └── user.schema.ts.html
+│   │   │               ├── users.controller.ts.html
+│   │   │               ├── users.module.ts.html
+│   │   │               └── users.service.ts.html
+│   │   ├── base.css
+│   │   ├── block-navigation.js
+│   │   ├── favicon.png
+│   │   ├── features
+│   │   │   ├── about
+│   │   │   │   ├── components
+│   │   │   │   │   ├── about-hero.tsx.html
+│   │   │   │   │   ├── about-section.tsx.html
+│   │   │   │   │   ├── index.html
+│   │   │   │   │   ├── team-member-card.tsx.html
+│   │   │   │   │   └── value-item.tsx.html
+│   │   │   │   ├── index.html
+│   │   │   │   └── index.ts.html
+│   │   │   └── contact
+│   │   │       ├── components
+│   │   │       │   ├── contact-form.tsx.html
+│   │   │       │   ├── contact-hero.tsx.html
+│   │   │       │   ├── contact-methods.tsx.html
+│   │   │       │   └── index.html
+│   │   │       ├── index.html
+│   │   │       └── index.ts.html
+│   │   ├── hooks
+│   │   │   ├── index.html
+│   │   │   ├── index.ts.html
+│   │   │   ├── use-auth.ts.html
+│   │   │   ├── use-debounce.ts.html
+│   │   │   ├── use-fetch.ts.html
+│   │   │   ├── use-form.ts.html
+│   │   │   ├── use-local-storage.ts.html
+│   │   │   ├── use-location.ts.html
+│   │   │   ├── use-location-data.ts.html
+│   │   │   ├── use-mobile.ts.html
+│   │   │   ├── use-multi-step-form.ts.html
+│   │   │   └── use-validation.ts.html
+│   │   ├── index.html
+│   │   ├── lib
+│   │   │   ├── api
+│   │   │   │   ├── client.ts.html
+│   │   │   │   └── index.html
+│   │   │   ├── constants.ts.html
+│   │   │   ├── fonts.ts.html
+│   │   │   ├── hooks
+│   │   │   │   ├── index.html
+│   │   │   │   ├── index.ts.html
+│   │   │   │   ├── use-debounce.ts.html
+│   │   │   │   └── use-mobile.ts.html
+│   │   │   ├── index.html
+│   │   │   ├── index.ts.html
+│   │   │   ├── jwt.ts.html
+│   │   │   ├── mock-data
+│   │   │   │   ├── index.html
+│   │   │   │   └── users.ts.html
+│   │   │   ├── models
+│   │   │   │   ├── index.html
+│   │   │   │   └── User.ts.html
+│   │   │   ├── mongodb.ts.html
+│   │   │   ├── theme.ts.html
+│   │   │   ├── utils
+│   │   │   │   ├── audit-logger.ts.html
+│   │   │   │   ├── csrf-protection.ts.html
+│   │   │   │   ├── dom.ts.html
+│   │   │   │   ├── formatting.ts.html
+│   │   │   │   ├── index.html
+│   │   │   │   ├── index.ts.html
+│   │   │   │   ├── rate-limit.ts.html
+│   │   │   │   └── styles.ts.html
+│   │   │   ├── utils.ts.html
+│   │   │   └── validations.ts.html
+│   │   ├── packages
+│   │   │   ├── shared-types
+│   │   │   └── shared-utils
+│   │   ├── prettify.css
+│   │   ├── prettify.js
+│   │   ├── shared
+│   │   │   ├── components
+│   │   │   │   ├── button.tsx.html
+│   │   │   │   ├── error
+│   │   │   │   │   ├── error-view.tsx.html
+│   │   │   │   │   └── index.html
+│   │   │   │   ├── index.html
+│   │   │   │   ├── index.ts.html
+│   │   │   │   ├── input.tsx.html
+│   │   │   │   └── textarea.tsx.html
+│   │   │   ├── hooks
+│   │   │   │   ├── index.html
+│   │   │   │   ├── index.ts.html
+│   │   │   │   ├── use-debounce.ts.html
+│   │   │   │   ├── use-form.ts.html
+│   │   │   │   ├── use-local-storage.ts.html
+│   │   │   │   ├── use-location.ts.html
+│   │   │   │   ├── use-location-data.ts.html
+│   │   │   │   ├── use-mobile.ts.html
+│   │   │   │   ├── use-multi-step-form.ts.html
+│   │   │   │   └── use-validation.ts.html
+│   │   │   ├── store
+│   │   │   │   ├── index.html
+│   │   │   │   ├── index.ts.html
+│   │   │   │   └── location-store.ts.html
+│   │   │   └── utils
+│   │   │       ├── api.ts.html
+│   │   │       ├── constants.ts.html
+│   │   │       ├── dom.ts.html
+│   │   │       ├── error-tracking.ts.html
+│   │   │       ├── error-types.ts.html
+│   │   │       ├── formatting.ts.html
+│   │   │       ├── http.ts.html
+│   │   │       ├── index.html
+│   │   │       ├── index.ts.html
+│   │   │       ├── styles.ts.html
+│   │   │       └── utils.ts.html
+│   │   ├── sort-arrow-sprite.png
+│   │   ├── sorter.js
+│   │   └── utils
+│   │       ├── dom.ts.html
+│   │       ├── formatting.ts.html
+│   │       ├── index.html
+│   │       ├── index.ts.html
+│   │       ├── styles.ts.html
+│   │       └── utils.ts.html
+│   ├── packages
+│   │   ├── shared-types
+│   │   └── shared-utils
+│   ├── prettify.css
+│   ├── prettify.js
+│   ├── shared
+│   │   ├── components
+│   │   │   ├── button.tsx.html
+│   │   │   ├── error
+│   │   │   │   ├── error-view.tsx.html
+│   │   │   │   └── index.html
+│   │   │   ├── index.html
+│   │   │   ├── index.ts.html
+│   │   │   ├── input.tsx.html
+│   │   │   └── textarea.tsx.html
+│   │   ├── hooks
+│   │   │   ├── index.html
+│   │   │   ├── index.ts.html
+│   │   │   ├── use-debounce.ts.html
+│   │   │   ├── use-form.ts.html
+│   │   │   ├── use-local-storage.ts.html
+│   │   │   ├── use-location.ts.html
+│   │   │   ├── use-location-data.ts.html
+│   │   │   ├── use-mobile.ts.html
+│   │   │   ├── use-multi-step-form.ts.html
+│   │   │   └── use-validation.ts.html
+│   │   ├── store
+│   │   │   ├── index.html
+│   │   │   ├── index.ts.html
+│   │   │   └── location-store.ts.html
+│   │   └── utils
+│   │       ├── api.ts.html
+│   │       ├── constants.ts.html
+│   │       ├── dom.ts.html
+│   │       ├── error-tracking.ts.html
+│   │       ├── error-types.ts.html
+│   │       ├── formatting.ts.html
+│   │       ├── http.ts.html
+│   │       ├── index.html
+│   │       ├── index.ts.html
+│   │       ├── styles.ts.html
+│   │       └── utils.ts.html
+│   ├── sort-arrow-sprite.png
+│   ├── sorter.js
+│   └── utils
+│       ├── dom.ts.html
+│       ├── formatting.ts.html
+│       ├── index.html
+│       ├── index.ts.html
+│       ├── styles.ts.html
+│       └── utils.ts.html
+├── docs
 │   ├── API.md
 │   ├── COMPONENTS.md
 │   ├── CONTRIBUTING.md
@@ -195,27 +805,32 @@ c:\Users\1\Darigo
 │   ├── STRUCTURE.md
 │   └── TESTING.md
 ├── jest.config.js
-├── package-lock.json
+├── line_count.txt
+├── next-env.d.ts
 ├── package.json
-├── packages\
-│   ├── eslint-config\
-│   ├── shared-types\
-│   │   ├── .turbo\
+├── package-lock.json
+├── packages
+│   ├── eslint-config
+│   ├── shared-types
 │   │   ├── package.json
-│   │   ├── src\
+│   │   ├── src
 │   │   │   ├── api.ts
 │   │   │   ├── auth.ts
 │   │   │   ├── index.ts
+│   │   │   ├── request.ts
 │   │   │   └── service.ts
-│   │   └── tsconfig.json
-│   └── shared-utils\
-│       ├── .turbo\
+│   │   ├── tsconfig.json
+│   │   └── tsconfig.tsbuildinfo
+│   └── shared-utils
 │       ├── package.json
-│       ├── src\
+│       ├── src
 │       │   ├── auth.ts
 │       │   ├── date.ts
 │       │   ├── index.ts
 │       │   └── validation.ts
-│       └── tsconfig.json
+│       ├── tsconfig.json
+│       └── tsconfig.tsbuildinfo
+├── tree.txt
 ├── tsconfig.base.json
+├── tsconfig.tsbuildinfo
 └── turbo.json

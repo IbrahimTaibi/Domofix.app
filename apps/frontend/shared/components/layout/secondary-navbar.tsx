@@ -41,11 +41,11 @@ export default function SecondaryNavbar() {
               >
                 {isAuthenticated && user && user.role !== "provider" ? "Profil" : "Dashboard"}
               </Link>
-              <Link href="/historique" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
+        <Link href="/history" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Historique
               </Link>
               <Link
-                href="/demander-un-service"
+        href="/request-service"
                 className="px-2 text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 transition-all text-sm font-semibold"
               >
                 Demander un service
@@ -70,13 +70,13 @@ export default function SecondaryNavbar() {
             <Link href="/dashboard" aria-label="Dashboard" className="flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
               <LayoutGrid className="w-5 h-5" />
             </Link>
-            <Link href="/historique" aria-label="Historique" className="flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
+        <Link href="/history" aria-label="Historique" className="flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors">
               <History className="w-5 h-5" />
             </Link>
             {/* Center floating action button */}
             <div className="relative">
               <Link
-                href="/demander-un-service"
+        href="/request-service"
                 aria-label="Demander un service"
                 className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary-600 hover:bg-primary-700 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white transition active:scale-95 z-10"
               >

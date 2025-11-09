@@ -6,3 +6,6 @@ export * from './api';
 
 // Service types
 export * from './service';
+
+// Request types
+export * from './request';

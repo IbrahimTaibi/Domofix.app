@@ -3,8 +3,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Navbar, Footer, SecondaryNavbar } from '@/shared/components/layout'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import Providers from '@/app/providers'
+import OfflineBanner from '@/shared/components/error/offline-banner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,6 +38,7 @@ export default async function RootLayout({
             {children}
           </main>
           <Footer />
+          <OfflineBanner />
         </Providers>
       </body>
     </html>
