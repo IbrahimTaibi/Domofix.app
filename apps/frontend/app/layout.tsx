@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Navbar, Footer, SecondaryNavbar } from '@/shared/components/layout'
+import AppChrome from '@/shared/components/layout/app-chrome'
+import RootMain from '@/shared/components/layout/root-main'
+import AppFooter from '@/shared/components/layout/app-footer'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import Providers from '@/app/providers'
@@ -31,14 +34,14 @@ export default async function RootLayout({
     <html lang="fr">
       <body className={inter.className}>
         <Providers session={session} initialUser={initialUser} initialBackendToken={initialBackendToken}>
-          <Navbar />
-          {/* Secondary navigation bar under the main one (desktop only) */}
-          <SecondaryNavbar />
-          {/* Adjust main padding to account for fixed navbars (top + mobile bottom). Fallbacks are 0 so spacing applies only when the secondary navbar is present. */}
-          <main className="min-h-screen pt-[calc(var(--navbar-height,4rem))] md:pt-[calc(var(--navbar-height,4rem)+var(--secondary-navbar-height,0px))] pb-[calc(var(--secondary-navbar-mobile-height,0px)+1rem)] md:pb-0">
+          {/* Site chrome (navbar, secondary navbar, footer) hidden on /dashboard */}
+          <AppChrome />
+          {/* Main content area with conditional padding based on route */}
+          <RootMain>
             {children}
-          </main>
-          <Footer />
+          </RootMain>
+          {/* Footer for site routes (hidden on /dashboard) */}
+          <AppFooter />
           {/* Global toasts */}
           <ToastContainer />
           {/* Portal target for toasts to avoid hydration mismatch */}
