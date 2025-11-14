@@ -14,6 +14,8 @@ import { RequestsModule } from './requests/requests.module';
 import { MonitoringService } from '@/common/monitoring/monitoring.service';
 import { OrdersModule } from './orders/orders.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     RequestsModule,
     NotificationsModule,
     OrdersModule,
+    ReviewsModule,
+    MessagingModule,
   ],
   controllers: [AppController],
   providers: [

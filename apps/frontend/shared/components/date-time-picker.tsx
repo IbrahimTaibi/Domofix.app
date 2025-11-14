@@ -7,7 +7,7 @@ import { fr } from 'date-fns/locale'
 import { isSameDay } from 'date-fns'
 import 'react-datepicker/dist/react-datepicker.css'
 
-const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false }) as any
+const ReactDatePicker = dynamic<any>(() => import('react-datepicker').then(m => m.default), { ssr: false })
 
 export interface DateTimePickerProps {
   label?: string

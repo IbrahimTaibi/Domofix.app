@@ -10,6 +10,7 @@ import { AppLogger } from '@/common/logging/logger.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { executeWithRetry } from '@/common/db/retry.util';
 import { runInTransaction } from '@/common/db/transaction.util';
+import { GeocodingService } from '@/common/geocoding/geocoding.service'
 
 @Injectable()
 export class RequestsService {
@@ -19,6 +20,7 @@ export class RequestsService {
     private readonly logger: AppLogger,
     private readonly events: EventEmitter2,
     @InjectConnection() private readonly connection: Connection,
+    private readonly geocoding: GeocodingService,
   ) {}
 
   async createRequest(customerId: string, dto: CreateRequestDto): Promise<RequestEntity> {
@@ -26,19 +28,30 @@ export class RequestsService {
     if (!user) throw new NotFoundException('User not found');
     if ((user as any).role !== 'customer') throw new ForbiddenException('Only customers can create requests');
 
+    let address = dto.address ? dto.address : {}
+    let location = dto.location
+    if (!location && address && ((address as any).street || (address as any).city || (address as any).fullAddress)) {
+      const result = await this.geocoding.geocode(address as any)
+      if (result) {
+        address = { ...(address as any), latitude: result.latitude, longitude: result.longitude, fullAddress: result.fullAddress }
+        location = { latitude: result.latitude, longitude: result.longitude, address: result.fullAddress }
+      }
+    }
+
     const doc = new this.requestModel({
       customerId: new Types.ObjectId(customerId),
-      address: dto.address ? dto.address : {},
-      location: dto.location
+      address,
+      location: location
         ? {
-            latitude: (dto as any).location.latitude,
-            longitude: (dto as any).location.longitude,
-            address: (dto as any).location.address || null,
-            city: (dto as any).location.city || null,
-            state: (dto as any).location.state || null,
-            zipCode: (dto as any).location.zipCode || null,
+            latitude: (location as any).latitude,
+            longitude: (location as any).longitude,
+            address: (location as any).address || null,
+            city: (location as any).city || null,
+            state: (location as any).state || null,
+            zipCode: (location as any).zipCode || null,
           }
         : null,
+      locationPoint: location ? { type: 'Point', coordinates: [Number((location as any).longitude), Number((location as any).latitude)] } : null,
       phone: dto.phone,
       category: dto.category,
       estimatedTimeOfService: new Date(dto.estimatedTimeOfService),
@@ -125,6 +138,28 @@ export class RequestsService {
     return updated as any;
   }
 
+  async listNearby(lat: number, lon: number, maxDistance: number) {
+    if (!isFinite(lat) || !isFinite(lon)) throw new BadRequestException('Invalid coordinates')
+    const results = await this.requestModel.find({
+      status: RequestStatusEnum.OPEN,
+      locationPoint: {
+        $near: {
+          $geometry: { type: 'Point', coordinates: [lon, lat] },
+          $maxDistance: maxDistance,
+        },
+      },
+    }).limit(100).lean()
+    return results.map((r: any) => ({
+      id: String(r._id),
+      customerId: String(r.customerId),
+      address: r.address,
+      location: r.location,
+      category: r.category,
+      estimatedTimeOfService: r.estimatedTimeOfService,
+      status: r.status,
+    }))
+  }
+
   async addRequestPhotos(customerId: string, requestId: string, photoUrls: string[]): Promise<RequestEntity> {
     const req = await executeWithRetry(() => this.requestModel.findById(requestId).exec());
     if (!req) throw new NotFoundException('Request not found');
@@ -153,5 +188,25 @@ export class RequestsService {
     if (typeof filters.offset === 'number') find = find.skip(filters.offset);
     if (typeof filters.limit === 'number') find = find.limit(filters.limit);
     return find.exec();
+  }
+
+  async listForProviders(
+    filters: { status?: RequestStatusEnum; offset?: number; limit?: number } = {},
+  ) {
+    const defaultStatuses = [RequestStatusEnum.OPEN, RequestStatusEnum.PENDING]
+    const query = filters.status
+      ? { status: filters.status }
+      : { status: { $in: defaultStatuses } }
+
+    let find = this.requestModel.find(query).sort({ createdAt: -1 })
+    if (typeof filters.offset === 'number') find = find.skip(filters.offset)
+    if (typeof filters.limit === 'number') find = find.limit(filters.limit)
+    return find.lean().exec()
+  }
+
+  async getOneForProvider(requestId: string) {
+    const doc = await executeWithRetry(() => this.requestModel.findById(requestId).lean().exec())
+    if (!doc) throw new NotFoundException('Request not found')
+    return doc
   }
 }

@@ -12,7 +12,8 @@ export class AppLogger {
     info: 2,
     debug: 3,
   };
-  private readonly currentLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
+  private readonly currentLevel: LogLevel =
+    (process.env.LOG_LEVEL as LogLevel) || 'info';
   private readonly isProd = process.env.NODE_ENV === 'production';
 
   private shouldLog(level: LogLevel): boolean {

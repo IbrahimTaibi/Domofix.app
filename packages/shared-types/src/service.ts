@@ -103,6 +103,16 @@ export interface Review {
   updatedAt: Date;
 }
 
+export interface Comment {
+  id: string;
+  reviewId: string;
+  parentCommentId?: string;
+  authorId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Search and Filter Types
 export interface SearchFilters {
   category?: ServiceCategory;

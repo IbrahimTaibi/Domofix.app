@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { hashPassword, comparePassword } from '@darigo/shared-utils';
 import { User, UserDocument, Address } from './schemas/user.schema';
+import { GeocodingService } from '../common/geocoding/geocoding.service';
 
 export interface CreateUserDto {
   email: string;
@@ -21,7 +22,10 @@ export interface CreateUserDto {
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private readonly geocoding: GeocodingService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await hashPassword(createUserDto.password);
@@ -84,7 +88,18 @@ export class UsersService {
 
   // Additional methods for enhanced user management
   async updateUser(id: string, updateData: Partial<CreateUserDto>): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+    // If address fields present, attempt geocode to set lat/lon/fullAddress
+    let setData = { ...updateData } as any
+    const addr = (updateData as any)?.address
+    if (addr && (addr.street || addr.city || addr.fullAddress)) {
+      try {
+        const res = await this.geocoding.geocode(addr as any)
+        if (res) {
+          setData.address = { ...(addr as any), latitude: res.latitude, longitude: res.longitude, fullAddress: res.fullAddress }
+        }
+      } catch {}
+    }
+    return this.userModel.findByIdAndUpdate(id, setData, { new: true }).exec();
   }
 
   async updateNotificationPreferences(id: string, preferences: Partial<any>): Promise<User | null> {

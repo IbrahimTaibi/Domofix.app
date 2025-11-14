@@ -58,6 +58,10 @@ export class Request {
   @Prop({ type: LocationSubdoc, default: null })
   location?: LocationSubdoc | null;
 
+  // GeoJSON point for geospatial queries
+  @Prop({ type: Object, default: null })
+  locationPoint?: { type: 'Point'; coordinates: [number, number] } | null;
+
   // Phone number for contact
   @Prop({ required: true })
   phone: string;
@@ -108,3 +112,4 @@ RequestSchema.index({ customerId: 1, status: 1, createdAt: -1 });
 RequestSchema.index({ status: 1, createdAt: -1 });
 RequestSchema.index({ acceptedProviderId: 1, status: 1 });
 RequestSchema.index({ 'applications.providerId': 1 });
+RequestSchema.index({ locationPoint: '2dsphere' });

@@ -16,6 +16,13 @@ describe('RequestsService', () => {
 
   class InMemoryRequestModel {
     static store: any[] = [];
+    static find(_filter: any) {
+      const api = {
+        limit: function (_n: number) { return this; },
+        lean: async function () { return InMemoryRequestModel.store.filter((d) => d.status === RequestStatusEnum.OPEN); },
+      } as any
+      return api
+    }
     _id: string;
     customerId: any;
     address: any;
@@ -26,6 +33,8 @@ describe('RequestsService', () => {
     status: RequestStatusEnum;
     applications: any[] = [];
     acceptedProviderId?: any;
+    location?: any;
+    locationPoint?: any;
     constructor(data: any) { Object.assign(this, data); this._id = `${Date.now()}-${Math.random()}`; }
     async save() { InMemoryRequestModel.store.push(this); return this; }
     static findById(id: string) { return { exec: async () => InMemoryRequestModel.store.find((d) => d._id === id) || null }; }
@@ -50,13 +59,14 @@ describe('RequestsService', () => {
 
   let cId: string;
   let pId: string;
+  const geocodingMock: any = { geocode: jest.fn(async (_addr: any) => ({ latitude: 36.8, longitude: 10.18, fullAddress: 'Mock Address' })) }
 
   beforeEach(() => {
     (eventsMock.emit as any).mockClear();
     InMemoryRequestModel.store = [];
-    service = new RequestsService(InMemoryRequestModel as any, usersServiceMock, loggerMock, eventsMock, connectionStub);
-    cId = (require('mongoose') as any).Types.ObjectId().toString();
-    pId = (require('mongoose') as any).Types.ObjectId().toString();
+    service = new RequestsService(InMemoryRequestModel as any, usersServiceMock, loggerMock, eventsMock, connectionStub, geocodingMock);
+    cId = new (require('mongoose') as any).Types.ObjectId().toString();
+    pId = new (require('mongoose') as any).Types.ObjectId().toString();
     (usersServiceMock.findById as any).mockImplementation(async (id: string) => {
       if (id === cId) return { role: 'customer', _id: cId } as any;
       if (id === pId) return { role: 'provider', _id: pId } as any;
@@ -82,6 +92,24 @@ describe('RequestsService', () => {
     expect(updated.applications.length).toBe(1);
     expect(eventsMock.emit).toHaveBeenCalledWith('request.pending', { id: (req as any)._id });
   });
+
+  it('geocodes address-only create and sets locationPoint', async () => {
+    const dto: any = { address: { street: 'Ave', city: 'Tunis' }, phone: '+12345678901', category: 'plumber', estimatedTimeOfService: new Date(Date.now() + 60000).toISOString() };
+    const res = await service.createRequest(cId, dto);
+    expect(geocodingMock.geocode).toHaveBeenCalled();
+    expect((res as any).address.latitude).toBeCloseTo(36.8);
+    expect((res as any).locationPoint).toEqual({ type: 'Point', coordinates: [10.18, 36.8] });
+  });
+
+  it('listNearby returns open requests', async () => {
+    // Seed two open requests with locationPoint
+    const r1 = await service.createRequest(cId, { location: { latitude: 36.8, longitude: 10.18 }, phone: '+111', category: 'other', estimatedTimeOfService: new Date(Date.now()+60000).toISOString() } as any)
+    const r2 = await service.createRequest(cId, { location: { latitude: 36.81, longitude: 10.19 }, phone: '+222', category: 'other', estimatedTimeOfService: new Date(Date.now()+60000).toISOString() } as any)
+    const out = await service.listNearby(36.8, 10.18, 2000)
+    expect(Array.isArray(out)).toBe(true)
+    expect(out.length).toBeGreaterThanOrEqual(2)
+    expect(out[0]).toHaveProperty('id')
+  })
 
   it('prevents duplicate applications by same provider', async () => {
     const req = await service.createRequest(cId, { phone: '+11111111111', category: 'other', estimatedTimeOfService: new Date(Date.now() + 60000).toISOString() } as any);

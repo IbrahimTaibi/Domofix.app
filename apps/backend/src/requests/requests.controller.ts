@@ -89,4 +89,35 @@ export class RequestsController {
       limit: query.limit,
     });
   }
+
+  // All open/pending requests for providers (non-geo, paginated)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('provider')
+  @Get('all')
+  async listAllForProvider(@Query() query: ListRequestsQueryDto) {
+    return this.service.listForProviders({
+      status: query.status,
+      offset: query.offset,
+      limit: query.limit,
+    });
+  }
+
+  // Nearby open requests for providers
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('provider')
+  @Get('near')
+  async listNearby(@Query('lat') lat?: string, @Query('lon') lon?: string, @Query('dist') dist?: string) {
+    const latitude = Number(lat)
+    const longitude = Number(lon)
+    const maxDistance = Math.max(1, Math.min(Number(dist || 2000), 50000))
+    return this.service.listNearby(latitude, longitude, maxDistance)
+  }
+
+  // Single request details for providers
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('provider')
+  @Get(':id')
+  async getOneForProvider(@Param('id') id: string) {
+    return this.service.getOneForProvider(id)
+  }
 }

@@ -110,3 +110,41 @@ export async function listMyRequests(params: ListRequestsParams = {}): Promise<R
     headers: { ...getAuthHeaders() },
   })
 }
+
+export interface ListNearbyParams {
+  lat: number
+  lon: number
+  dist?: number
+}
+
+export async function listNearbyRequests(params: ListNearbyParams): Promise<Request[]> {
+  const q = new URLSearchParams()
+  q.set('lat', String(params.lat))
+  q.set('lon', String(params.lon))
+  if (typeof params.dist === 'number') q.set('dist', String(params.dist))
+  const url = `${API_BASE_URL}/requests/near?${q.toString()}`
+  return httpRequest<Request[]>(url, {
+    method: 'GET',
+    headers: { ...getAuthHeaders() },
+  })
+}
+
+export async function listProviderAllRequests(params: ListRequestsParams = {}): Promise<Request[]> {
+  const q = new URLSearchParams()
+  if (params.status) q.set('status', String(params.status))
+  if (typeof params.offset === 'number') q.set('offset', String(params.offset))
+  if (typeof params.limit === 'number') q.set('limit', String(params.limit))
+  const url = `${API_BASE_URL}/requests/all${q.toString() ? `?${q.toString()}` : ''}`
+  return httpRequest<Request[]>(url, {
+    method: 'GET',
+    headers: { ...getAuthHeaders() },
+  })
+}
+
+export async function getProviderRequestById(requestId: string): Promise<Request> {
+  const url = `${API_BASE_URL}/requests/${encodeURIComponent(requestId)}`
+  return httpRequest<Request>(url, {
+    method: 'GET',
+    headers: { ...getAuthHeaders() },
+  })
+}

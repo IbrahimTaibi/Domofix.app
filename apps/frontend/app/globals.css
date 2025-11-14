@@ -32,23 +32,23 @@
 
 /* Light scrollbar styling for scrollable areas */
 .scrollbar-light {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #d1d5db #f9fafb; /* thumb track */
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb #ffffff;
 }
 .scrollbar-light::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .scrollbar-light::-webkit-scrollbar-track {
-  background: #f9fafb;
+  background: #ffffff;
   border-radius: 9999px;
 }
 .scrollbar-light::-webkit-scrollbar-thumb {
-  background-color: #d1d5db; /* gray-300 */
+  background-color: #e5e7eb;
   border-radius: 9999px;
-  border: 2px solid #f9fafb; /* match track */
+  border: 2px solid #ffffff;
 }
 .scrollbar-light::-webkit-scrollbar-button {
-  display: none; /* hide top/bottom arrows */
+  display: none;
   width: 0;
   height: 0;
 }

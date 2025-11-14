@@ -12,3 +12,4 @@ export * from './request';
 
 // Notification types
 export * from './notifications';
+export * from './messaging';
