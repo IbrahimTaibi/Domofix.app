@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, KeyboardEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/shared/components'
+import { Bell } from 'lucide-react'
+import { useNotificationsStore } from '@/shared/store/notifications-store'
 import { Logo } from './logo'
 import NavLinks from './nav-links'
 import { useMobile } from '@/shared/hooks'
@@ -18,6 +20,12 @@ export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuth()
   const { data: session, status } = useSession()
   const sessionUser = session?.user
+  const unreadCount = useNotificationsStore((s) => s.unreadCount)
+  const notifications = useNotificationsStore((s) => s.notifications)
+  const markAllRead = useNotificationsStore((s) => s.markAllRead)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const notifMenuRef = useRef<HTMLDivElement>(null)
+  const notifButtonRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -86,6 +94,14 @@ export default function Navbar() {
           userMenuButtonRef.current && 
           !userMenuButtonRef.current.contains(event.target as Node)) {
         setIsUserMenuOpen(false)
+      }
+
+      if (isNotifOpen &&
+          notifMenuRef.current &&
+          !notifMenuRef.current.contains(event.target as Node) &&
+          notifButtonRef.current &&
+          !notifButtonRef.current.contains(event.target as Node)) {
+        setIsNotifOpen(false)
       }
     }
 
@@ -175,6 +191,58 @@ export default function Navbar() {
                         Devenir prestataire
                       </Link>
                     )}
+                    <div className="relative">
+                      <button
+                        ref={notifButtonRef}
+                        type="button"
+                        onClick={() => setIsNotifOpen((v) => !v)}
+                        aria-label="Notifications"
+                        className="relative inline-flex items-center justify-center text-gray-700 hover:text-primary-600 transition-colors focus:outline-none"
+                      >
+                        <span className="w-8 h-8 rounded-full bg-gray-100 ring-1 ring-gray-200 flex items-center justify-center">
+                          <Bell className="w-5 h-5" />
+                        </span>
+                        {unreadCount > 0 && (
+                          <span
+                            className="absolute rounded-full bg-red-600"
+                            style={{ top: '-2px', right: '-2px', width: '10px', height: '10px', boxShadow: '0 0 0 2px #fff' }}
+                          />
+                        )}
+                      </button>
+                      {isNotifOpen && (
+                        <div
+                          ref={notifMenuRef}
+                          className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 overflow-x-hidden"
+                        >
+                          <div className="px-3 py-2 flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-900">Notifications</span>
+                            <Link href="/notifications" className="text-xs text-primary-600 hover:text-primary-700">Voir tout</Link>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto overflow-x-hidden scrollbar-light">
+                            {notifications.filter((n) => !n.readAt).length === 0 ? (
+                              <div className="px-3 py-3 text-xs text-gray-600">Aucune notification non lue</div>
+                            ) : (
+                              notifications.filter((n) => !n.readAt).slice(0, 6).map((n) => (
+                                <div key={n.id} className="px-3 py-2 hover:bg-gray-50">
+                                  <div className="flex items-start gap-2">
+                                    <span className="mt-0.5 inline-block w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-white" />
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-gray-900 truncate break-words">{n.title}</div>
+                                      <div className="text-xs text-gray-600 truncate break-words">{n.message}</div>
+                                      <div className="text-[11px] text-gray-500">{new Date(n.createdAt).toLocaleString()}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                          <div className="px-3 py-2 border-t border-gray-100 flex items-center justify-between">
+                            <button className="text-xs text-gray-600 hover:text-gray-800" onClick={() => { markAllRead(); setIsNotifOpen(false) }}>Marquer tout comme lu</button>
+                            <Link href="/notifications" className="text-xs text-primary-600 hover:text-primary-700">Aller aux notifications</Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div className="relative">
                       <button
                         ref={userMenuButtonRef}

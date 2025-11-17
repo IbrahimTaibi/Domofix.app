@@ -14,8 +14,11 @@ export class MonitoringService {
       if (!mod) return;
       mod.init({
         dsn,
-        environment: process.env.SENTRY_ENV || process.env.NODE_ENV || 'development',
-        tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE || '0.0'),
+        environment:
+          process.env.SENTRY_ENV || process.env.NODE_ENV || 'development',
+        tracesSampleRate: Number(
+          process.env.SENTRY_TRACES_SAMPLE_RATE || '0.0',
+        ),
       });
       this.sentry = mod;
       this.initialized = true;

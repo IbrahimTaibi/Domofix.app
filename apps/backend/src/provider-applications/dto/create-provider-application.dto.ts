@@ -1,7 +1,9 @@
 import { IsString, IsOptional, MinLength } from 'class-validator';
 import type { CreateProviderApplicationRequest } from '@darigo/shared-types';
 
-export class CreateProviderApplicationDto implements CreateProviderApplicationRequest {
+export class CreateProviderApplicationDto
+  implements CreateProviderApplicationRequest
+{
   @IsString()
   @MinLength(2)
   businessName: string;

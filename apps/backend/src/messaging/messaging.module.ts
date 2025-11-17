@@ -1,14 +1,15 @@
-import { Module } from '@nestjs/common'
-import { MongooseModule } from '@nestjs/mongoose'
-import { Thread, ThreadSchema } from './schemas/thread.schema'
-import { Message, MessageSchema } from './schemas/message.schema'
-import { MessagingService } from './messaging.service'
-import { MessagingController } from './messaging.controller'
-import { NotificationsModule } from '@/notifications/notifications.module'
-import { AppLogger } from '@/common/logging/logger.service'
-import { Order, OrderSchema } from '@/orders/schemas/order.schema'
-import { User, UserSchema } from '@/users/schemas/user.schema'
-import { MessagingGateway } from './messaging.gateway'
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Thread, ThreadSchema } from './schemas/thread.schema';
+import { Message, MessageSchema } from './schemas/message.schema';
+import { MessagingService } from './messaging.service';
+import { MessagingController } from './messaging.controller';
+import { NotificationsModule } from '@/notifications/notifications.module';
+import { AppLogger } from '@/common/logging/logger.service';
+import { Order, OrderSchema } from '@/orders/schemas/order.schema';
+import { User, UserSchema } from '@/users/schemas/user.schema';
+import { MessagingGateway } from './messaging.gateway';
+import { OrderStatusListener } from './listeners/order-status.listener';
 
 @Module({
   imports: [
@@ -21,7 +22,12 @@ import { MessagingGateway } from './messaging.gateway'
     NotificationsModule,
   ],
   controllers: [MessagingController],
-  providers: [MessagingService, AppLogger, MessagingGateway],
+  providers: [
+    MessagingService,
+    AppLogger,
+    MessagingGateway,
+    OrderStatusListener,
+  ],
   exports: [MessagingService],
 })
 export class MessagingModule {}

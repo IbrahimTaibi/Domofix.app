@@ -61,341 +61,73 @@ async function main() {
   const customerPwd = await hashPassword('Customer@123');
   const providers: Types.ObjectId[] = [];
   const customers: Types.ObjectId[] = [];
-  const streets = [
-    'Rue de la Liberté',
-    'Avenue Habib Bourguiba',
-    'Rue Ibn Khaldoun',
-    'Rue de Carthage',
-    'Rue de Monastir',
-    'Rue de la Kasbah',
-  ];
-  function rnd(min: number, max: number) {
-    return Math.random() * (max - min) + min;
-  }
+  const streets = ['Rue de la Liberté','Avenue Habib Bourguiba','Rue Ibn Khaldoun','Rue de Carthage','Rue de Monastir','Rue de la Kasbah'];
+  function rnd(min: number, max: number) { return Math.random() * (max - min) + min }
   function addr(i: number) {
-    const s = streets[i % streets.length];
-    const city = i % 5 === 0 ? 'Ariana' : 'Tunis';
-    const lat = rnd(36.78, 36.88);
-    const lon = rnd(10.15, 10.22);
-    return {
-      street: s,
-      city,
-      country: 'TN',
-      latitude: Number(lat.toFixed(5)),
-      longitude: Number(lon.toFixed(5)),
-      fullAddress: `${s}, ${city}, TN`,
-    };
+    const s = streets[i % streets.length]
+    const city = i % 2 === 0 ? 'Tunis' : 'Ariana'
+    const lat = rnd(36.78, 36.88)
+    const lon = rnd(10.15, 10.22)
+    return { street: s, city, country: 'TN', latitude: Number(lat.toFixed(5)), longitude: Number(lon.toFixed(5)), fullAddress: `${s}, ${city}, TN` }
   }
+
   const baseProviders = [
-    {
-      email: 'provider1@example.com',
-      id: new Types.ObjectId(),
-      firstName: 'Ali',
-      lastName: 'K',
-      phone: '+21612345678',
-    },
-    {
-      email: 'provider2@example.com',
-      id: new Types.ObjectId(),
-      firstName: 'Youssef',
-      lastName: 'B',
-      phone: '+21622334455',
-    },
-  ];
-  for (let i = 0; i < 18; i++) {
-    baseProviders.push({
-      email: `provider${i + 3}@example.com`,
-      id: new Types.ObjectId(),
-      firstName: 'Provider',
-      lastName: String(i + 3),
-      phone: `+2165${i}123456`,
-    });
-  }
-  await UserModel.create(
-    baseProviders.map((p, i) => {
-      providers.push(p.id);
-      return {
-        _id: p.id,
-        email: p.email,
-        password: providerPwd,
-        role: 'provider',
-        phoneNumber: p.phone,
-        address: addr(i),
-        providerStatus: i < 10 ? 'approved' : 'pending',
-        firstName: p.firstName,
-        lastName: p.lastName,
-      } as any;
-    }),
-  );
-  const baseCustomers = [
-    {
-      email: 'customer1@example.com',
-      id: new Types.ObjectId(),
-      firstName: 'Sara',
-      lastName: 'M',
-      phone: '+21699887766',
-    },
-    {
-      email: 'customer2@example.com',
-      id: new Types.ObjectId(),
-      firstName: 'Noura',
-      lastName: 'H',
-      phone: '+21688990077',
-    },
-  ];
-  for (let i = 0; i < 38; i++) {
-    baseCustomers.push({
-      email: `customer${i + 3}@example.com`,
-      id: new Types.ObjectId(),
-      firstName: 'Customer',
-      lastName: String(i + 3),
-      phone: `+2169${i}88776`,
-    });
-  }
-  await UserModel.create(
-    baseCustomers.map((c, i) => {
-      customers.push(c.id);
-      return {
-        _id: c.id,
-        email: c.email,
-        password: customerPwd,
-        role: 'customer',
-        phoneNumber: c.phone,
-        address: addr(i + 20),
-        firstName: c.firstName,
-        lastName: c.lastName,
-      } as any;
-    }),
-  );
-
-  // Seed requests
-  const now = Date.now();
-  const categories = [
-    'plumber',
-    'electrician',
-    'cleaner',
-    'gardener',
-    'carpenter',
-  ];
-  const reqDocs: any[] = [];
-  for (let i = 0; i < 300; i++) {
-    const cust = customers[i % customers.length];
-    const a = addr(i + 50);
-    const lat = a.latitude;
-    const lon = a.longitude;
-    const statusPick = Math.random();
-    let status = RequestStatusEnum.OPEN;
-    let acceptedProviderId: Types.ObjectId | undefined;
-    if (statusPick > 0.5 && statusPick <= 0.8) {
-      status = RequestStatusEnum.ACCEPTED;
-      acceptedProviderId = providers[i % providers.length];
-    } else if (statusPick > 0.8) {
-      status = RequestStatusEnum.COMPLETED;
-      acceptedProviderId = providers[(i + 3) % providers.length];
-    }
-    reqDocs.push({
-      _id: new Types.ObjectId(),
-      customerId: cust,
-      phone: `+216${Math.floor(10000000 + Math.random() * 89999999)}`,
-      category: categories[i % categories.length],
-      estimatedTimeOfService: new Date(now + ((i % 4) + 1) * 60 * 60 * 1000),
-      status,
-      acceptedProviderId,
-      address: a,
-      location: {
-        latitude: lat,
-        longitude: lon,
-        address: a.fullAddress,
-      } as any,
-      locationPoint: { type: 'Point', coordinates: [lon, lat] },
-    });
-  }
-  const requests = await RequestModel.create(reqDocs);
-
-  // Seed orders from accepted requests
-  const orderDocs: any[] = [];
-  for (const r of requests) {
-    if (r.status === RequestStatusEnum.ACCEPTED && r.acceptedProviderId) {
-      const assigned = Math.random() > 0.5;
-      orderDocs.push({
-        _id: new Types.ObjectId(),
-        requestId: (r as any)._id,
-        customerId: r.customerId,
-        providerId: r.acceptedProviderId,
-        status: assigned ? 'assigned' : 'in_progress',
-        acceptedAt: new Date(
-          now - (Math.floor(Math.random() * 3) + 1) * 60 * 60 * 1000,
-        ),
-        startedAt: assigned ? undefined : new Date(now - 60 * 60 * 1000),
-      });
-    } else if (
-      r.status === RequestStatusEnum.COMPLETED &&
-      r.acceptedProviderId
-    ) {
-      orderDocs.push({
-        _id: new Types.ObjectId(),
-        requestId: (r as any)._id,
-        customerId: r.customerId,
-        providerId: r.acceptedProviderId,
-        status: 'completed',
-        acceptedAt: new Date(now - 24 * 60 * 60 * 1000),
-        startedAt: new Date(now - 23 * 60 * 60 * 1000),
-        completedAt: new Date(now - 22 * 60 * 60 * 1000),
-      });
-    }
-  }
-  const orders = await OrderModel.create(orderDocs);
-
-  // Seed notifications
-  const notifDocs: any[] = [];
-  for (const o of orders.slice(0, 100)) {
-    notifDocs.push({
-      userId: String(o.providerId),
-      type: 'system.message',
-      severity: 'info',
-      title: 'New assignment',
-      message: 'You have a new order',
-      data: { orderId: String((o as any)._id) },
-    });
-    notifDocs.push({
-      userId: String(o.customerId),
-      type: 'system.message',
-      severity: 'success',
-      title: 'Request accepted',
-      message: 'Provider accepted your request',
-      data: { requestId: String(o.requestId) },
-    });
-  }
-  await NotificationModel.create(notifDocs as any);
-
-  // Seed reviews and comments (link to orders)
-  const completedOrders = orders.filter((o: any) => o.status === 'completed');
-  for (const o of completedOrders.slice(0, 60)) {
-    const rev = await ReviewModel.create({
-      bookingId: (o as any)._id,
-      customerId: o.customerId,
-      providerId: o.providerId,
-      serviceId: new Types.ObjectId(),
-      rating: Math.floor(rnd(3, 5)),
-      comment: 'Service review',
-      images: [],
-    } as any);
-    await CommentModel.create([
-      { reviewId: rev._id, authorId: o.customerId, content: 'Thanks!' } as any,
-      {
-        reviewId: rev._id,
-        authorId: o.providerId,
-        content: 'Pleasure to help.',
-      } as any,
-    ]);
-  }
-
-  // Seed messaging threads and messages
-  for (const o of orders.slice(0, 120)) {
-    const thread = await ThreadModel.create({
-      orderId: (o as any)._id,
-      participants: [
-        { userId: o.customerId, role: 'customer' },
-        { userId: o.providerId, role: 'provider' },
-      ],
-      status: 'open',
-      lastMessageAt: null,
-      unreadCounts: {},
-    } as any);
-    await MessageModel.create([
-      {
-        threadId: thread._id,
-        senderId: o.customerId,
-        kind: 'text',
-        text: 'Hello, can you confirm arrival time?',
-        status: 'sent',
-      } as any,
-      {
-        threadId: thread._id,
-        senderId: o.providerId,
-        kind: 'text',
-        text: 'Sure, I will be there at 16:00.',
-        status: 'sent',
-      } as any,
-    ]);
-  }
-
-  // Seed avatars for customers
-  const sampleAvatars = [
-    '/uploads/request-photos/1762730896234-394059162.jpg',
-    '/uploads/request-photos/1762730896235-420690649.jpg',
-    '/uploads/request-photos/1762730896236-248942398.jpg',
-    '/uploads/request-photos/1762726466012-245628361.jpg',
-    '/uploads/request-photos/1762726466013-303596230.jpg',
+    { email: 'provider1@example.com', id: new Types.ObjectId(), firstName: 'Ali', lastName: 'K', phone: '+21612345678', avatar: 'https://i.pravatar.cc/150?img=11' },
+    { email: 'provider2@example.com', id: new Types.ObjectId(), firstName: 'Youssef', lastName: 'B', phone: '+21622334455', avatar: 'https://i.pravatar.cc/150?img=12' },
+    { email: 'provider3@example.com', id: new Types.ObjectId(), firstName: 'Rania', lastName: 'T', phone: '+21633445566', avatar: 'https://i.pravatar.cc/150?img=13' },
   ]
-  try {
-    await UserModel.updateMany({ role: 'customer' }, [
-      {
-        $set: {
-          avatar: {
-            $concat: [
-              { $literal: 'http://localhost:3001' },
-              {
-                $arrayElemAt: [sampleAvatars, { $mod: [{ $toInt: { $rand: {} } }, sampleAvatars.length] }],
-              },
-            ],
-          },
-        },
-      },
-    ])
-  } catch (e) {}
+  await UserModel.create(baseProviders.map((p, i) => {
+    providers.push(p.id);
+    return {
+      _id: p.id,
+      email: p.email,
+      password: providerPwd,
+      role: 'provider',
+      phoneNumber: p.phone,
+      address: addr(i),
+      providerStatus: 'approved',
+      firstName: p.firstName,
+      lastName: p.lastName,
+      avatar: p.avatar,
+    } as any
+  }))
 
-  // Extra discussions for provider1@example.com (Ali K) with multiple customers
-  const provider1Id = baseProviders[0].id
-  const extraOrders: any[] = []
-  for (let i = 0; i < Math.min(20, customers.length); i++) {
-    const custId = customers[i]
-    const ordId = new Types.ObjectId()
-    extraOrders.push({
-      _id: ordId,
-      requestId: new Types.ObjectId(),
-      customerId: custId,
-      providerId: provider1Id,
-      status: 'in_progress',
-      acceptedAt: new Date(now - 2 * 60 * 60 * 1000),
-      startedAt: new Date(now - 60 * 60 * 1000),
-    })
-  }
-  const seededExtraOrders = await OrderModel.create(extraOrders)
-  for (const o of seededExtraOrders) {
-    const thread = await ThreadModel.create({
-      orderId: (o as any)._id,
-      participants: [
-        { userId: o.customerId, role: 'customer' },
-        { userId: o.providerId, role: 'provider' },
-      ],
-      status: 'open',
-      lastMessageAt: null,
-      unreadCounts: {},
-    } as any)
-    await MessageModel.create([
-      {
-        threadId: thread._id,
-        senderId: o.customerId,
-        kind: 'text',
-        text: 'Bonjour Ali, pouvez-vous passer aujourd\u2019hui ?'
-      } as any,
-      {
-        threadId: thread._id,
-        senderId: o.providerId,
-        kind: 'text',
-        text: 'Oui, je suis disponible en fin d\u2019après-midi.'
-      } as any,
-      {
-        threadId: thread._id,
-        senderId: o.customerId,
-        kind: 'text',
-        text: 'Parfait, merci !'
-      } as any,
-    ])
-  }
+  const baseCustomers = [
+    { email: 'customer1@example.com', id: new Types.ObjectId(), firstName: 'Sara', lastName: 'M', phone: '+21699887766' },
+    { email: 'customer2@example.com', id: new Types.ObjectId(), firstName: 'Noura', lastName: 'H', phone: '+21688990077' },
+    { email: 'customer3@example.com', id: new Types.ObjectId(), firstName: 'Karim', lastName: 'S', phone: '+21677889900' },
+    { email: 'customer4@example.com', id: new Types.ObjectId(), firstName: 'Aya', lastName: 'B', phone: '+21666778899' },
+    { email: 'customer5@example.com', id: new Types.ObjectId(), firstName: 'Amine', lastName: 'D', phone: '+21655667788' },
+  ]
+  await UserModel.create(baseCustomers.map((c, i) => { customers.push(c.id); return { _id: c.id, email: c.email, password: customerPwd, role: 'customer', phoneNumber: c.phone, address: addr(i + 10), firstName: c.firstName, lastName: c.lastName } as any }))
 
-  console.log('Seeding completed.');
+  const now = Date.now()
+  const categories = ['plumber','electrician','cleaner']
+  const reqDocs: any[] = []
+  for (let ci = 0; ci < customers.length; ci++) {
+    for (let rj = 0; rj < 3; rj++) {
+      const a = addr(ci * 3 + rj)
+      const lat = a.latitude
+      const lon = a.longitude
+      const applications = baseProviders.map((p, k) => ({ providerId: p.id, message: 'Je suis disponible', appliedAt: new Date(now - (rj + 1) * 600000), proposedEts: new Date(now + (rj + 1) * 90 * 60000), proposedPriceMin: 50 + k * 10, proposedPriceMax: 120 + k * 15 }))
+      reqDocs.push({
+        _id: new Types.ObjectId(),
+        customerId: customers[ci],
+        phone: `+216${Math.floor(10000000 + Math.random() * 89999999)}`,
+        category: categories[rj % categories.length],
+        estimatedTimeOfService: new Date(now + (rj + 1) * 2 * 60 * 60 * 1000),
+        status: RequestStatusEnum.PENDING,
+        acceptedProviderId: null,
+        address: a,
+        location: { latitude: lat, longitude: lon, address: a.fullAddress } as any,
+        locationPoint: { type: 'Point', coordinates: [lon, lat] },
+        applications,
+      })
+    }
+  }
+  await RequestModel.create(reqDocs)
+
+  console.log('Seeding completed. Providers: 3, Customers: 5, Requests: 15');
   await mongoose.disconnect();
 }
 

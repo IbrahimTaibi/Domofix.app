@@ -1,13 +1,13 @@
-import { IsMongoId, IsOptional, IsString } from 'class-validator'
+import { IsMongoId, IsOptional, IsString } from 'class-validator';
 
 export class CreateCommentDto {
   @IsMongoId()
-  reviewId: string
+  reviewId: string;
 
   @IsOptional()
   @IsMongoId()
-  parentCommentId?: string
+  parentCommentId?: string;
 
   @IsString()
-  content: string
+  content: string;
 }

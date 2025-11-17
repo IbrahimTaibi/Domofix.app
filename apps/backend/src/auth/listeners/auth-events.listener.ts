@@ -16,18 +16,32 @@ export class AuthEventsListener {
   @OnEvent('user.registered', { async: true })
   async handleUserRegistered(payload: UserRegisteredPayload) {
     try {
-      await this.emailService.sendWelcomeEmail(payload.email, payload.firstName);
+      await this.emailService.sendWelcomeEmail(
+        payload.email,
+        payload.firstName,
+      );
     } catch (err: any) {
-      this.logger.error('Failed to send welcome email', { userId: payload.id }, err?.stack);
+      this.logger.error(
+        'Failed to send welcome email',
+        { userId: payload.id },
+        err?.stack,
+      );
     }
   }
 
   @OnEvent('user.verification.requested', { async: true })
   async handleVerificationRequested(payload: VerificationRequestedPayload) {
     try {
-      await this.emailService.sendVerificationEmail(payload.email, payload.token);
+      await this.emailService.sendVerificationEmail(
+        payload.email,
+        payload.token,
+      );
     } catch (err: any) {
-      this.logger.error('Failed to send verification email', { email: payload.email }, err?.stack);
+      this.logger.error(
+        'Failed to send verification email',
+        { email: payload.email },
+        err?.stack,
+      );
     }
   }
 }

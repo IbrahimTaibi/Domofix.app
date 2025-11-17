@@ -31,11 +31,7 @@ export class RequestExpirationService implements OnModuleInit, OnModuleDestroy {
     );
     this.timer = setInterval(() => {
       this.processExpiry().catch((err) => {
-        this.logger.error(
-          'Request expiry tick failed',
-          {},
-          (err as any)?.stack,
-        );
+        this.logger.error('Request expiry tick failed', {}, err?.stack);
       });
     }, intervalMs);
     this.logger.info('Request expiration service started', { intervalMs });
@@ -59,7 +55,10 @@ export class RequestExpirationService implements OnModuleInit, OnModuleDestroy {
         .find({
           status: { $in: [RequestStatusEnum.OPEN, RequestStatusEnum.PENDING] },
           estimatedTimeOfService: { $lte: now },
-          $or: [{ expiryNoticeSentAt: null }, { expiryNoticeSentAt: { $exists: false } }],
+          $or: [
+            { expiryNoticeSentAt: null },
+            { expiryNoticeSentAt: { $exists: false } },
+          ],
         })
         .exec(),
     );
@@ -70,7 +69,9 @@ export class RequestExpirationService implements OnModuleInit, OnModuleDestroy {
         this.logger.info('Request expiring soon notice sent', {
           requestId: (req as any)._id.toString(),
         });
-        this.events.emit('request.expiringSoon', { id: (req as any)._id.toString() });
+        this.events.emit('request.expiringSoon', {
+          id: (req as any)._id.toString(),
+        });
       } catch (err: any) {
         this.logger.error(
           'Failed to mark/send expiring notice',

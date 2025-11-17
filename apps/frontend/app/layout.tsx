@@ -10,6 +10,7 @@ import { authOptions } from '@/lib/auth'
 import Providers from '@/app/providers'
 import OfflineBanner from '@/shared/components/error/offline-banner'
 import ToastContainer from '@/shared/components/toast-container'
+import Widget from '@/features/widget/components/widget'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,7 +33,7 @@ export default async function RootLayout({
 
   return (
     <html lang="fr">
-      <body className={inter.className}>
+      <body className={`${inter.className} overflow-x-hidden scrollbar-light`}>
         <Providers session={session} initialUser={initialUser} initialBackendToken={initialBackendToken}>
           {/* Site chrome (navbar, secondary navbar, footer) hidden on /dashboard */}
           <AppChrome />
@@ -47,6 +48,7 @@ export default async function RootLayout({
           {/* Portal target for toasts to avoid hydration mismatch */}
           <div id="toast-root" />
           <OfflineBanner />
+          <Widget />
         </Providers>
       </body>
     </html>

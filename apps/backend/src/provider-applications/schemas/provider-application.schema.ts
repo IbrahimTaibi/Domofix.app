@@ -23,12 +23,18 @@ export class ProviderApplication {
   @Prop({ default: null })
   notes?: string;
 
-  @Prop({ required: true, enum: ['pending', 'approved', 'rejected', 'needs_info'], default: 'pending', index: true })
+  @Prop({
+    required: true,
+    enum: ['pending', 'approved', 'rejected', 'needs_info'],
+    default: 'pending',
+    index: true,
+  })
   status: 'pending' | 'approved' | 'rejected' | 'needs_info';
 
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const ProviderApplicationSchema = SchemaFactory.createForClass(ProviderApplication);
+export const ProviderApplicationSchema =
+  SchemaFactory.createForClass(ProviderApplication);
 ProviderApplicationSchema.index({ userId: 1, status: 1 });

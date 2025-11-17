@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import Button from '@/shared/components/button'
 import { categoryOptions } from '@/features/requests/services/requests-service'
 import { motion } from 'framer-motion'
+import { makeRequestRef } from '@/shared/utils/refs'
 
 function getDisplayId(req: any): string {
   return (req?.id || req?._id || '') as string
@@ -53,7 +54,7 @@ function RequestCardInner({ request, className, currentProviderId, onApply, onVi
   return (
     <motion.article
       className={clsx(
-        'group rounded-xl border bg-white p-4 shadow-sm transition-shadow hover:shadow-md border-gray-200 border-l-4 h-full flex flex-col transition-colors',
+        'group rounded-2xl border bg-white p-6 shadow-sm ring-1 ring-gray-200 border-l-4 h-full flex flex-col transition hover:shadow-md hover:ring-gray-300',
         accentClass,
         className,
       )}
@@ -63,36 +64,53 @@ function RequestCardInner({ request, className, currentProviderId, onApply, onVi
       tabIndex={0}
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary-50 text-primary-600">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-primary-50 text-primary-600">
             <ClipboardList className="h-4 w-4" aria-hidden="true" />
           </span>
-          <h3 className="text-sm font-semibold text-gray-900 truncate">{getCategoryLabel(String(request?.category))}</h3>
+          <h3 className="text-base font-semibold text-gray-900 truncate">{getCategoryLabel(String(request?.category))}</h3>
         </div>
         {status && <StatusBadge status={status} />}
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-2">
-        {createdAt && (
-          <MetaRow icon={<CalendarClock className="h-4 w-4 text-gray-600" aria-hidden="true" />} label="Créée" value={format(createdAt, 'dd/MM/yyyy HH:mm')} />
-        )}
-        {ets && (
-          <MetaRow icon={<CalendarClock className="h-4 w-4 text-gray-600" aria-hidden="true" />} label="Intervention" value={format(ets, 'dd/MM/yyyy HH:mm')} />
-        )}
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+        {ets ? (
+          <span className="inline-flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-gray-600" aria-hidden="true" />
+            {format(ets, 'dd/MM/yyyy HH:mm')}
+          </span>
+        ) : null}
+        {request?.location?.address ? (
+          <span className="inline-flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-gray-600" aria-hidden="true" />
+            <span className="truncate">{request.location.address}</span>
+          </span>
+        ) : null}
       </div>
 
-      <div className="mt-auto">
-        {request?.location?.address ? (
-          <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gray-100">
-              <MapPin className="h-4 w-4 text-gray-600" aria-hidden="true" />
-            </span>
-            <span className="truncate">{request.location.address}</span>
-          </div>
-        ) : null}
+      {details ? (
+        <p className="mt-3 text-sm text-gray-700 break-words max-h-20 overflow-hidden">{details}</p>
+      ) : null}
 
-        <div className="mt-3 flex items-center justify-between">
-          {id ? <div className="text-xs text-gray-500">ID: {id}</div> : <span />}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex -space-x-2">
+          {apps.slice(0, 4).map((a: any, i: number) => {
+            const meta = request?.applicationsMeta?.[String(a.providerId)]
+            const title = meta?.name || 'Prestataire'
+            const avatar = meta?.avatar || ''
+            return (
+              <span key={i} title={title} className="inline-block w-7 h-7 rounded-full ring-2 ring-white overflow-hidden bg-gray-200">
+                {avatar ? <img alt={title} src={avatar} className="w-full h-full object-cover" /> : null}
+              </span>
+            )
+          })}
+        </div>
+        <div className="text-xs text-gray-600">Candidatures: {apps.length}</div>
+      </div>
+
+      <div className="mt-6 border-t border-gray-200 pt-4">
+        <div className="flex items-center justify-between">
+          {id ? <div className="text-xs text-gray-500">Ref: {makeRequestRef(id)}</div> : <span />}
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="whitespace-nowrap" aria-label="Voir" onClick={() => onView?.(request)}>Voir</Button>
             {onApply ? (

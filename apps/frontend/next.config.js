@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'tawa.com', 'graph.facebook.com', 'lookaside.facebook.com', 'platform-lookaside.fbsbx.com', 'fbcdn.net', 'scontent.xx.fbcdn.net'],
+    domains: ['localhost', 'tawa.com', 'graph.facebook.com', 'lookaside.facebook.com', 'platform-lookaside.fbsbx.com', 'fbcdn.net', 'scontent.xx.fbcdn.net', 'i.pravatar.cc'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,6 +31,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'scontent.xx.fbcdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
       },
     ],
   },

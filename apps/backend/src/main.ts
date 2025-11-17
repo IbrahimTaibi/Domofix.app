@@ -53,7 +53,7 @@ async function bootstrap() {
         const fields: Record<string, string[]> = {};
         for (const e of errors) {
           const constraints = e.constraints ? Object.values(e.constraints) : [];
-          if (e.property) fields[e.property] = constraints as string[];
+          if (e.property) fields[e.property] = constraints;
         }
         return new ValidationError('Validation failed', { fields });
       },

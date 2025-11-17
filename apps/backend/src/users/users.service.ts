@@ -29,7 +29,7 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await hashPassword(createUserDto.password);
-    
+
     const createdUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
@@ -60,7 +60,7 @@ export class UsersService {
       timezone: createUserDto.timezone || 'UTC',
       locale: createUserDto.locale || 'en',
     });
-    
+
     return createdUser.save();
   }
 
@@ -87,150 +87,205 @@ export class UsersService {
   }
 
   // Additional methods for enhanced user management
-  async updateUser(id: string, updateData: Partial<CreateUserDto>): Promise<User | null> {
+  async updateUser(
+    id: string,
+    updateData: Partial<CreateUserDto>,
+  ): Promise<User | null> {
     // If address fields present, attempt geocode to set lat/lon/fullAddress
-    let setData = { ...updateData } as any
-    const addr = (updateData as any)?.address
+    const setData = { ...updateData } as any;
+    const addr = (updateData as any)?.address;
     if (addr && (addr.street || addr.city || addr.fullAddress)) {
       try {
-        const res = await this.geocoding.geocode(addr as any)
+        const res = await this.geocoding.geocode(addr);
         if (res) {
-          setData.address = { ...(addr as any), latitude: res.latitude, longitude: res.longitude, fullAddress: res.fullAddress }
+          setData.address = {
+            ...addr,
+            latitude: res.latitude,
+            longitude: res.longitude,
+            fullAddress: res.fullAddress,
+          };
         }
       } catch {}
     }
     return this.userModel.findByIdAndUpdate(id, setData, { new: true }).exec();
   }
 
-  async updateNotificationPreferences(id: string, preferences: Partial<any>): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(
-      id,
-      { $set: { notificationPreferences: preferences } },
-      { new: true }
-    ).exec();
+  async updateNotificationPreferences(
+    id: string,
+    preferences: Partial<any>,
+  ): Promise<User | null> {
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        { $set: { notificationPreferences: preferences } },
+        { new: true },
+      )
+      .exec();
   }
 
-  async updateSecuritySettings(id: string, securityData: Partial<any>): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(
-      id,
-      { $set: { security: securityData } },
-      { new: true }
-    ).exec();
+  async updateSecuritySettings(
+    id: string,
+    securityData: Partial<any>,
+  ): Promise<User | null> {
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        { $set: { security: securityData } },
+        { new: true },
+      )
+      .exec();
   }
 
   async incrementFailedLoginAttempts(id: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {
-      $inc: { 'security.failedLoginAttempts': 1 },
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        $inc: { 'security.failedLoginAttempts': 1 },
+      })
+      .exec();
   }
 
   async resetFailedLoginAttempts(id: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {
-      $set: { 'security.failedLoginAttempts': 0, 'security.lockedUntil': null },
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        $set: {
+          'security.failedLoginAttempts': 0,
+          'security.lockedUntil': null,
+        },
+      })
+      .exec();
   }
 
   async lockUser(id: string, lockUntil: Date): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {
-      $set: { 'security.lockedUntil': lockUntil },
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        $set: { 'security.lockedUntil': lockUntil },
+      })
+      .exec();
   }
 
   async updateLastLogin(id: string, ip?: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {
-      $set: {
-        'security.lastLoginAt': new Date(),
-        'security.lastLoginIP': ip,
-      },
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        $set: {
+          'security.lastLoginAt': new Date(),
+          'security.lastLoginIP': ip,
+        },
+      })
+      .exec();
   }
 
   async setEmailVerificationToken(id: string, token: string): Promise<void> {
-    await this.userModel.findByIdAndUpdate(id, {
-      $set: { 'security.emailVerificationToken': token },
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(id, {
+        $set: { 'security.emailVerificationToken': token },
+      })
+      .exec();
   }
 
   async verifyEmail(token: string): Promise<User | null> {
-    return this.userModel.findOneAndUpdate(
-      { 'security.emailVerificationToken': token },
-      {
-        $set: { 'security.emailVerified': true },
-        $unset: { 'security.emailVerificationToken': 1 },
-      },
-      { new: true }
-    ).exec();
-  }
-
-  async setPasswordResetToken(email: string, token: string, expires: Date): Promise<void> {
-    await this.userModel.findOneAndUpdate(
-      { email },
-      {
-        $set: {
-          'security.passwordResetToken': token,
-          'security.passwordResetExpires': expires,
+    return this.userModel
+      .findOneAndUpdate(
+        { 'security.emailVerificationToken': token },
+        {
+          $set: { 'security.emailVerified': true },
+          $unset: { 'security.emailVerificationToken': 1 },
         },
-      }
-    ).exec();
+        { new: true },
+      )
+      .exec();
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<User | null> {
+  async setPasswordResetToken(
+    email: string,
+    token: string,
+    expires: Date,
+  ): Promise<void> {
+    await this.userModel
+      .findOneAndUpdate(
+        { email },
+        {
+          $set: {
+            'security.passwordResetToken': token,
+            'security.passwordResetExpires': expires,
+          },
+        },
+      )
+      .exec();
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<User | null> {
     const hashedPassword = await hashPassword(newPassword);
-    
-    return this.userModel.findOneAndUpdate(
-      {
-        'security.passwordResetToken': token,
-        'security.passwordResetExpires': { $gt: new Date() },
-      },
-      {
-        $set: { password: hashedPassword },
-        $unset: {
-          'security.passwordResetToken': 1,
-          'security.passwordResetExpires': 1,
+
+    return this.userModel
+      .findOneAndUpdate(
+        {
+          'security.passwordResetToken': token,
+          'security.passwordResetExpires': { $gt: new Date() },
         },
-      },
-      { new: true }
-    ).exec();
+        {
+          $set: { password: hashedPassword },
+          $unset: {
+            'security.passwordResetToken': 1,
+            'security.passwordResetExpires': 1,
+          },
+        },
+        { new: true },
+      )
+      .exec();
   }
 
-  async updatePhoneVerification(id: string, verificationData: Partial<any>): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(
-      id,
-      { $set: { phoneVerification: verificationData } },
-      { new: true }
-    ).exec();
+  async updatePhoneVerification(
+    id: string,
+    verificationData: Partial<any>,
+  ): Promise<User | null> {
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        { $set: { phoneVerification: verificationData } },
+        { new: true },
+      )
+      .exec();
   }
 
   async enable2FA(id: string, secret: string): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          'security.twoFactorEnabled': true,
-          'security.twoFactorSecret': secret,
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            'security.twoFactorEnabled': true,
+            'security.twoFactorSecret': secret,
+          },
         },
-      },
-      { new: true }
-    ).exec();
+        { new: true },
+      )
+      .exec();
   }
 
   async disable2FA(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(
-      id,
-      {
-        $set: { 'security.twoFactorEnabled': false },
-        $unset: { 'security.twoFactorSecret': 1 },
-      },
-      { new: true }
-    ).exec();
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: { 'security.twoFactorEnabled': false },
+          $unset: { 'security.twoFactorSecret': 1 },
+        },
+        { new: true },
+      )
+      .exec();
   }
 
   async updatePassword(id: string, newPassword: string): Promise<User | null> {
     const hashedPassword = await hashPassword(newPassword);
-    return this.userModel.findByIdAndUpdate(
-      id,
-      { $set: { password: hashedPassword } },
-      { new: true }
-    ).exec();
+    return this.userModel
+      .findByIdAndUpdate(
+        id,
+        { $set: { password: hashedPassword } },
+        { new: true },
+      )
+      .exec();
   }
 }

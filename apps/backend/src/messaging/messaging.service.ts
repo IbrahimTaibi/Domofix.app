@@ -78,13 +78,18 @@ export class MessagingService {
     // collect unique userIds
     const ids = Array.from(
       new Set(
-        items.flatMap((t: any) => t.participants.map((p: any) => String(p.userId)))
-      )
-    ).map((id) => new Types.ObjectId(id))
-    const users = await this.userModel.find({ _id: { $in: ids } }).lean()
-    const userMeta: Record<string, { name: string; avatar?: string }> = {}
+        items.flatMap((t: any) =>
+          t.participants.map((p: any) => String(p.userId)),
+        ),
+      ),
+    ).map((id) => new Types.ObjectId(id));
+    const users = await this.userModel.find({ _id: { $in: ids } }).lean();
+    const userMeta: Record<string, { name: string; avatar?: string }> = {};
     for (const u of users as any[]) {
-      userMeta[String(u._id)] = { name: `${u.firstName} ${u.lastName}`.trim(), avatar: u.avatar || undefined }
+      userMeta[String(u._id)] = {
+        name: `${u.firstName} ${u.lastName}`.trim(),
+        avatar: u.avatar || undefined,
+      };
     }
     return {
       data: items.map((t: any) => ({
@@ -209,7 +214,12 @@ export class MessagingService {
       status: msg.status,
       createdAt: msg.createdAt,
     };
-    try { this.events.emit('message.sent', { threadId: String(thread._id), message: payload }) } catch {}
+    try {
+      this.events.emit('message.sent', {
+        threadId: String(thread._id),
+        message: payload,
+      });
+    } catch {}
     return payload;
   }
 
@@ -248,16 +258,21 @@ export class MessagingService {
     thread.unreadCounts = thread.unreadCounts || {};
     thread.unreadCounts[String(uid)] = 0;
     await thread.save();
-    try { this.events.emit('message.read', { threadId: String(thread._id), userId: String(uid) }) } catch {}
+    try {
+      this.events.emit('message.read', {
+        threadId: String(thread._id),
+        userId: String(uid),
+      });
+    } catch {}
     return { ok: true };
   }
 
   async isParticipant(threadId: string, userId: string): Promise<boolean> {
-    const tid = new Types.ObjectId(threadId)
-    const uid = new Types.ObjectId(userId)
-    const thread = await this.threadModel.findById(tid)
-    if (!thread) return false
-    return thread.participants.some((p) => p.userId.equals(uid))
+    const tid = new Types.ObjectId(threadId);
+    const uid = new Types.ObjectId(userId);
+    const thread = await this.threadModel.findById(tid);
+    if (!thread) return false;
+    return thread.participants.some((p) => p.userId.equals(uid));
   }
 
   async archive(threadId: string, userId: string) {

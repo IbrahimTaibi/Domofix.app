@@ -1,4 +1,10 @@
-import { User as SharedUser, Address, NotificationPreferences, SecuritySettings, PhoneVerification } from '@darigo/shared-types';
+import {
+  User as SharedUser,
+  Address,
+  NotificationPreferences,
+  SecuritySettings,
+  PhoneVerification,
+} from '@darigo/shared-types';
 
 export class User implements Omit<SharedUser, 'createdAt' | 'updatedAt'> {
   id: string;
@@ -8,34 +14,34 @@ export class User implements Omit<SharedUser, 'createdAt' | 'updatedAt'> {
   lastName: string;
   avatar?: string;
   bio?: string;
-  
+
   // Phone and SMS fields
   phoneNumber?: string;
   countryCode?: string;
   phoneVerification: PhoneVerification;
-  
+
   // Address and location fields
   address?: Address;
-  
+
   // Notification preferences
   notificationPreferences: NotificationPreferences;
-  
+
   // Security settings
   security: SecuritySettings;
-  
+
   // User status and role
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   role: 'customer' | 'provider' | 'admin';
   providerStatus: 'none' | 'pending' | 'approved' | 'rejected' | 'needs_info';
-  
+
   // Profile completion and onboarding
   profileCompleted: boolean;
   onboardingCompleted: boolean;
-  
+
   // Timezone and locale
   timezone: string;
   locale: string;
-  
+
   createdAt: Date; // Backend uses Date objects
   updatedAt: Date; // Backend uses Date objects
 

@@ -21,7 +21,12 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   providerId: Types.ObjectId;
 
-  @Prop({ required: true, enum: Object.values(OrderStatusEnum), default: OrderStatusEnum.ASSIGNED, index: true })
+  @Prop({
+    required: true,
+    enum: Object.values(OrderStatusEnum),
+    default: OrderStatusEnum.ASSIGNED,
+    index: true,
+  })
   status: OrderStatusEnum;
 
   @Prop({ required: true })
@@ -35,6 +40,10 @@ export class Order {
 
   @Prop({ default: null })
   canceledAt?: Date | null;
+
+  // Provider-proposed estimated time of service for this order
+  @Prop({ default: null })
+  providerEts?: Date | null;
 
   createdAt: Date;
   updatedAt: Date;

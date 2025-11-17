@@ -24,7 +24,7 @@ export class EmailService {
     this.appUrl = process.env.APP_URL || 'http://localhost:3000';
 
     this.logger.log(
-      `EmailService initialized: sender="${this.senderName} <${this.senderEmail}>", appUrl=${this.appUrl}, brevoConfigured=${this.isConfigured}`
+      `EmailService initialized: sender="${this.senderName} <${this.senderEmail}>", appUrl=${this.appUrl}, brevoConfigured=${this.isConfigured}`,
     );
   }
 
@@ -128,10 +128,16 @@ export class EmailService {
     await this.sendEmail(toEmail, subject, html);
   }
 
-  async sendRequestNewApplicationEmail(toEmail: string, requestId: string, providerName?: string) {
+  async sendRequestNewApplicationEmail(
+    toEmail: string,
+    requestId: string,
+    providerName?: string,
+  ) {
     const url = `${this.appUrl}/requests/${encodeURIComponent(requestId)}`;
     const subject = 'Nouveau prestataire a postulé à votre demande';
-    const providerText = providerName ? `Le prestataire <strong>${providerName}</strong> a postulé.` : `Un prestataire a postulé.`;
+    const providerText = providerName
+      ? `Le prestataire <strong>${providerName}</strong> a postulé.`
+      : `Un prestataire a postulé.`;
     const html = `
       <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
         <h2>Nouvelle candidature reçue 📬</h2>
@@ -146,7 +152,10 @@ export class EmailService {
     await this.sendEmail(toEmail, subject, html);
   }
 
-  async sendProviderApplicationReceivedEmail(toEmail: string, applicationId: string) {
+  async sendProviderApplicationReceivedEmail(
+    toEmail: string,
+    applicationId: string,
+  ) {
     const url = `${this.appUrl}/get-started`;
     const subject = 'Votre candidature prestataire a été reçue';
     const html = `
@@ -167,7 +176,9 @@ export class EmailService {
   private async sendEmail(toEmail: string, subject: string, html: string) {
     try {
       if (!this.isConfigured) {
-        this.logger.warn('Brevo not configured (missing BREVO_API_KEY); skipping email send');
+        this.logger.warn(
+          'Brevo not configured (missing BREVO_API_KEY); skipping email send',
+        );
         return;
       }
       const payload: SibApiV3Sdk.SendSmtpEmail = {
@@ -177,9 +188,13 @@ export class EmailService {
         htmlContent: html,
       } as any;
       const res = await this.api.sendTransacEmail(payload);
-      this.logger.log(`Email sent to ${toEmail}: subject="${subject}" id=${(res as any)?.messageId || 'n/a'}`);
+      this.logger.log(
+        `Email sent to ${toEmail}: subject="${subject}" id=${(res as any)?.messageId || 'n/a'}`,
+      );
     } catch (error: any) {
-      this.logger.error(`Failed to send email to ${toEmail}: ${error?.message || error}`);
+      this.logger.error(
+        `Failed to send email to ${toEmail}: ${error?.message || error}`,
+      );
       throw error;
     }
   }

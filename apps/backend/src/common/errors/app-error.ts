@@ -22,7 +22,12 @@ export class AppError extends HttpException {
   readonly details?: ErrorDetails;
   readonly isOperational = true;
 
-  constructor(type: ErrorType, message: string, status: number, details?: ErrorDetails) {
+  constructor(
+    type: ErrorType,
+    message: string,
+    status: number,
+    details?: ErrorDetails,
+  ) {
     super(message, status);
     this.type = type;
     this.details = details;
@@ -60,7 +65,11 @@ export class RateLimitError extends AppError {
 }
 
 export class DatabaseError extends AppError {
-  constructor(message = 'Database error', status: number = HttpStatus.INTERNAL_SERVER_ERROR, details?: ErrorDetails) {
+  constructor(
+    message = 'Database error',
+    status: number = HttpStatus.INTERNAL_SERVER_ERROR,
+    details?: ErrorDetails,
+  ) {
     super('DatabaseError', message, status, details);
   }
 }

@@ -1,4 +1,16 @@
-import { Controller, Post, Patch, Body, Param, UseGuards, Req, UseInterceptors, UploadedFiles, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  UseInterceptors,
+  UploadedFiles,
+  Get,
+  Query,
+} from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { ApplyForRequestDto } from './dto/apply-for-request.dto';
@@ -27,7 +39,11 @@ export class RequestsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('provider')
   @Post(':id/apply')
-  async apply(@Req() req: any, @Param('id') id: string, @Body() dto: ApplyForRequestDto) {
+  async apply(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: ApplyForRequestDto,
+  ) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
     return this.service.applyForRequest(userId, id, dto);
   }
@@ -35,7 +51,11 @@ export class RequestsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('customer')
   @Post(':id/accept')
-  async acceptProvider(@Req() req: any, @Param('id') id: string, @Body() dto: AcceptProviderDto) {
+  async acceptProvider(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: AcceptProviderDto,
+  ) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
     return this.service.acceptProvider(userId, id, dto);
   }
@@ -59,7 +79,8 @@ export class RequestsController {
           cb(null, uploadDir);
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `${uniqueSuffix}${ext}`);
         },
@@ -70,11 +91,17 @@ export class RequestsController {
         if (/^image\//.test(file.mimetype)) cb(null, true);
         else cb(null, false);
       },
-    })
+    }),
   )
-  async uploadPhotos(@Req() req: any, @Param('id') id: string, @UploadedFiles() files: any[]) {
+  async uploadPhotos(
+    @Req() req: any,
+    @Param('id') id: string,
+    @UploadedFiles() files: any[],
+  ) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
-    const urls = (files || []).map((f) => `/uploads/request-photos/${f.filename}`);
+    const urls = (files || []).map(
+      (f) => `/uploads/request-photos/${f.filename}`,
+    );
     return this.service.addRequestPhotos(userId, id, urls);
   }
 
@@ -88,6 +115,15 @@ export class RequestsController {
       offset: query.offset,
       limit: query.limit,
     });
+  }
+
+  // Providers available for a specific request (customer view)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('customer')
+  @Get(':id/providers')
+  async listProviders(@Req() req: any, @Param('id') id: string) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    return this.service.getProvidersForRequest(userId, id);
   }
 
   // All open/pending requests for providers (non-geo, paginated)
@@ -106,11 +142,15 @@ export class RequestsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('provider')
   @Get('near')
-  async listNearby(@Query('lat') lat?: string, @Query('lon') lon?: string, @Query('dist') dist?: string) {
-    const latitude = Number(lat)
-    const longitude = Number(lon)
-    const maxDistance = Math.max(1, Math.min(Number(dist || 2000), 50000))
-    return this.service.listNearby(latitude, longitude, maxDistance)
+  async listNearby(
+    @Query('lat') lat?: string,
+    @Query('lon') lon?: string,
+    @Query('dist') dist?: string,
+  ) {
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+    const maxDistance = Math.max(1, Math.min(Number(dist || 2000), 50000));
+    return this.service.listNearby(latitude, longitude, maxDistance);
   }
 
   // Single request details for providers
@@ -118,6 +158,6 @@ export class RequestsController {
   @Roles('provider')
   @Get(':id')
   async getOneForProvider(@Param('id') id: string) {
-    return this.service.getOneForProvider(id)
+    return this.service.getOneForProvider(id);
   }
 }

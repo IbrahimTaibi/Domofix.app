@@ -35,6 +35,18 @@ export class RequestApplicationSubdoc {
 
   @Prop({ required: true, default: () => new Date() })
   appliedAt: Date;
+
+  @Prop({ default: null })
+  proposedEts?: Date | null;
+
+  @Prop({ default: null })
+  proposedPrice?: number | null;
+
+  @Prop({ default: null })
+  proposedPriceMin?: number | null;
+
+  @Prop({ default: null })
+  proposedPriceMax?: number | null;
 }
 
 export enum RequestStatusEnum {
@@ -67,9 +79,22 @@ export class Request {
   phone: string;
 
   // Service category from predefined list
-  @Prop({ required: true, enum: [
-    'plumber','barber','cleaner','tutor','delivery','electrician','carpenter','painter','gardener','other'
-  ], index: true })
+  @Prop({
+    required: true,
+    enum: [
+      'plumber',
+      'barber',
+      'cleaner',
+      'tutor',
+      'delivery',
+      'electrician',
+      'carpenter',
+      'painter',
+      'gardener',
+      'other',
+    ],
+    index: true,
+  })
   category: string;
 
   // Estimated time of service (ETS)
@@ -89,7 +114,12 @@ export class Request {
   photos: string[];
 
   // Lifecycle status
-  @Prop({ required: true, enum: Object.values(RequestStatusEnum), default: RequestStatusEnum.OPEN, index: true })
+  @Prop({
+    required: true,
+    enum: Object.values(RequestStatusEnum),
+    default: RequestStatusEnum.OPEN,
+    index: true,
+  })
   status: RequestStatusEnum;
 
   // Provider applications
@@ -104,7 +134,9 @@ export class Request {
   updatedAt: Date;
 }
 
-export const RequestApplicationSchema = SchemaFactory.createForClass(RequestApplicationSubdoc);
+export const RequestApplicationSchema = SchemaFactory.createForClass(
+  RequestApplicationSubdoc,
+);
 export const RequestSchema = SchemaFactory.createForClass(Request);
 
 // Performance indexes

@@ -5,7 +5,10 @@ import { EmailService } from '../../email/email.service';
 import { AppLogger } from '@/common/logging/logger.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Request as RequestEntity, RequestDocument } from '../schemas/request.schema';
+import {
+  Request as RequestEntity,
+  RequestDocument,
+} from '../schemas/request.schema';
 import { NotificationsService } from '../../notifications/notifications.service';
 
 type RequestCreatedPayload = { id: string; customerId: string };
@@ -19,7 +22,8 @@ export class RequestEventsListener {
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
     private readonly logger: AppLogger,
-    @InjectModel(RequestEntity.name) private readonly requestModel: Model<RequestDocument>,
+    @InjectModel(RequestEntity.name)
+    private readonly requestModel: Model<RequestDocument>,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -36,29 +40,47 @@ export class RequestEventsListener {
       gardener: 'jardinage',
       other: 'service',
     };
-    return map[(cat || '').toLowerCase()] || (cat || 'service');
+    return map[(cat || '').toLowerCase()] || cat || 'service';
   }
 
   @OnEvent('request.application.created', { async: true })
-  async handleRequestApplicationCreated(payload: RequestApplicationCreatedPayload) {
+  async handleRequestApplicationCreated(
+    payload: RequestApplicationCreatedPayload,
+  ) {
     try {
       const requestId = payload.id;
       const displayId = `R-${String(requestId).slice(-6).toUpperCase()}`;
       const req = await this.requestModel.findById(requestId).exec();
       if (!req) {
-        this.logger.warn('Skipping request.application.created email: request not found', { requestId });
+        this.logger.warn(
+          'Skipping request.application.created email: request not found',
+          { requestId },
+        );
         return;
       }
       const customerId = (req.customerId as any)?.toString?.() || '';
-      const customer = customerId ? await this.usersService.findById(customerId) : null;
+      const customer = customerId
+        ? await this.usersService.findById(customerId)
+        : null;
       const toEmail = (customer as any)?.email;
       if (!toEmail) {
-        this.logger.warn('Skipping request.application.created email: no customer email', { requestId, customerId });
+        this.logger.warn(
+          'Skipping request.application.created email: no customer email',
+          { requestId, customerId },
+        );
         return;
       }
-      const provider = await this.usersService.findById(payload.providerId).catch(() => null);
-      const providerName = provider ? `${(provider as any)?.firstName || ''} ${(provider as any)?.lastName || ''}`.trim() : undefined;
-      await this.emailService.sendRequestNewApplicationEmail(toEmail, requestId, providerName);
+      const provider = await this.usersService
+        .findById(payload.providerId)
+        .catch(() => null);
+      const providerName = provider
+        ? `${provider?.firstName || ''} ${provider?.lastName || ''}`.trim()
+        : undefined;
+      await this.emailService.sendRequestNewApplicationEmail(
+        toEmail,
+        requestId,
+        providerName,
+      );
       // Real-time notification for customer
       await this.notifications.create({
         userId: customerId,
@@ -67,9 +89,13 @@ export class RequestEventsListener {
         severity: 'info',
         type: 'request.created',
         data: { requestId, displayId },
-      })
+      });
     } catch (err: any) {
-      this.logger.error('Failed to send request.application.created email', { requestId: payload.id }, err?.stack);
+      this.logger.error(
+        'Failed to send request.application.created email',
+        { requestId: payload.id },
+        err?.stack,
+      );
     }
   }
 
@@ -95,8 +121,12 @@ export class RequestEventsListener {
         message: `Votre demande de ${categoryLabel} ${displayId} a été créée.`,
         severity: 'success',
         type: 'request.created',
-        data: { requestId: payload.id, displayId, category: (req as any)?.category },
-      })
+        data: {
+          requestId: payload.id,
+          displayId,
+          category: (req as any)?.category,
+        },
+      });
     } catch (err: any) {
       this.logger.error(
         'Failed to send request.created email',
@@ -114,14 +144,21 @@ export class RequestEventsListener {
       const req = await this.requestModel.findById(requestId).exec();
       const categoryLabel = this.getCategoryLabel((req as any)?.category);
       if (!req) {
-        this.logger.warn('Skipping request.closed email: request not found', { requestId });
+        this.logger.warn('Skipping request.closed email: request not found', {
+          requestId,
+        });
         return;
       }
       const customerId = (req.customerId as any)?.toString?.() || '';
-      const user = customerId ? await this.usersService.findById(customerId) : null;
+      const user = customerId
+        ? await this.usersService.findById(customerId)
+        : null;
       const toEmail = (user as any)?.email;
       if (!toEmail) {
-        this.logger.warn('Skipping request.closed email: no customer email', { requestId, customerId });
+        this.logger.warn('Skipping request.closed email: no customer email', {
+          requestId,
+          customerId,
+        });
         return;
       }
       await this.emailService.sendRequestExpiredEmail(toEmail, requestId);
@@ -132,9 +169,13 @@ export class RequestEventsListener {
         severity: 'warning',
         type: 'request.completed',
         data: { requestId, displayId, category: (req as any)?.category },
-      })
+      });
     } catch (err: any) {
-      this.logger.error('Failed to send request.closed email', { requestId: payload.id }, err?.stack);
+      this.logger.error(
+        'Failed to send request.closed email',
+        { requestId: payload.id },
+        err?.stack,
+      );
     }
   }
 
@@ -146,14 +187,22 @@ export class RequestEventsListener {
       const req = await this.requestModel.findById(requestId).exec();
       const categoryLabel = this.getCategoryLabel((req as any)?.category);
       if (!req) {
-        this.logger.warn('Skipping request.expiringSoon email: request not found', { requestId });
+        this.logger.warn(
+          'Skipping request.expiringSoon email: request not found',
+          { requestId },
+        );
         return;
       }
       const customerId = (req.customerId as any)?.toString?.() || '';
-      const user = customerId ? await this.usersService.findById(customerId) : null;
+      const user = customerId
+        ? await this.usersService.findById(customerId)
+        : null;
       const toEmail = (user as any)?.email;
       if (!toEmail) {
-        this.logger.warn('Skipping request.expiringSoon email: no customer email', { requestId, customerId });
+        this.logger.warn(
+          'Skipping request.expiringSoon email: no customer email',
+          { requestId, customerId },
+        );
         return;
       }
       await this.emailService.sendRequestExpiringSoonEmail(toEmail, requestId);
@@ -164,9 +213,13 @@ export class RequestEventsListener {
         severity: 'warning',
         type: 'system.message',
         data: { requestId, displayId, category: (req as any)?.category },
-      })
+      });
     } catch (err: any) {
-      this.logger.error('Failed to send request.expiringSoon email', { requestId: payload.id }, err?.stack);
+      this.logger.error(
+        'Failed to send request.expiringSoon email',
+        { requestId: payload.id },
+        err?.stack,
+      );
     }
   }
 }

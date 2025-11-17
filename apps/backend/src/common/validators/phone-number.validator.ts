@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import {
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 import { isValidPhoneNumber } from '@darigo/shared-utils';
 
 @ValidatorConstraint({ async: false })

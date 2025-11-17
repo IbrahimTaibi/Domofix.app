@@ -15,6 +15,9 @@ export interface RequestApplication {
   providerId: string;
   message?: string;
   createdAt: string;
+  proposedEts?: string;
+  proposedPrice?: number;
+  proposedPriceRange?: { min: number; max: number };
 }
 
 // Request entity used across client and server
@@ -30,6 +33,7 @@ export interface Request {
   photos?: string[];
   status: RequestStatus;
   applications: RequestApplication[];
+  applicationsMeta?: Record<string, { name: string; avatar?: string }>;
   acceptedProviderId?: string;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +51,10 @@ export interface CreateRequestRequest {
 
 export interface ApplyForRequestRequest {
   message?: string;
+  proposedEts?: string;
+  proposedPrice?: number;
+  proposedPriceMin?: number;
+  proposedPriceMax?: number;
 }
 
 export interface AcceptProviderRequest {

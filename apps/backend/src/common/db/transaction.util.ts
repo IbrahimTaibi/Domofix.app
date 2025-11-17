@@ -1,6 +1,9 @@
 import { Connection } from 'mongoose';
 
-export async function runInTransaction<T>(connection: Connection, fn: (session: any) => Promise<T>): Promise<T> {
+export async function runInTransaction<T>(
+  connection: Connection,
+  fn: (session: any) => Promise<T>,
+): Promise<T> {
   const session = await connection.startSession();
   let result: T;
   try {
@@ -8,7 +11,7 @@ export async function runInTransaction<T>(connection: Connection, fn: (session: 
       result = await fn(session);
     });
     // @ts-ignore result is set in transaction
-    return result!;
+    return result;
   } catch (err) {
     try {
       await session.abortTransaction();

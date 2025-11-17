@@ -1,4 +1,16 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Param, Patch, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { ProviderApplicationsService } from './provider-applications.service';
 import { CreateProviderApplicationDto } from './dto/create-provider-application.dto';
 import { UpdateProviderApplicationStatusDto } from './dto/update-status.dto';
@@ -20,22 +32,33 @@ export class ProviderApplicationsController {
     FileInterceptor('document', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const uploadDir = join(process.cwd(), 'uploads', 'provider-documents');
+          const uploadDir = join(
+            process.cwd(),
+            'uploads',
+            'provider-documents',
+          );
           mkdirSync(uploadDir, { recursive: true });
           cb(null, uploadDir);
         },
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           cb(null, `${uniqueSuffix}${ext}`);
         },
       }),
       limits: { fileSize: 5 * 1024 * 1024 },
-    })
+    }),
   )
-  async apply(@Req() req: any, @Body() dto: CreateProviderApplicationDto, @UploadedFile() document?: any) {
+  async apply(
+    @Req() req: any,
+    @Body() dto: CreateProviderApplicationDto,
+    @UploadedFile() document?: any,
+  ) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
-    const documentUrl = document ? `/uploads/provider-documents/${document.filename}` : '';
+    const documentUrl = document
+      ? `/uploads/provider-documents/${document.filename}`
+      : '';
     return this.service.create(userId, dto, documentUrl);
   }
 
@@ -56,7 +79,10 @@ export class ProviderApplicationsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch(':id/status')
-  async updateStatus(@Param('id') id: string, @Body() dto: UpdateProviderApplicationStatusDto) {
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateProviderApplicationStatusDto,
+  ) {
     return this.service.updateStatus(id, dto.status);
   }
 }

@@ -10,7 +10,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { EmailService } from '../email/email.service';
 import { AppLogger } from '@/common/logging/logger.service';
 import { AuthEventsListener } from './listeners/auth-events.listener';
-import { RefreshToken, RefreshTokenSchema } from './schemas/refresh-token.schema';
+import {
+  RefreshToken,
+  RefreshTokenSchema,
+} from './schemas/refresh-token.schema';
 import { RefreshTokensService } from './refresh-tokens.service';
 
 function ttlToSeconds(ttl: string): number {
@@ -29,7 +32,9 @@ function ttlToSeconds(ttl: string): number {
   imports: [
     UsersModule,
     PassportModule,
-    MongooseModule.forFeature([{ name: RefreshToken.name, schema: RefreshTokenSchema }]),
+    MongooseModule.forFeature([
+      { name: RefreshToken.name, schema: RefreshTokenSchema },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -51,7 +56,14 @@ function ttlToSeconds(ttl: string): number {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, EmailService, RefreshTokensService, AppLogger, AuthEventsListener],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    EmailService,
+    RefreshTokensService,
+    AppLogger,
+    AuthEventsListener,
+  ],
   exports: [AuthService, EmailService, RefreshTokensService],
 })
 export class AuthModule {}

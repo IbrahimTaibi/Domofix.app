@@ -15,7 +15,7 @@ export interface RequestsListProps {
 export default function RequestsList({ items, currentProviderId, onApply, onView, appliedIds, statusOverrideById }: RequestsListProps) {
   if (!items?.length) return null
   return (
-    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <AnimatePresence mode="popLayout">
         {items.map((req: any) => (
           <motion.li

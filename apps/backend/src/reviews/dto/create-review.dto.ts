@@ -1,28 +1,36 @@
-import { IsArray, IsInt, IsMongoId, IsOptional, IsString, Max, Min } from 'class-validator'
+import {
+  IsArray,
+  IsInt,
+  IsMongoId,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateReviewDto {
   @IsMongoId()
-  bookingId: string
+  bookingId: string;
 
   @IsMongoId()
-  customerId: string
+  customerId: string;
 
   @IsMongoId()
-  providerId: string
+  providerId: string;
 
   @IsMongoId()
-  serviceId: string
+  serviceId: string;
 
   @IsInt()
   @Min(1)
   @Max(5)
-  rating: number
+  rating: number;
 
   @IsOptional()
   @IsString()
-  comment?: string
+  comment?: string;
 
   @IsOptional()
   @IsArray()
-  images?: string[]
+  images?: string[];
 }

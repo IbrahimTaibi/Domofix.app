@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { registerDecorator, ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import {
+  registerDecorator,
+  ValidationArguments,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 
 @ValidatorConstraint({ async: false })
 @Injectable()
@@ -22,7 +28,10 @@ export class RequireOneOfConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function RequireOneOf(properties: string[], options?: ValidationOptions) {
+export function RequireOneOf(
+  properties: string[],
+  options?: ValidationOptions,
+) {
   return function (object: any, propertyName: string) {
     registerDecorator({
       name: 'RequireOneOf',

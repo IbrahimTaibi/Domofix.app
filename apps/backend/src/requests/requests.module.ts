@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RequestsController } from './requests.controller';
-import { GeocodingService } from '@/common/geocoding/geocoding.service'
+import { GeocodingService } from '@/common/geocoding/geocoding.service';
 import { RequestsService } from './requests.service';
 import { Request, RequestSchema } from './schemas/request.schema';
 import { UsersModule } from '../users/users.module';
@@ -10,16 +10,26 @@ import { AuthModule } from '../auth/auth.module';
 import { RequestEventsListener } from './listeners/request-events.listener';
 import { RequestExpirationService } from './expiration.service';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { User, UserSchema } from '@/users/schemas/user.schema';
 
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     NotificationsModule,
-    MongooseModule.forFeature([{ name: Request.name, schema: RequestSchema }]),
+    MongooseModule.forFeature([
+      { name: Request.name, schema: RequestSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
   ],
   controllers: [RequestsController],
-  providers: [RequestsService, AppLogger, RequestEventsListener, RequestExpirationService, GeocodingService],
+  providers: [
+    RequestsService,
+    AppLogger,
+    RequestEventsListener,
+    RequestExpirationService,
+    GeocodingService,
+  ],
   exports: [RequestsService],
 })
 export class RequestsModule {}

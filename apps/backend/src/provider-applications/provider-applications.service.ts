@@ -74,7 +74,10 @@ export class ProviderApplicationsService {
         .exec();
       return saved;
     });
-    this.events.emit('providerApplication.created', { id: (app as any)?._id?.toString?.() || '', userId });
+    this.events.emit('providerApplication.created', {
+      id: (app as any)?._id?.toString?.() || '',
+      userId,
+    });
     return app;
   }
 

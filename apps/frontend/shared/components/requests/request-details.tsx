@@ -18,6 +18,8 @@ export default function RequestDetails({ request, onClose }: RequestDetailsProps
   const details = typeof request?.details === 'string' ? request.details : ''
   const photos: string[] = Array.isArray(request?.photos) ? request.photos : []
   const status: RequestStatus | undefined = request?.status
+  const apps: any[] = Array.isArray(request?.applications) ? request.applications : []
+  const appsMeta: Record<string, { name?: string; avatar?: string }> = request?.applicationsMeta || {}
 
   return (
     <div className="fixed inset-0 z-50">
@@ -91,6 +93,31 @@ export default function RequestDetails({ request, onClose }: RequestDetailsProps
               </div>
             </div>
           ) : null}
+
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">Candidatures ({apps.length})</h3>
+            {apps.length > 0 ? (
+              <ul className="mt-2 space-y-2">
+                {apps.map((a: any, i: number) => {
+                  const key = String(a.providerId)
+                  const meta = appsMeta[key] || {}
+                  const name = meta.name || 'Prestataire'
+                  const avatar = meta.avatar || ''
+                  return (
+                    <li key={i} className="flex items-center gap-3">
+                      <span className="inline-block w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                        {avatar ? <img src={avatar} alt={name} className="w-full h-full object-cover" /> : null}
+                      </span>
+                      <div className="text-sm text-gray-800">{name}</div>
+                      <div className="text-xs text-gray-500 ml-auto">{new Date(a.appliedAt).toLocaleString()}</div>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-gray-600">Aucune candidature pour le moment.</p>
+            )}
+          </div>
 
           {photos.length > 0 ? (
             <div>

@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Address } from '../users/schemas/user.schema';
@@ -66,25 +72,33 @@ export class AuthService {
     return Math.max(1, Math.floor(ms / 1000));
   }
 
-  private async issueTokens(user: any, meta?: { ip?: string; userAgent?: string }) {
-    const payload = { sub: (user as any)._id.toString(), email: user.email };
+  private async issueTokens(
+    user: any,
+    meta?: { ip?: string; userAgent?: string },
+  ) {
+    const payload = { sub: user._id.toString(), email: user.email };
 
     const access_token = this.jwtService.sign(payload, {
       secret: this.getAccessSecret(),
       expiresIn: this.ttlToSeconds(this.getAccessTtl()),
     });
 
-    const jti = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-    const refreshExpiresAt = new Date(Date.now() + this.ttlToMs(this.getRefreshTtl()));
+    const jti = crypto.randomUUID();
+    const refreshExpiresAt = new Date(
+      Date.now() + this.ttlToMs(this.getRefreshTtl()),
+    );
     await this.refreshTokensService.create(payload.sub, jti, refreshExpiresAt, {
       ip: meta?.ip,
       userAgent: meta?.userAgent,
     });
 
-    const refresh_token = this.jwtService.sign({ sub: payload.sub, jti }, {
-      secret: this.getRefreshSecret(),
-      expiresIn: this.ttlToSeconds(this.getRefreshTtl()),
-    });
+    const refresh_token = this.jwtService.sign(
+      { sub: payload.sub, jti },
+      {
+        secret: this.getRefreshSecret(),
+        expiresIn: this.ttlToSeconds(this.getRefreshTtl()),
+      },
+    );
 
     return { access_token, refresh_token };
   }
@@ -120,13 +134,13 @@ export class AuthService {
       email: user.email,
       firstName: (user as any).firstName,
     });
-    
+
     // Generate JWT token
-    const payload = { 
-      sub: (user as any)._id.toString(), 
-      email: user.email 
+    const payload = {
+      sub: (user as any)._id.toString(),
+      email: user.email,
     };
-    
+
     const tokens = await this.issueTokens(user);
     return {
       ...tokens,
@@ -141,8 +155,14 @@ export class AuthService {
     const user = await this.usersService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
     const token = crypto.randomBytes(32).toString('hex');
-    await this.usersService.setEmailVerificationToken((user as any)._id.toString(), token);
-    this.events.emit('user.verification.requested', { email: user.email, token });
+    await this.usersService.setEmailVerificationToken(
+      (user as any)._id.toString(),
+      token,
+    );
+    this.events.emit('user.verification.requested', {
+      email: user.email,
+      token,
+    });
     return { ok: true };
   }
 
@@ -176,7 +196,9 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string) {
     if (!isValidPassword(newPassword)) {
-      throw new BadRequestException('New password does not meet policy requirements');
+      throw new BadRequestException(
+        'New password does not meet policy requirements',
+      );
     }
     const updated = await this.usersService.resetPassword(token, newPassword);
     if (!updated) throw new NotFoundException('Invalid or expired token');
@@ -195,13 +217,15 @@ export class AuthService {
     }
 
     // Reset failed login attempts on successful login
-    await this.usersService.resetFailedLoginAttempts((user as any)._id.toString());
+    await this.usersService.resetFailedLoginAttempts(
+      (user as any)._id.toString(),
+    );
 
-    const payload = { 
-      sub: (user as any)._id.toString(), 
-      email: user.email 
+    const payload = {
+      sub: (user as any)._id.toString(),
+      email: user.email,
     };
-    
+
     const tokens = await this.issueTokens(user, { ip });
     return {
       ...tokens,
@@ -217,21 +241,32 @@ export class AuthService {
 
     // Check if user is locked
     if (user.security.lockedUntil && user.security.lockedUntil > new Date()) {
-      throw new UnauthorizedException('Account is temporarily locked due to too many failed login attempts');
+      throw new UnauthorizedException(
+        'Account is temporarily locked due to too many failed login attempts',
+      );
     }
 
-    const isPasswordValid = await this.usersService.validatePassword(user, password);
+    const isPasswordValid = await this.usersService.validatePassword(
+      user,
+      password,
+    );
     if (!isPasswordValid) {
       // Increment failed login attempts
-      await this.usersService.incrementFailedLoginAttempts((user as any)._id.toString());
-      
+      await this.usersService.incrementFailedLoginAttempts(
+        (user as any)._id.toString(),
+      );
+
       // Lock account if too many failed attempts (e.g., 5 attempts)
-      if (user.security.failedLoginAttempts >= 4) { // 4 because we just incremented
+      if (user.security.failedLoginAttempts >= 4) {
+        // 4 because we just incremented
         const lockUntil = new Date();
         lockUntil.setMinutes(lockUntil.getMinutes() + 15); // Lock for 15 minutes
-        await this.usersService.lockUser((user as any)._id.toString(), lockUntil);
+        await this.usersService.lockUser(
+          (user as any)._id.toString(),
+          lockUntil,
+        );
       }
-      
+
       return null;
     }
 
@@ -241,19 +276,32 @@ export class AuthService {
   /**
    * OAuth login/link: find existing user by email or create one, then issue JWT.
    */
-  async oauthLogin(provider: 'facebook' | 'google', payload: OAuthLoginDto, ip?: string) {
+  async oauthLogin(
+    provider: 'facebook' | 'google',
+    payload: OAuthLoginDto,
+    ip?: string,
+  ) {
     // Normalize email: if provider didn't supply email, synthesize one from providerId
-    const normalizedEmail = payload.email || (payload.providerId ? `${provider}_${payload.providerId}@social.local` : undefined);
+    const normalizedEmail =
+      payload.email ||
+      (payload.providerId
+        ? `${provider}_${payload.providerId}@social.local`
+        : undefined);
     if (!normalizedEmail) {
       // Without email or providerId we cannot link/create; reject gracefully
-      throw new UnauthorizedException('OAuth payload missing email and providerId');
+      throw new UnauthorizedException(
+        'OAuth payload missing email and providerId',
+      );
     }
     // Try find user by normalized email
     const existing = await this.usersService.findByEmail(normalizedEmail);
 
     let user = existing;
     if (!existing) {
-      const { firstName, lastName } = this.extractNames(payload.firstName, payload.lastName);
+      const { firstName, lastName } = this.extractNames(
+        payload.firstName,
+        payload.lastName,
+      );
       const randomPassword = this.generateRandomPassword();
       user = await this.usersService.create({
         email: normalizedEmail,
@@ -268,20 +316,24 @@ export class AuthService {
     } else {
       // If user exists and we received an avatar, update when missing or when current is a Facebook CDN URL (refresh to higher-res)
       const currentAvatar = (existing as any).avatar as string | undefined;
-      const isFacebookAvatar = (url?: string) => !!url && /(facebook\.com|fbcdn\.net|fbsbx\.com)/i.test(url);
-      const shouldUpdateAvatar = !!payload.avatar && (!currentAvatar || isFacebookAvatar(currentAvatar));
+      const isFacebookAvatar = (url?: string) =>
+        !!url && /(facebook\.com|fbcdn\.net|fbsbx\.com)/i.test(url);
+      const shouldUpdateAvatar =
+        !!payload.avatar && (!currentAvatar || isFacebookAvatar(currentAvatar));
       if (shouldUpdateAvatar) {
-        user = await this.usersService.updateUser(
+        user = (await this.usersService.updateUser(
           (existing as any)._id.toString(),
           { avatar: payload.avatar } as any,
-        ) as any;
+        )) as any;
       }
     }
 
     // Update last login info
     if (ip && user) {
       await this.usersService.updateLastLogin((user as any)._id.toString(), ip);
-      await this.usersService.resetFailedLoginAttempts((user as any)._id.toString());
+      await this.usersService.resetFailedLoginAttempts(
+        (user as any)._id.toString(),
+      );
     }
 
     const tokens = await this.issueTokens(user, { ip });
@@ -305,7 +357,8 @@ export class AuthService {
 
   private generateRandomPassword() {
     // 32-char random string as placeholder password for OAuth-created users
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
+    const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
     let pwd = '';
     for (let i = 0; i < 32; i++) {
       pwd += chars[Math.floor(Math.random() * chars.length)];
@@ -316,22 +369,34 @@ export class AuthService {
   /**
    * Change password for an authenticated user.
    */
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const isCurrentValid = await this.usersService.validatePassword(user as any, currentPassword);
+    const isCurrentValid = await this.usersService.validatePassword(
+      user as any,
+      currentPassword,
+    );
     if (!isCurrentValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     if (!isValidPassword(newPassword)) {
-      throw new BadRequestException('New password does not meet policy requirements');
+      throw new BadRequestException(
+        'New password does not meet policy requirements',
+      );
     }
 
-    const updated = await this.usersService.updatePassword((user as any)._id.toString(), newPassword);
+    const updated = await this.usersService.updatePassword(
+      (user as any)._id.toString(),
+      newPassword,
+    );
     if (!updated) {
       throw new NotFoundException('Unable to update password');
     }
@@ -340,13 +405,17 @@ export class AuthService {
 
   async refresh(refreshToken: string, ip?: string, userAgent?: string) {
     try {
-      const decoded: any = this.jwtService.verify(refreshToken, { secret: this.getRefreshSecret() });
+      const decoded: any = this.jwtService.verify(refreshToken, {
+        secret: this.getRefreshSecret(),
+      });
       const userId = decoded?.sub as string;
       const jti = decoded?.jti as string;
-      if (!userId || !jti) throw new UnauthorizedException('Invalid refresh token');
+      if (!userId || !jti)
+        throw new UnauthorizedException('Invalid refresh token');
 
       const active = await this.refreshTokensService.findActive(userId, jti);
-      if (!active) throw new UnauthorizedException('Invalid or expired refresh token');
+      if (!active)
+        throw new UnauthorizedException('Invalid or expired refresh token');
 
       // rotate
       await this.refreshTokensService.revokeByJti(userId, jti);
@@ -364,7 +433,9 @@ export class AuthService {
   async logout(userId: string, refreshToken?: string) {
     if (refreshToken) {
       try {
-        const decoded: any = this.jwtService.verify(refreshToken, { secret: this.getRefreshSecret() });
+        const decoded: any = this.jwtService.verify(refreshToken, {
+          secret: this.getRefreshSecret(),
+        });
         if (decoded?.sub !== userId) {
           // If token does not belong to user, revoke all as a safety measure
           await this.refreshTokensService.revokeAllForUser(userId);

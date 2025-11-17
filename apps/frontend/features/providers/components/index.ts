@@ -1,2 +1,7 @@
 export { AuthProvider } from '../../auth/components/providers'
 export { useAuth as useAuthContext } from '../../auth/hooks/useAuth'
+export { default as ProvidersHeader } from './providers-header'
+export { default as ProvidersFilters } from './providers-filters'
+export { default as ProvidersList } from './providers-list'
+export { default as SidebarSafety } from './sidebar-safety'
+export { default as SidebarStats } from './sidebar-stats'

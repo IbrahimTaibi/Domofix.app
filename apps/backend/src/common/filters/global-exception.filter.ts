@@ -7,7 +7,16 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
-import { AppError, AuthenticationError, AuthorizationError, DatabaseError, InternalError, NotFoundError, RateLimitError, ValidationError } from '@/common/errors/app-error';
+import {
+  AppError,
+  AuthenticationError,
+  AuthorizationError,
+  DatabaseError,
+  InternalError,
+  NotFoundError,
+  RateLimitError,
+  ValidationError,
+} from '@/common/errors/app-error';
 import { AppLogger } from '@/common/logging/logger.service';
 import { MonitoringService } from '@/common/monitoring/monitoring.service';
 
@@ -17,7 +26,10 @@ function isProd(): boolean {
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: AppLogger, private readonly monitoring: MonitoringService) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly monitoring: MonitoringService,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -68,21 +80,30 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     // Log with context
-    this.logger.error(message, {
+    this.logger.error(
+      message,
+      {
+        errorId,
+        type,
+        statusCode: status,
+        method: request.method,
+        path,
+        ip: (request.headers['x-forwarded-for'] as string) || request.ip,
+        userAgent: request.headers['user-agent'],
+        body: request.body,
+        query: request.query,
+        params: request.params,
+      },
+      exception instanceof Error ? exception.stack : undefined,
+    );
+
+    // Send to monitoring
+    this.monitoring.captureException(exception, {
       errorId,
       type,
       statusCode: status,
-      method: request.method,
       path,
-      ip: (request.headers['x-forwarded-for'] as string) || request.ip,
-      userAgent: request.headers['user-agent'],
-      body: request.body,
-      query: request.query,
-      params: request.params,
-    }, exception instanceof Error ? exception.stack : undefined);
-
-    // Send to monitoring
-    this.monitoring.captureException(exception, { errorId, type, statusCode: status, path });
+    });
 
     // Special header for rate limit
     if (status === HttpStatus.TOO_MANY_REQUESTS) {
@@ -113,21 +134,38 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const e: any = err;
     return (
       e &&
-      (e.name === 'MongoServerError' || e.name === 'MongooseError' || e.name === 'CastError' || e.name === 'MongoNetworkError')
+      (e.name === 'MongoServerError' ||
+        e.name === 'MongooseError' ||
+        e.name === 'CastError' ||
+        e.name === 'MongoNetworkError')
     );
   }
 
   private mapMongoError(err: any): DatabaseError {
     if (err.code === 11000) {
-      return new DatabaseError('Duplicate key error', HttpStatus.CONFLICT, { code: 11000, meta: { keyPattern: err.keyPattern } });
+      return new DatabaseError('Duplicate key error', HttpStatus.CONFLICT, {
+        code: 11000,
+        meta: { keyPattern: err.keyPattern },
+      });
     }
     if (err.name === 'CastError') {
-      return new DatabaseError('Invalid identifier', HttpStatus.BAD_REQUEST, { code: 'CastError', cause: err.message });
+      return new DatabaseError('Invalid identifier', HttpStatus.BAD_REQUEST, {
+        code: 'CastError',
+        cause: err.message,
+      });
     }
     if (err.name === 'MongoNetworkError') {
-      return new DatabaseError('Database network error', HttpStatus.SERVICE_UNAVAILABLE, { code: 'MongoNetworkError' });
+      return new DatabaseError(
+        'Database network error',
+        HttpStatus.SERVICE_UNAVAILABLE,
+        { code: 'MongoNetworkError' },
+      );
     }
-    return new DatabaseError(err.message || 'Database error', HttpStatus.INTERNAL_SERVER_ERROR, { cause: err });
+    return new DatabaseError(
+      err.message || 'Database error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      { cause: err },
+    );
   }
 
   private extractErrorDetails(exception: unknown): any {

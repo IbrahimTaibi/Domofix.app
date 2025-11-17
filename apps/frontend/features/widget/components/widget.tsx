@@ -1,0 +1,183 @@
+"use client";
+
+import React from "react";
+import { useWidgetStore } from "@/features/widget/store/widget-store";
+import BottomNav from "@/features/widget/components/bottom-nav";
+import ChatComposer from "@/features/widget/components/messages/chat-composer";
+import HomeScreen from "@/features/widget/components/screens/home-screen";
+import MessagesScreen from "@/features/widget/components/screens/messages-screen";
+import HelpScreen from "@/features/widget/components/screens/help-screen";
+import { MessageCircle, X, ChevronLeft } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMessagesStore } from "@/features/widget/store/messages-store";
+
+export default function Widget() {
+  const open = useWidgetStore((s) => s.open);
+  const setOpen = useWidgetStore((s) => s.setOpen);
+  const tab = useWidgetStore((s) => s.tab);
+  const activeThreadId = useMessagesStore((s) => s.activeThreadId);
+  const threads = useMessagesStore((s) => s.threads);
+  const participants = useMessagesStore((s) => s.participants);
+  const backToList = useMessagesStore((s) => s.backToList);
+
+  return (
+    <>
+      {!open ? (
+        <button
+          type="button"
+          aria-label="Ouvrir le widget"
+          onClick={() => setOpen(true)}
+          className="fixed bottom-4 right-4 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg ring-4 ring-white/40 hover:bg-primary-700">
+          <MessageCircle className="h-6 w-6" />
+        </button>
+      ) : null}
+      {open ? (
+        <div className="fixed z-50 inset-0 md:inset-auto md:bottom-4 md:right-4 w-full h-full md:w-[360px] md:h-[680px] md:max-w-[92vw] rounded-none md:rounded-xl border-0 md:border bg-white shadow-none md:shadow-2xl flex flex-col">
+          {tab !== "home" ? (
+            <div className="px-3 py-2 bg-white border-b flex-shrink-0">
+              {tab === "messages" && activeThreadId ? (
+                <div className="grid grid-cols-3 items-center">
+                  <div className="flex items-center gap-2">
+                    <button
+                      aria-label="Retour"
+                      onClick={backToList}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100">
+                      <ChevronLeft className="h-4 w-4 text-gray-700" />
+                    </button>
+                    {(() => {
+                      const th = threads.find((t) => t.id === activeThreadId);
+                      const otherId =
+                        th?.participantIds.find((id) => id !== "me") || "me";
+                      const p = participants[otherId];
+                      const initial = (p?.name || "U").charAt(0).toUpperCase();
+                      return (
+                        <span className="h-5 w-5 rounded-full overflow-hidden flex items-center justify-center">
+                          {p?.avatarUrl ? (
+                            <img
+                              src={p.avatarUrl}
+                              alt={p?.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <span className="h-full w-full rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-medium">
+                              {initial}
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  {(() => {
+                    const th = threads.find((t) => t.id === activeThreadId);
+                    const otherId =
+                      th?.participantIds.find((id) => id !== "me") || "me";
+                    const p = participants[otherId];
+                    return (
+                      <div className="min-w-0 text-center">
+                        <span className="block text-sm font-semibold text-gray-900 truncate whitespace-nowrap">
+                          {p?.name || "Conversation"}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      aria-label="Fermer"
+                      onClick={() => setOpen(false)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100">
+                      <X className="h-4 w-4 text-gray-700" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 items-center">
+                  <div />
+                  <div className="text-sm font-semibold text-center text-gray-900">
+                    {tab === "messages" ? "Messages" : "Aide"}
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      aria-label="Fermer"
+                      onClick={() => setOpen(false)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100">
+                      <X className="h-4 w-4 text-gray-700" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : null}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <AnimatePresence mode="wait">
+              {tab === "home" ? (
+                <motion.div
+                  key="home"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="relative bg-white min-h-full">
+                  <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-primary-600 via-primary-300 to-white pointer-events-none z-0" />
+                  <button
+                    type="button"
+                    aria-label="Fermer"
+                    onClick={() => setOpen(false)}
+                    className="absolute top-2 right-2 inline-flex h-7 w-7 items-center justify-center rounded hover:bg-white/10 text-white z-20 pointer-events-auto">
+                    <X className="h-4 w-4" />
+                  </button>
+                  <div className="relative z-10">
+                    <HomeScreen />
+                  </div>
+                </motion.div>
+              ) : tab === "messages" ? (
+                <motion.div
+                  key="messages"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="h-full">
+                  <MessagesScreen />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="help"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="h-full">
+                  <HelpScreen />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <AnimatePresence mode="wait">
+            {tab === "messages" && activeThreadId ? (
+              <motion.div
+                key="composer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="bg-white border-t flex-shrink-0 overflow-hidden">
+                <ChatComposer
+                  onSend={(text) =>
+                    useMessagesStore.getState().addMessage(text)
+                  }
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="nav"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="flex-shrink-0 overflow-hidden">
+                <BottomNav />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ) : null}
+    </>
+  );
+}

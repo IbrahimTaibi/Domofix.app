@@ -37,12 +37,7 @@ export default function SecondaryNavbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-12 flex items-center justify-center">
             <div className="flex items-center space-x-8">
-              <Link
-                href={isAuthenticated && user && user.role !== "provider" ? "/profile" : "/dashboard"}
-                className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium"
-              >
-                {isAuthenticated && user && user.role !== "provider" ? "Profil" : "Dashboard"}
-              </Link>
+              {/* Removed "Mes demandes" link as requested */}
         <Link href="/history" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Historique
               </Link>
@@ -55,21 +50,7 @@ export default function SecondaryNavbar() {
               <Link href="/messages" className="px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
                 Messages
               </Link>
-              <Link href="/notifications" className="relative px-2 text-gray-700 hover:text-primary-600 transition-colors text-sm font-medium">
-                Notifications
-                {unreadCount > 0 && (
-                  <span
-                    className="ml-2 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] leading-none"
-                    style={{
-                      width: 'var(--notif-badge-size, 18px)',
-                      height: 'var(--notif-badge-size, 18px)',
-                      minWidth: 'var(--notif-badge-size, 18px)',
-                    }}
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
+              {/* Moved notifications to main navbar; removed from secondary desktop */}
             </div>
           </div>
         </div>

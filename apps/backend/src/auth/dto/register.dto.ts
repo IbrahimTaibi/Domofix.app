@@ -1,4 +1,12 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum, ValidateNested, IsNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsEnum,
+  ValidateNested,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import type { RegisterRequest, Address } from '@darigo/shared-types';
 

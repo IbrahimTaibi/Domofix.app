@@ -148,14 +148,20 @@ export class User {
   security: SecuritySettings;
 
   // User status and role
-  @Prop({ default: 'active', enum: ['active', 'inactive', 'suspended', 'pending'] })
+  @Prop({
+    default: 'active',
+    enum: ['active', 'inactive', 'suspended', 'pending'],
+  })
   status: string;
 
   @Prop({ default: 'customer', enum: ['customer', 'provider', 'admin'] })
   role: 'customer' | 'provider' | 'admin';
 
   // Provider application lifecycle status
-  @Prop({ default: 'none', enum: ['none', 'pending', 'approved', 'rejected', 'needs_info'] })
+  @Prop({
+    default: 'none',
+    enum: ['none', 'pending', 'approved', 'rejected', 'needs_info'],
+  })
   providerStatus: string;
 
   // Profile completion and onboarding

@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import { categoryOptions } from '@/features/requests/services/requests-service'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
+import { makeRequestRef } from '@/shared/utils/refs'
 
 export interface RequestsListRowsProps {
   items: (Request | any)[]
@@ -46,7 +47,7 @@ export default function RequestsListRows({ items, currentProviderId, onApply, on
           <motion.div
             key={id || Math.random()}
             className={clsx(
-              'px-4 py-3 grid grid-cols-[1fr_auto] items-center gap-3 border-l-4',
+              'px-6 py-4 grid grid-cols-[1fr_auto] items-center gap-4 border-l-4',
               applied && status ? STATUS_ACCENT[String(status)] : 'border-l-transparent'
             )}
             initial={false}
@@ -57,7 +58,7 @@ export default function RequestsListRows({ items, currentProviderId, onApply, on
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-gray-900 truncate">{catLabel}</span>
                 {status ? <StatusBadge status={status} /> : null}
-                {id ? <span className="text-xs text-gray-500">ID: {id}</span> : null}
+                {id ? <span className="text-xs text-gray-500">Ref: {makeRequestRef(id)}</span> : null}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                 {createdAt && (

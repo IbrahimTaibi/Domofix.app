@@ -1,18 +1,18 @@
-import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator'
+import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator';
 
 export class ListThreadsQueryDto {
   @IsOptional()
   @IsString()
-  status?: 'open' | 'archived' | 'blocked'
+  status?: 'open' | 'archived' | 'blocked';
 
   @IsOptional()
   @IsInt()
   @Min(1)
-  page?: number
+  page?: number;
 
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(100)
-  limit?: number
+  limit?: number;
 }

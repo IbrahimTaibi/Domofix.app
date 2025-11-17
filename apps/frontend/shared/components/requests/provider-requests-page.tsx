@@ -25,6 +25,10 @@ export default function ProviderRequestsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selected, setSelected] = React.useState<any | null>(null)
+  const [applyFor, setApplyFor] = React.useState<any | null>(null)
+  const [applyMin, setApplyMin] = React.useState<string>('')
+  const [applyMax, setApplyMax] = React.useState<string>('')
+  const [applyEts, setApplyEts] = React.useState<string>('')
   const requestId = searchParams.get('request')
 
   React.useEffect(() => {
@@ -44,18 +48,34 @@ export default function ProviderRequestsPage() {
     return () => { cancelled = true }
   }, [requestId])
 
-  async function onApply(req: any) {
+  function onApply(req: any) {
+    setApplyFor(req)
+    setApplyMin('')
+    setApplyMax('')
+    setApplyEts('')
+  }
+
+  async function submitApplication() {
     try {
-      const id = String(req?.id || req?._id || '')
+      const id = String(applyFor?.id || applyFor?._id || '')
       if (!id) return
+      const min = Number(applyMin)
+      const max = Number(applyMax)
+      const hasRange = Number.isFinite(min) && Number.isFinite(max) && min > 0 && max >= min
+      const proposedEts = applyEts ? new Date(applyEts).toISOString() : undefined
       addApplied(id)
-      if (String(req?.status) === 'open') setStatusOverride(id, 'pending')
-      await applyForRequest(id, { message: '' })
+      if (String(applyFor?.status) === 'open') setStatusOverride(id, 'pending')
+      await applyForRequest(id, {
+        message: '',
+        proposedEts,
+        ...(hasRange ? { proposedPriceMin: min, proposedPriceMax: max } : {}),
+      })
       show({ message: 'Candidature envoyée', variant: 'success' })
+      setApplyFor(null)
     } catch (err: any) {
       const msg = typeof err?.message === 'string' ? err.message : 'Échec de la candidature'
       show({ message: msg, variant: 'error' })
-      const id = String(req?.id || req?._id || '')
+      const id = String(applyFor?.id || applyFor?._id || '')
       if (id) removeApplied(id)
       if (id) removeStatusOverride(id)
     }
@@ -69,7 +89,7 @@ export default function ProviderRequestsPage() {
 
   return (
     <>
-    <section className="py-6">
+    <section className="py-8">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Toutes les demandes</h1>
       </header>
@@ -123,6 +143,32 @@ export default function ProviderRequestsPage() {
     </section>
     {selected && (
       <RequestDetails request={selected} onClose={() => router.push('/dashboard/provider/requests/all')} />
+    )}
+    {applyFor && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+        <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-md">
+          <h2 className="text-base font-semibold text-gray-900">Postuler</h2>
+          <p className="mt-1 text-xs text-gray-600">Indiquez votre plage de prix et ETS proposé (facultatif).</p>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-600">Prix min (DT)</label>
+              <input type="number" min="0" step="1" value={applyMin} onChange={(e) => setApplyMin(e.target.value)} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600">Prix max (DT)</label>
+              <input type="number" min="0" step="1" value={applyMax} onChange={(e) => setApplyMax(e.target.value)} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs text-gray-600">ETS proposé</label>
+              <input type="datetime-local" value={applyEts} onChange={(e) => setApplyEts(e.target.value)} className="mt-1 w-full rounded border px-2 py-1 text-sm" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button type="button" className="px-3 py-2 rounded border border-gray-300 bg-white text-sm hover:bg-gray-50" onClick={() => setApplyFor(null)}>Annuler</button>
+            <button type="button" className="px-3 py-2 rounded bg-primary-600 text-white text-sm hover:bg-primary-700" onClick={submitApplication}>Envoyer</button>
+          </div>
+        </div>
+      </div>
     )}
     </>
   )

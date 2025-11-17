@@ -87,7 +87,11 @@ export class NotificationsService {
       event: 'notification.read',
       data: { id: notif.id, readAt: notif.readAt },
     });
-    this.events.emit('notification.read', { userId, id: notif.id, readAt: notif.readAt })
+    this.events.emit('notification.read', {
+      userId,
+      id: notif.id,
+      readAt: notif.readAt,
+    });
     return notif;
   }
 
@@ -97,7 +101,7 @@ export class NotificationsService {
       { $set: { readAt: new Date() } },
     );
     this.pushToUser(userId, { event: 'notifications.read_all' });
-    this.events.emit('notifications.read_all', { userId })
+    this.events.emit('notifications.read_all', { userId });
     return res.modifiedCount || 0;
   }
 
@@ -108,7 +112,7 @@ export class NotificationsService {
     });
     if (res.deletedCount) {
       this.pushToUser(userId, { event: 'notification.deleted', data: { id } });
-      this.events.emit('notification.deleted', { userId, id })
+      this.events.emit('notification.deleted', { userId, id });
     }
   }
 

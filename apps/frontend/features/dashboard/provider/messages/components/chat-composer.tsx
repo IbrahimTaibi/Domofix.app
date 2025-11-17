@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from 'react'
+// reverted to simple buttons
 
 interface Props {
   onSend: (text: string) => void

@@ -1,7 +1,24 @@
-import { Controller, Post, Body, Get, UseGuards, Request, Req, Param, Query, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Request,
+  Req,
+  Param,
+  Query,
+  Patch,
+} from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, OAuthLoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
+import {
+  RegisterDto,
+  LoginDto,
+  OAuthLoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RefreshDto, LogoutDto } from './dto';
@@ -17,7 +34,8 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Req() req: any) {
-    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const clientIp =
+      req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
     return this.authService.login(loginDto.email, loginDto.password, clientIp);
   }
 
@@ -60,7 +78,8 @@ export class AuthController {
     @Body() body: OAuthLoginDto,
     @Req() req: any,
   ) {
-    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const clientIp =
+      req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
     return this.authService.oauthLogin(provider, body, clientIp);
   }
 
@@ -69,12 +88,17 @@ export class AuthController {
   @Patch('change-password')
   async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
-    return this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
+    return this.authService.changePassword(
+      userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   @Post('refresh')
   async refresh(@Body() dto: RefreshDto, @Req() req: any) {
-    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
+    const ip =
+      req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
     const ua = req.headers['user-agent'] || '';
     return this.authService.refresh(dto.refreshToken, ip, ua);
   }
