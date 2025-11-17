@@ -1,7 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useWidgetStore } from "@/features/widget/store/widget-store";
+import { useMessagesStore } from "@/features/widget/store/messages-store";
+import { useAuthStore } from "@/features/auth/store/auth-store";
+import { useWidgetSocket } from "@/features/widget/hooks/useWidgetSocket";
 import BottomNav from "@/features/widget/components/bottom-nav";
 import ChatComposer from "@/features/widget/components/messages/chat-composer";
 import HomeScreen from "@/features/widget/components/screens/home-screen";
@@ -9,16 +12,75 @@ import MessagesScreen from "@/features/widget/components/screens/messages-screen
 import HelpScreen from "@/features/widget/components/screens/help-screen";
 import { MessageCircle, X, ChevronLeft } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useMessagesStore } from "@/features/widget/store/messages-store";
 
 export default function Widget() {
   const open = useWidgetStore((s) => s.open);
   const setOpen = useWidgetStore((s) => s.setOpen);
   const tab = useWidgetStore((s) => s.tab);
+
+  // Auth
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  // Messages
   const activeThreadId = useMessagesStore((s) => s.activeThreadId);
   const threads = useMessagesStore((s) => s.threads);
-  const participants = useMessagesStore((s) => s.participants);
   const backToList = useMessagesStore((s) => s.backToList);
+  const loadThreads = useMessagesStore((s) => s.loadThreads);
+  const sendMessage = useMessagesStore((s) => s.sendMessage);
+  const addIncomingMessage = useMessagesStore((s) => s.addIncomingMessage);
+  const markAsRead = useMessagesStore((s) => s.markAsRead);
+  const isSending = useMessagesStore((s) => s.isSending);
+
+  // Socket.IO for real-time updates
+  const { joinThread, leaveThread } = useWidgetSocket({
+    enabled: !!user,
+    onNewMessage: addIncomingMessage,
+    onMessageRead: markAsRead,
+  });
+
+  // Load threads on mount (only if authenticated)
+  useEffect(() => {
+    if (user?.id) {
+      loadThreads(user.id);
+    }
+  }, [user?.id, loadThreads]);
+
+  // Join active thread room when it changes
+  useEffect(() => {
+    if (activeThreadId) {
+      joinThread(activeThreadId);
+      return () => leaveThread(activeThreadId);
+    }
+  }, [activeThreadId, joinThread, leaveThread]);
+
+  // Listen for auto-open events (e.g., when customer accepts provider)
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const { widgetEventBus } = require('@/features/widget/events/widget-events');
+    const setTab = useWidgetStore.getState().setTab;
+    const openThreadForOrder = useMessagesStore.getState().openThreadForOrder;
+
+    const unsubscribe = widgetEventBus.on(
+      'open-thread-for-order',
+      async (data: { orderId: string; requestDisplayId: string }) => {
+        // Open widget
+        setOpen(true);
+        // Switch to messages tab
+        setTab('messages');
+        // Open the thread for this order
+        await openThreadForOrder(data.orderId, data.requestDisplayId, user.id);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [user?.id, setOpen]);
+
+  // Don't render widget if not authenticated
+  if (!user || isLoading) {
+    return null;
+  }
 
   return (
     <>
@@ -46,16 +108,14 @@ export default function Widget() {
                     </button>
                     {(() => {
                       const th = threads.find((t) => t.id === activeThreadId);
-                      const otherId =
-                        th?.participantIds.find((id) => id !== "me") || "me";
-                      const p = participants[otherId];
-                      const initial = (p?.name || "U").charAt(0).toUpperCase();
+                      const otherParticipant = th?.participants.find((p) => p.id !== user.id);
+                      const initial = (otherParticipant?.name || "U").charAt(0).toUpperCase();
                       return (
                         <span className="h-5 w-5 rounded-full overflow-hidden flex items-center justify-center">
-                          {p?.avatarUrl ? (
+                          {otherParticipant?.avatarUrl ? (
                             <img
-                              src={p.avatarUrl}
-                              alt={p?.name}
+                              src={otherParticipant.avatarUrl}
+                              alt={otherParticipant?.name}
                               className="h-full w-full object-cover"
                             />
                           ) : (
@@ -69,13 +129,10 @@ export default function Widget() {
                   </div>
                   {(() => {
                     const th = threads.find((t) => t.id === activeThreadId);
-                    const otherId =
-                      th?.participantIds.find((id) => id !== "me") || "me";
-                    const p = participants[otherId];
                     return (
                       <div className="min-w-0 text-center">
                         <span className="block text-sm font-semibold text-gray-900 truncate whitespace-nowrap">
-                          {p?.name || "Conversation"}
+                          {th?.title || "Conversation"}
                         </span>
                       </div>
                     );
@@ -160,9 +217,9 @@ export default function Widget() {
                 exit={{ opacity: 0, y: 20 }}
                 className="bg-white border-t flex-shrink-0 overflow-hidden">
                 <ChatComposer
-                  onSend={(text) =>
-                    useMessagesStore.getState().addMessage(text)
-                  }
+                  onSend={sendMessage}
+                  isSending={isSending}
+                  isReadOnly={threads.find((t) => t.id === activeThreadId)?.isReadOnly}
                 />
               </motion.div>
             ) : (
