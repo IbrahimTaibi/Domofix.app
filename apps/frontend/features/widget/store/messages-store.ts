@@ -166,20 +166,9 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       )
 
       if (message) {
-        const widgetMessage = toWidgetMessage(message)
-
-        // Add message to store
-        set((state) => ({
-          messagesByThread: {
-            ...state.messagesByThread,
-            [activeThreadId]: [
-              ...(state.messagesByThread[activeThreadId] || []),
-              widgetMessage,
-            ],
-          },
-          isSending: false,
-        }))
-
+        // Don't add message here - let Socket.IO handle it
+        // This prevents duplicate messages in the sender's UI
+        set({ isSending: false })
         return true
       } else {
         set({ error: "Échec de l'envoi du message", isSending: false })
