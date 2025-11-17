@@ -82,6 +82,9 @@ export default function Widget() {
     return null;
   }
 
+  // Calculate total unread count
+  const totalUnread = threads.reduce((sum, thread) => sum + thread.unreadCount, 0);
+
   return (
     <>
       {!open ? (
@@ -91,6 +94,11 @@ export default function Widget() {
           onClick={() => setOpen(true)}
           className="fixed bottom-4 right-4 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg ring-4 ring-white/40 hover:bg-primary-700">
           <MessageCircle className="h-6 w-6" />
+          {totalUnread > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold shadow-lg">
+              {totalUnread > 9 ? '9+' : totalUnread}
+            </span>
+          )}
         </button>
       ) : null}
       {open ? (

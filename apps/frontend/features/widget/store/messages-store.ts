@@ -198,6 +198,18 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
 
       if (messageExists) return state
 
+      // Check if this is not from current user and not in active thread
+      const shouldNotify = threadId !== state.activeThreadId
+
+      if (shouldNotify) {
+        // Play notification sound
+        if (typeof window !== 'undefined') {
+          import('@/shared/utils/sound').then(({ playNotificationAudioFile }) => {
+            playNotificationAudioFile()
+          })
+        }
+      }
+
       return {
         messagesByThread: {
           ...state.messagesByThread,
