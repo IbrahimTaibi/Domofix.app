@@ -12,6 +12,7 @@ import {
   RequestStatusEnum,
 } from './schemas/request.schema';
 import { User, UserDocument } from '@/users/schemas/user.schema';
+import { Order, OrderDocument } from '../orders/schemas/order.schema';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { ApplyForRequestDto } from './dto/apply-for-request.dto';
 import { AcceptProviderDto } from './dto/accept-provider.dto';
@@ -28,6 +29,7 @@ export class RequestsService {
     @InjectModel(RequestEntity.name)
     private readonly requestModel: Model<RequestDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(Order.name) private readonly orderModel: Model<OrderDocument>,
     private readonly usersService: UsersService,
     private readonly logger: AppLogger,
     private readonly events: EventEmitter2,
@@ -233,7 +235,22 @@ export class RequestsService {
       id: requestId,
       providerId: dto.providerId,
     });
-    return result as any;
+
+    // Wait for order to be created by the listener (poll with timeout)
+    let order: OrderDocument | null = null;
+    for (let i = 0; i < 10; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      order = await this.orderModel.findOne({ requestId: result._id }).exec();
+      if (order) break;
+    }
+
+    // Add orderId to response if order was created
+    const response: any = result.toObject ? result.toObject() : result;
+    if (order) {
+      response.orderId = (order as any)._id.toString();
+    }
+
+    return response;
   }
 
   async completeRequest(

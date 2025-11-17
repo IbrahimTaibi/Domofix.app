@@ -87,8 +87,14 @@ export default function ProvidersSelectionPage() {
   async function handleApprove(providerId: string) {
     try {
       trackEvent('provider_approve_click', { providerId, requestId: serviceId })
-      await acceptProvider(serviceId, { providerId } as any)
+      const response = await acceptProvider(serviceId, { providerId } as any)
       showSuccess('Prestataire approuvé', { title: 'Succès' })
+
+      // Auto-open widget with the conversation
+      if (response.orderId) {
+        const { openWidgetForOrder } = await import('@/features/widget/events/widget-events')
+        openWidgetForOrder(response.orderId, response.id || serviceId)
+      }
     } catch (err: any) {
       showError(err?.message || "Échec de l'approbation", { title: 'Erreur' })
     }
