@@ -241,23 +241,31 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
 
   /**
    * Auto-open thread when customer accepts provider
-   * Creates system message if thread is new
+   * Polls for thread creation (since it's async on backend)
    */
   openThreadForOrder: async (
     orderId: string,
     requestDisplayId: string,
     currentUserId: string
   ) => {
-    // Reload threads to get the newly created thread
-    await get().loadThreads(currentUserId)
+    // Poll for thread creation (max 5 attempts over 2.5 seconds)
+    let thread: WidgetThread | undefined
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await get().loadThreads(currentUserId)
+      const { threads } = get()
+      thread = threads.find((t) => t.orderId === orderId)
 
-    const { threads } = get()
-    const thread = threads.find((t) => t.orderId === orderId)
+      if (thread) break
+
+      // Wait before next attempt
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
 
     if (!thread) {
       console.error(
-        `[MessagesStore] Thread for order ${orderId} not found after reload`
+        `[MessagesStore] Thread for order ${orderId} not found after polling`
       )
+      set({ error: 'Impossible de charger la conversation. Veuillez réessayer.' })
       return
     }
 

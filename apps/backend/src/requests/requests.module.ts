@@ -11,6 +11,7 @@ import { RequestEventsListener } from './listeners/request-events.listener';
 import { RequestExpirationService } from './expiration.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { User, UserSchema } from '@/users/schemas/user.schema';
+import { Order, OrderSchema } from '../orders/schemas/order.schema';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { User, UserSchema } from '@/users/schemas/user.schema';
     MongooseModule.forFeature([
       { name: Request.name, schema: RequestSchema },
       { name: User.name, schema: UserSchema },
+      { name: Order.name, schema: OrderSchema },
     ]),
   ],
   controllers: [RequestsController],

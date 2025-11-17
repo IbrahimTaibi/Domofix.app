@@ -115,7 +115,7 @@ export function createSystemMessage(
     id: `system-${threadId}`,
     threadId,
     senderId: 'system',
-    text: `Cette conversation est liée à la demande ${requestDisplayId}. Vous pouvez maintenant échanger avec le prestataire.`,
+    text: `Cette conversation est liée à la demande ${requestDisplayId}. Vous pouvez échanger ici pendant toute la durée de la commande. Cette conversation sera automatiquement fermée dans 7 jours ou lorsque la commande sera terminée ou annulée.`,
     createdAt: new Date().toISOString(),
     status: 'read',
   }
