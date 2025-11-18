@@ -18,6 +18,7 @@ export default function Widget() {
   const open = useWidgetStore((s) => s.open);
   const setOpen = useWidgetStore((s) => s.setOpen);
   const tab = useWidgetStore((s) => s.tab);
+  const setTab = useWidgetStore((s) => s.setTab);
 
   // Auth
   const user = useAuthStore((s) => s.user);
@@ -108,6 +109,14 @@ export default function Widget() {
     return { thread, otherParticipant, initial };
   }, [activeThreadId, threads, user?.id]);
 
+  // Handle widget open - switch to messages tab if there are unread messages
+  const handleWidgetOpen = useCallback(() => {
+    if (totalUnread > 0) {
+      setTab('messages');
+    }
+    setOpen(true);
+  }, [totalUnread, setTab, setOpen]);
+
   // Don't render widget if not authenticated
   if (!user || isLoading) {
     return null;
@@ -119,7 +128,7 @@ export default function Widget() {
         <button
           type="button"
           aria-label="Ouvrir le widget"
-          onClick={() => setOpen(true)}
+          onClick={handleWidgetOpen}
           className="fixed bottom-4 right-4 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg ring-4 ring-white/40 hover:bg-primary-700">
           <MessageCircle className="h-6 w-6" />
           {totalUnread > 0 && (
