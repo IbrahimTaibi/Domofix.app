@@ -4,18 +4,15 @@ import React from "react"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
-  Search,
-  History,
   MessageSquare,
   FileText,
   Users,
   HelpCircle,
   User,
   CreditCard,
-  MapPin,
-  UserPlus,
-  Clock,
   List,
+  Briefcase,
+  ClipboardList,
 } from "lucide-react"
 import { SidebarMenuSections, type SidebarMenuSection } from "@/features/dashboard/provider/components/sidebar-menu-sections"
 
@@ -30,25 +27,9 @@ const sections: SidebarMenuSection[] = [
     title: "Menu principal",
     items: [
       { href: "/dashboard/provider", label: "Tableau de bord", icon: LayoutDashboard },
-      {
-        href: "/dashboard/provider/requests",
-        label: "Demandes",
-        icon: Search,
-        children: [
-          { href: "/dashboard/provider/requests/nearby", label: "À proximité", icon: MapPin },
-          { href: "/dashboard/provider/requests/in-progress", label: "En cours", icon: Clock },
-          { href: "/dashboard/provider/requests/candidatures", label: "Mes candidatures", icon: UserPlus },
-        ],
-      },
-      {
-        href: "/dashboard/provider/orders",
-        label: "Commandes",
-        icon: List,
-        children: [
-          { href: "/dashboard/provider/orders/actives", label: "Actives", icon: List },
-          { href: "/dashboard/provider/orders/terminees", label: "Terminées", icon: History },
-        ],
-      },
+      { href: "/dashboard/provider/requests", label: "Demandes", icon: ClipboardList },
+      { href: "/dashboard/provider/orders", label: "Commandes", icon: List },
+      { href: "/dashboard/provider/services", label: "Mes services", icon: Briefcase },
       { href: "/dashboard/provider/messages", label: "Messages", icon: MessageSquare },
       {
         href: "/dashboard/provider/billing",
