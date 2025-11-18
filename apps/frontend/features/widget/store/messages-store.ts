@@ -21,6 +21,11 @@ function getSoundModule() {
   if (typeof window === 'undefined') return null
   if (!soundModulePromise) {
     soundModulePromise = import('@/shared/utils/sound')
+      .catch((err) => {
+        // Clear cache on error so next call can retry
+        soundModulePromise = null
+        throw err
+      })
   }
   return soundModulePromise
 }
