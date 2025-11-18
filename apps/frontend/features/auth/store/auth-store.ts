@@ -78,17 +78,23 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     }
   },
   checkAuth: async () => {
+    console.log('[AuthStore] checkAuth started')
     // 1) Try syncing NextAuth session-backed token to our backend client
     try {
       const session = await getSession()
+      console.log('[AuthStore] Session:', session ? 'exists' : 'null')
       const backendToken = (session as any)?.backendAccessToken as string | undefined
       if (backendToken) {
+        console.log('[AuthStore] Backend token found in session')
         apiClient.setAuthToken(backendToken)
         set({ backendToken })
         const instantUser = (session as any)?.backendUser as User | undefined
         if (instantUser) {
+          console.log('[AuthStore] Instant user found:', instantUser.id, instantUser.role)
           set({ user: instantUser })
         }
+      } else {
+        console.log('[AuthStore] No backend token in session')
       }
 
       // Fallback: if NextAuth session exists but backend token missing, link via email
@@ -119,16 +125,22 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
     // 2) If we have a backend token (from localStorage or NextAuth), fetch profile
     if (apiClient.isAuthenticated()) {
+      console.log('[AuthStore] API client is authenticated, fetching profile...')
       try {
         const userData = await apiClient.getProfile()
+        console.log('[AuthStore] Profile fetched:', userData.id, userData.role)
         set({ user: userData })
       } catch (err) {
+        console.error('[AuthStore] Error fetching profile:', err)
         const { trackError } = await import('@/shared/utils/error-tracking')
         trackError(err, { source: 'auth-store.checkAuth.getProfile' })
         apiClient.logout()
         set({ backendToken: null })
       }
+    } else {
+      console.log('[AuthStore] API client not authenticated')
     }
+    console.log('[AuthStore] checkAuth complete, setting isLoading=false')
     set({ isLoading: false })
   },
   applyProvider: async (data, document) => {

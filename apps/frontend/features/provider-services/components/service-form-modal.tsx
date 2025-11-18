@@ -32,7 +32,7 @@ export default function ServiceFormModal({ service, onClose, onSuccess }: Servic
   })
   const [tagInput, setTagInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { showError } = useToast()
+  const { error: showError } = useToast()
 
   // Initialize form with service data if editing
   useEffect(() => {
