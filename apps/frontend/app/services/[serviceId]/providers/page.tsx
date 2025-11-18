@@ -105,6 +105,13 @@ export default function ProvidersSelectionPage() {
       const response = await acceptProvider(serviceId, { providerId: pendingProviderId } as any)
       showSuccess('Prestataire approuvé', { title: 'Succès' })
 
+      // Update the request state to reflect the acceptance
+      setRequest({
+        ...request,
+        status: 'accepted',
+        acceptedProviderId: pendingProviderId,
+      } as any)
+
       // Close the confirmation dialog
       setShowConfirmDialog(false)
       setPendingProviderId(null)
@@ -131,16 +138,50 @@ export default function ProvidersSelectionPage() {
       <ProvidersHeader request={request ?? undefined} />
 
       {(() => {
-        const isClosed = (request?.status === 'completed' || request?.status === 'closed')
-        return isClosed ? (
-          <div className="mt-3 mb-8 rounded-lg border border-gray-300 bg-gray-50 p-4 text-gray-800 flex items-start gap-3">
-            <Lock className="h-5 w-5 text-gray-700 mt-0.5" aria-hidden="true" />
-            <div>
-              <p className="text-sm font-medium">Demande clôturée</p>
-              <p className="text-xs">Cette demande est terminée ou fermée — l'approbation est désactivée.</p>
+        const isAccepted = request?.status === 'accepted'
+        const isClosed = request?.status === 'completed' || request?.status === 'closed'
+        const acceptedProvider = isAccepted
+          ? providers.find(p => p.id === (request as any)?.acceptedProviderId)
+          : null
+
+        if (isAccepted) {
+          return (
+            <div className="mt-3 mb-8 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800 flex items-start gap-3">
+              <div className="flex-shrink-0 bg-green-100 p-2 rounded-lg">
+                <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold">Prestataire approuvé</p>
+                {acceptedProvider ? (
+                  <p className="text-xs mt-1">
+                    Vous avez approuvé <span className="font-medium">{acceptedProvider.name}</span>.
+                    Une commande a été créée et le chat est maintenant ouvert.
+                  </p>
+                ) : (
+                  <p className="text-xs mt-1">
+                    Un prestataire a été approuvé pour cette demande. La commande a été créée.
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        ) : null
+          )
+        }
+
+        if (isClosed) {
+          return (
+            <div className="mt-3 mb-8 rounded-lg border border-gray-300 bg-gray-50 p-4 text-gray-800 flex items-start gap-3">
+              <Lock className="h-5 w-5 text-gray-700 mt-0.5" aria-hidden="true" />
+              <div>
+                <p className="text-sm font-medium">Demande clôturée</p>
+                <p className="text-xs">Cette demande est terminée ou fermée — l'approbation est désactivée.</p>
+              </div>
+            </div>
+          )
+        }
+
+        return null
       })()}
       <ProvidersFilters filters={filters} setFilters={setFilters} />
 

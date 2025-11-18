@@ -33,12 +33,24 @@ export default function ProvidersList({
   serviceId,
   onApprove,
 }: ProvidersListProps) {
+  const isAccepted = request?.status === "accepted";
+  const acceptedProviderId = (request as any)?.acceptedProviderId;
+
   return (
     <ul className="space-y-3">
-      {providers.map((p) => (
+      {providers.map((p) => {
+        const isThisProviderAccepted = isAccepted && p.id === acceptedProviderId;
+
+        return (
         <li
           key={p.id}
-          className={`group relative overflow-hidden rounded-2xl border bg-white p-4 sm:p-6 shadow-sm ring-1 ${selectedIds.includes(p.id) ? "ring-primary-300 border-primary-300" : "ring-gray-200 border-gray-200"} transition hover:shadow-lg`}>
+          className={`group relative overflow-hidden rounded-2xl border bg-white p-4 sm:p-6 shadow-sm ring-2 ${
+            isThisProviderAccepted
+              ? "ring-green-300 border-green-300 bg-green-50/30"
+              : selectedIds.includes(p.id)
+                ? "ring-primary-300 border-primary-300"
+                : "ring-gray-200 border-gray-200"
+          } transition hover:shadow-lg`}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <span className="inline-block w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-100 ring-1 ring-gray-200">
@@ -51,10 +63,18 @@ export default function ProvidersList({
                 ) : null}
               </span>
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-base font-semibold text-gray-900">
                     {p.name}
                   </span>
+                  {isThisProviderAccepted && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-300">
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Approuvé
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-200">
                     <Star className="h-3.5 w-3.5" aria-hidden="true" />
                     {p.rating ?? "N/A"}
@@ -157,16 +177,18 @@ export default function ProvidersList({
 
           <div className="mt-4 flex flex-col sm:flex-row sm:justify-end gap-2">
             {(() => {
-              const isClosed =
-                request?.status === "completed" || request?.status === "closed";
+              const isAccepted = request?.status === "accepted";
+              const isClosed = request?.status === "completed" || request?.status === "closed";
+              const isDisabled = isAccepted || isClosed;
+
               return (
                 <>
                   <Button
-                    disabled={isClosed}
+                    disabled={isDisabled}
                     onClick={async () => {
-                      if (!isClosed) await onApprove(p.id);
+                      if (!isDisabled) await onApprove(p.id);
                     }}>
-                    Approuver
+                    {isAccepted ? "Déjà approuvé" : "Approuver"}
                   </Button>
                 </>
               );
@@ -176,7 +198,8 @@ export default function ProvidersList({
             </Link>
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
