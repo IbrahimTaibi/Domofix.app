@@ -33,19 +33,22 @@
 /* Light scrollbar styling for scrollable areas */
 .scrollbar-light {
   scrollbar-width: thin;
-  scrollbar-color: #e5e7eb #ffffff;
+  scrollbar-color: #d1d5db #ffffff;
 }
 .scrollbar-light::-webkit-scrollbar {
   width: 6px;
 }
 .scrollbar-light::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: #f9fafb;
   border-radius: 9999px;
 }
 .scrollbar-light::-webkit-scrollbar-thumb {
-  background-color: #e5e7eb;
+  background-color: #d1d5db;
   border-radius: 9999px;
-  border: 2px solid #ffffff;
+  transition: background-color 0.2s ease;
+}
+.scrollbar-light::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }
 .scrollbar-light::-webkit-scrollbar-button {
   display: none;

@@ -99,22 +99,22 @@ export default function ProviderSidebar({ collapsed, onClose }: SidebarProps) {
   const headerJustify = collapsed ? 'justify-center' : 'justify-between md:justify-start'
 
   return (
-    <nav className="h-full bg-white border-r border-gray-200" aria-label="Provider navigation">
-      <div className={`h-16 md:h-[5rem] px-4 flex items-center ${headerJustify} sticky top-0 bg-white z-10`}>
+    <nav className="h-full bg-white border-r border-gray-100 shadow-sm" aria-label="Provider navigation">
+      <div className={`h-16 md:h-[5rem] px-5 flex items-center ${headerJustify} sticky top-0 bg-white/95 backdrop-blur-sm z-10 border-b border-gray-100`}>
         {collapsed ? (
-          <span aria-label="Domofix" className="text-3xl font-extrabold text-primary-600 leading-none transition-all duration-300 ease-in-out">
+          <span aria-label="Domofix" className="text-3xl font-bold bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent leading-none transition-all duration-300 ease-in-out">
             D
           </span>
         ) : (
-          <span aria-label="Domofix" className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight transition-all duration-300 ease-in-out">
-            <span className="text-primary-600">D</span>
-            <span className="font-light text-gray-500">omofix</span>
+          <span aria-label="Domofix" className="text-3xl md:text-4xl font-bold tracking-tight leading-tight transition-all duration-300 ease-in-out">
+            <span className="bg-gradient-to-br from-primary-600 to-primary-700 bg-clip-text text-transparent">D</span>
+            <span className="font-normal text-gray-600">omofix</span>
           </span>
         )}
         <button
           type="button"
           onClick={onClose}
-          className="md:hidden inline-flex items-center px-2.5 py-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+          className="md:hidden inline-flex items-center px-3 py-2 rounded-lg bg-gray-50 text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
           aria-label="Close navigation"
         >
           Fermer

@@ -27,25 +27,30 @@ export function SidebarMenuSections({ sections, collapsed = false, activePath }:
   const toggle = (id: string) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
 
   return (
-    <div className="py-2">
-      {sections.map((section) => {
+    <div className="py-3">
+      {sections.map((section, index) => {
         const isOpen = open[section.id] ?? true
         return (
-          <div key={section.id} className="mb-2">
+          <div key={section.id} className={index > 0 ? "mt-6" : ""}>
             {!collapsed && section.title && (
-              <button
-                type="button"
-                onClick={() => toggle(section.id)}
-                className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] uppercase tracking-wide text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                aria-expanded={isOpen}
-              >
-                <span>{section.title}</span>
-                {isOpen ? (
-                  <ChevronDown className="w-3 h-3" aria-hidden="true" />
-                ) : (
-                  <ChevronRight className="w-3 h-3" aria-hidden="true" />
-                )}
-              </button>
+              <div className="px-3 mb-2">
+                <button
+                  type="button"
+                  onClick={() => toggle(section.id)}
+                  className="w-full flex items-center justify-between py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-700 transition-colors group"
+                  aria-expanded={isOpen}
+                >
+                  <span className="group-hover:translate-x-0.5 transition-transform duration-200">{section.title}</span>
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded transition-colors group-hover:bg-gray-100">
+                    {isOpen ? (
+                      <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200" aria-hidden="true" />
+                    ) : (
+                      <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200" aria-hidden="true" />
+                    )}
+                  </span>
+                </button>
+                {index > 0 && <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mt-2" />}
+              </div>
             )}
             <AnimatePresence initial={false}>
               {isOpen && (
@@ -54,7 +59,7 @@ export function SidebarMenuSections({ sections, collapsed = false, activePath }:
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="overflow-hidden"
                 >
                   <SidebarMenu items={section.items} collapsed={collapsed} activePath={activePath} />
