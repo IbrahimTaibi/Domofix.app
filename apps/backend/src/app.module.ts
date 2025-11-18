@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProviderApplicationsModule } from './provider-applications/provider-applications.module';
+import { ProviderServicesModule } from './provider-services/provider-services.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppLogger } from '@/common/logging/logger.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -46,6 +47,7 @@ import { MessagingModule } from './messaging/messaging.module';
     AuthModule,
     UsersModule,
     ProviderApplicationsModule,
+    ProviderServicesModule,
     RequestsModule,
     NotificationsModule,
     OrdersModule,
