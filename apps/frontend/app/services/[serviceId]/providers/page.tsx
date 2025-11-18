@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Button from '@/shared/components/button'
 import { AlertTriangle, Lock, Inbox } from 'lucide-react'
@@ -12,6 +12,7 @@ import { useAuthTokenReady } from '@/features/auth/hooks/useAuthTokenReady'
 import { trackEvent } from '@/shared/utils/analytics'
 import { acceptProvider } from '@/features/requests/services/requests-service'
 import { ProvidersHeader, ProvidersFilters, ProvidersList, SidebarSafety, SidebarStats } from '@/features/providers/components'
+import { ConfirmationDialog } from '@/shared/components'
 
 export default function ProvidersSelectionPage() {
   const params = useParams<{ serviceId: string }>()
@@ -43,6 +44,11 @@ export default function ProvidersSelectionPage() {
   const earliestEtsTime = etsTimes.length ? Math.min(...etsTimes) : null
 
   const { ready, expired } = useAuthTokenReady()
+
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingProviderId, setPendingProviderId] = useState<string | null>(null)
+  const [isApproving, setIsApproving] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -84,11 +90,24 @@ export default function ProvidersSelectionPage() {
       return 0
     })
 
-  async function handleApprove(providerId: string) {
+  function handleApprove(providerId: string) {
+    // Show confirmation dialog instead of immediately approving
+    setPendingProviderId(providerId)
+    setShowConfirmDialog(true)
+    trackEvent('provider_approve_click', { providerId, requestId: serviceId })
+  }
+
+  async function confirmApprove() {
+    if (!pendingProviderId) return
+
+    setIsApproving(true)
     try {
-      trackEvent('provider_approve_click', { providerId, requestId: serviceId })
-      const response = await acceptProvider(serviceId, { providerId } as any)
+      const response = await acceptProvider(serviceId, { providerId: pendingProviderId } as any)
       showSuccess('Prestataire approuvé', { title: 'Succès' })
+
+      // Close the confirmation dialog
+      setShowConfirmDialog(false)
+      setPendingProviderId(null)
 
       // Auto-open widget with the conversation
       if (response.orderId) {
@@ -97,7 +116,14 @@ export default function ProvidersSelectionPage() {
       }
     } catch (err: any) {
       showError(err?.message || "Échec de l'approbation", { title: 'Erreur' })
+    } finally {
+      setIsApproving(false)
     }
+  }
+
+  function cancelApprove() {
+    setShowConfirmDialog(false)
+    setPendingProviderId(null)
   }
 
   return (
@@ -182,6 +208,18 @@ export default function ProvidersSelectionPage() {
           />
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showConfirmDialog}
+        title="Confirmer l'approbation"
+        message="Êtes-vous sûr de vouloir approuver ce prestataire ? Une fois approuvé, une commande sera créée et un chat sera ouvert avec le prestataire."
+        confirmText="Oui, approuver"
+        cancelText="Annuler"
+        onConfirm={confirmApprove}
+        onCancel={cancelApprove}
+        isLoading={isApproving}
+        variant="info"
+      />
     </section>
   )
 }
