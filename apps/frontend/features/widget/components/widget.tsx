@@ -54,6 +54,23 @@ export default function Widget() {
     }
   }, [activeThreadId, joinThread, leaveThread]);
 
+  // Join ALL thread rooms to receive notifications (even when widget is closed)
+  useEffect(() => {
+    if (!user?.id || threads.length === 0) return;
+
+    // Join all thread rooms
+    threads.forEach((thread) => {
+      joinThread(thread.id);
+    });
+
+    // Leave all thread rooms on unmount
+    return () => {
+      threads.forEach((thread) => {
+        leaveThread(thread.id);
+      });
+    };
+  }, [threads.map(t => t.id).join(','), joinThread, leaveThread, user?.id]);
+
   // Listen for auto-open events (e.g., when customer accepts provider)
   useEffect(() => {
     if (!user?.id) return;

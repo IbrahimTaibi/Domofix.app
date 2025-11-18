@@ -191,6 +191,15 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     const { threadId, message } = payload
     const widgetMessage = toWidgetMessage(message)
 
+    // Get current user ID from auth store
+    let currentUserId: string | null = null
+    if (typeof window !== 'undefined') {
+      try {
+        const { useAuthStore } = require('@/features/auth/store/auth-store')
+        currentUserId = useAuthStore.getState().user?.id || null
+      } catch {}
+    }
+
     set((state) => {
       // Add message to thread
       const existingMessages = state.messagesByThread[threadId] || []
@@ -198,10 +207,13 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
 
       if (messageExists) return state
 
-      // Check if this is not from current user and not in active thread
-      const shouldNotify = threadId !== state.activeThreadId
+      // Play notification sound if:
+      // 1. Message is not from current user
+      // 2. Either widget is closed OR message is in a different thread
+      const isFromMe = currentUserId && message.senderId === currentUserId
+      const isInActiveThread = threadId === state.activeThreadId
 
-      if (shouldNotify) {
+      if (!isFromMe && !isInActiveThread) {
         // Play notification sound
         if (typeof window !== 'undefined') {
           import('@/shared/utils/sound').then(({ playNotificationAudioFile }) => {
@@ -215,9 +227,9 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           ...state.messagesByThread,
           [threadId]: [...existingMessages, widgetMessage],
         },
-        // Update unread count if not active thread
+        // Update unread count if not active thread and not from current user
         threads: state.threads.map((t) =>
-          t.id === threadId && threadId !== state.activeThreadId
+          t.id === threadId && threadId !== state.activeThreadId && !isFromMe
             ? { ...t, unreadCount: t.unreadCount + 1 }
             : t
         ),
