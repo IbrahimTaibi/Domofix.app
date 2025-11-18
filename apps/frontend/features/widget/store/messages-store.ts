@@ -11,6 +11,20 @@ import type { WidgetThread, WidgetMessage } from '../types'
 import { toWidgetThread, toWidgetMessage, createSystemMessage } from '../types'
 import * as widgetMessagingService from '../services/widget-messaging-service'
 
+// Constants for thread polling
+const THREAD_POLL_MAX_ATTEMPTS = 5
+const THREAD_POLL_DELAY_MS = 500
+
+// Cache sound module import (lazy loaded, shared across all messages)
+let soundModulePromise: Promise<typeof import('@/shared/utils/sound')> | null = null
+function getSoundModule() {
+  if (typeof window === 'undefined') return null
+  if (!soundModulePromise) {
+    soundModulePromise = import('@/shared/utils/sound')
+  }
+  return soundModulePromise
+}
+
 interface MessagesState {
   // Data
   threads: WidgetThread[]
@@ -195,55 +209,31 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     const normalizedCurrentUserId = currentUserId ? String(currentUserId) : null
     const normalizedSenderId = message.senderId ? String(message.senderId) : null
 
-    console.log('[MessagesStore] Incoming message:', {
-      threadId,
-      messageId: message.id,
-      senderId: normalizedSenderId,
-      currentUserId: normalizedCurrentUserId,
-      isFromMe: normalizedCurrentUserId === normalizedSenderId,
-    })
-
     set((state) => {
       // Add message to thread
       const existingMessages = state.messagesByThread[threadId] || []
       const messageExists = existingMessages.some((m) => m.id === message.id)
 
       if (messageExists) {
-        console.log('[MessagesStore] Message already exists, skipping:', message.id)
         return state
       }
 
       // Determine if this message is from the current user
       const isFromMe = normalizedCurrentUserId && normalizedCurrentUserId === normalizedSenderId
-      const isInActiveThread = threadId === state.activeThreadId
-
-      console.log('[MessagesStore] Notification check:', {
-        isFromMe,
-        isInActiveThread,
-        activeThreadId: state.activeThreadId,
-        shouldNotify: !isFromMe,
-        windowDefined: typeof window !== 'undefined',
-      })
 
       // Play notification sound if message is not from current user
       // Note: We play sound even if thread is active, because the user might not be focused
       if (!isFromMe) {
-        console.log('[MessagesStore] 🔊 TRIGGERING NOTIFICATION SOUND for message from:', normalizedSenderId)
-        if (typeof window !== 'undefined') {
-          console.log('[MessagesStore] Window is defined, importing sound module...')
-          import('@/shared/utils/sound').then(({ playNotificationAudioFile }) => {
-            console.log('[MessagesStore] Sound module loaded, calling playNotificationAudioFile()')
+        getSoundModule()
+          ?.then(({ playNotificationAudioFile }) => {
             playNotificationAudioFile()
-            console.log('[MessagesStore] playNotificationAudioFile() called successfully')
-          }).catch((err) => {
-            console.error('[MessagesStore] ❌ FAILED to import or play notification sound:', err)
           })
-        } else {
-          console.warn('[MessagesStore] ❌ Window is not defined, cannot play sound')
-        }
-      } else {
-        console.log('[MessagesStore] 🔇 NOT playing sound - message is from current user')
+          .catch((err) => {
+            console.error('[MessagesStore] Failed to play notification sound:', err)
+          })
       }
+
+      const shouldIncrementUnread = threadId !== state.activeThreadId && !isFromMe
 
       return {
         messagesByThread: {
@@ -251,24 +241,11 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           [threadId]: [...existingMessages, widgetMessage],
         },
         // Update unread count if not active thread and not from current user
-        threads: state.threads.map((t) => {
-          if (t.id === threadId) {
-            const shouldIncrement = threadId !== state.activeThreadId && !isFromMe
-            console.log('[MessagesStore] Thread unread check:', {
-              threadId: t.id,
-              currentUnread: t.unreadCount,
-              isActiveThread: threadId === state.activeThreadId,
-              isFromMe,
-              willIncrement: shouldIncrement,
-            })
-            if (shouldIncrement) {
-              const newCount = t.unreadCount + 1
-              console.log('[MessagesStore] 🔴 INCREMENTING unread count:', t.unreadCount, '→', newCount)
-              return { ...t, unreadCount: newCount }
-            }
-          }
-          return t
-        }),
+        threads: state.threads.map((t) =>
+          t.id === threadId && shouldIncrementUnread
+            ? { ...t, unreadCount: t.unreadCount + 1 }
+            : t
+        ),
       }
     })
   },
@@ -298,9 +275,9 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
     requestDisplayId: string,
     currentUserId: string
   ) => {
-    // Poll for thread creation (max 5 attempts over 2.5 seconds)
+    // Poll for thread creation
     let thread: WidgetThread | undefined
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (let attempt = 0; attempt < THREAD_POLL_MAX_ATTEMPTS; attempt++) {
       await get().loadThreads(currentUserId)
       const { threads } = get()
       thread = threads.find((t) => t.orderId === orderId)
@@ -308,7 +285,7 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       if (thread) break
 
       // Wait before next attempt
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, THREAD_POLL_DELAY_MS))
     }
 
     if (!thread) {

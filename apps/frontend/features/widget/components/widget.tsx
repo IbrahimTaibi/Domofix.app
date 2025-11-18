@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useMemo } from "react";
 import { useWidgetStore } from "@/features/widget/store/widget-store";
 import { useMessagesStore } from "@/features/widget/store/messages-store";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useWidgetSocket } from "@/features/widget/hooks/useWidgetSocket";
+import { widgetEventBus } from "@/features/widget/events/widget-events";
 import BottomNav from "@/features/widget/components/bottom-nav";
 import ChatComposer from "@/features/widget/components/messages/chat-composer";
 import HomeScreen from "@/features/widget/components/screens/home-screen";
@@ -33,20 +34,11 @@ export default function Widget() {
   const isSending = useMessagesStore((s) => s.isSending);
 
   // Socket.IO for real-time updates
-  // Wrap addIncomingMessage to pass current user ID
-  const handleNewMessage = useCallback((payload: { threadId: string; message: any }) => {
-    console.log('[Widget] 📨 handleNewMessage called:', {
-      threadId: payload.threadId,
-      messageId: payload.message.id,
-      senderId: payload.message.senderId,
-      currentUserId: user?.id,
-    });
-    addIncomingMessage(payload, user?.id || null);
-  }, [addIncomingMessage, user?.id]);
-
   const { joinThread, leaveThread } = useWidgetSocket({
     enabled: !!user,
-    onNewMessage: handleNewMessage,
+    onNewMessage: useCallback((payload: { threadId: string; message: any }) => {
+      addIncomingMessage(payload, user?.id || null);
+    }, [addIncomingMessage, user?.id]),
     onMessageRead: markAsRead,
   });
 
@@ -60,46 +52,33 @@ export default function Widget() {
   // Clear active thread when widget is closed to allow badge updates
   useEffect(() => {
     if (!open && activeThreadId) {
-      console.log('[Widget] Widget closed - clearing active thread to enable badge updates');
       backToList();
     }
   }, [open, activeThreadId, backToList]);
 
-  // Join active thread room when it changes
-  // Note: We don't leave the thread room when it becomes inactive
-  // because we want to stay in all thread rooms to receive notifications
-  useEffect(() => {
-    if (activeThreadId) {
-      joinThread(activeThreadId);
-    }
-  }, [activeThreadId, joinThread]);
+  // Memoize thread IDs for dependency tracking
+  const threadIds = useMemo(() => threads.map(t => t.id).join(','), [threads]);
 
   // Join ALL thread rooms to receive notifications (even when widget is closed)
   useEffect(() => {
     if (!user?.id || threads.length === 0) return;
 
-    console.log('[Widget] 📡 Joining all thread rooms:', threads.map(t => t.id));
-    // Join all thread rooms
+    // Join all thread rooms (including active thread)
     threads.forEach((thread) => {
       joinThread(thread.id);
     });
 
     // Leave all thread rooms on unmount
     return () => {
-      console.log('[Widget] 📡 Leaving all thread rooms (unmount)');
       threads.forEach((thread) => {
         leaveThread(thread.id);
       });
     };
-  }, [threads.map(t => t.id).join(','), joinThread, leaveThread, user?.id]);
+  }, [threadIds, threads, joinThread, leaveThread, user?.id]);
 
   // Listen for auto-open events (e.g., when customer accepts provider)
   useEffect(() => {
     if (!user?.id) return;
-
-    const { widgetEventBus } = require('@/features/widget/events/widget-events');
-    const setTab = useWidgetStore.getState().setTab;
-    const openThreadForOrder = useMessagesStore.getState().openThreadForOrder;
 
     const unsubscribe = widgetEventBus.on(
       'open-thread-for-order',
@@ -107,9 +86,9 @@ export default function Widget() {
         // Open widget
         setOpen(true);
         // Switch to messages tab
-        setTab('messages');
+        useWidgetStore.getState().setTab('messages');
         // Open the thread for this order
-        await openThreadForOrder(data.orderId, data.requestDisplayId, user.id);
+        await useMessagesStore.getState().openThreadForOrder(data.orderId, data.requestDisplayId, user.id);
       }
     );
 
@@ -119,13 +98,15 @@ export default function Widget() {
   // Calculate total unread count
   const totalUnread = threads.reduce((sum, thread) => sum + thread.unreadCount, 0);
 
-  // Debug: Log when totalUnread changes
-  useEffect(() => {
-    console.log('[Widget] 🔴 Total unread count updated:', totalUnread, 'threads:', threads.length);
-    if (totalUnread > 0) {
-      console.log('[Widget] 🔴 BADGE SHOULD BE VISIBLE with count:', totalUnread);
-    }
-  }, [totalUnread, threads.length]);
+  // Memoize active thread data for header
+  const activeThreadData = useMemo(() => {
+    if (!activeThreadId) return null;
+    const thread = threads.find((t) => t.id === activeThreadId);
+    if (!thread) return null;
+    const otherParticipant = thread.participants.find((p) => p.id !== user?.id);
+    const initial = (otherParticipant?.name || "U").charAt(0).toUpperCase();
+    return { thread, otherParticipant, initial };
+  }, [activeThreadId, threads, user?.id]);
 
   // Don't render widget if not authenticated
   if (!user || isLoading) {
@@ -161,37 +142,25 @@ export default function Widget() {
                       className="inline-flex h-7 w-7 items-center justify-center rounded hover:bg-gray-100">
                       <ChevronLeft className="h-4 w-4 text-gray-700" />
                     </button>
-                    {(() => {
-                      const th = threads.find((t) => t.id === activeThreadId);
-                      const otherParticipant = th?.participants.find((p) => p.id !== user.id);
-                      const initial = (otherParticipant?.name || "U").charAt(0).toUpperCase();
-                      return (
-                        <span className="h-5 w-5 rounded-full overflow-hidden flex items-center justify-center">
-                          {otherParticipant?.avatarUrl ? (
-                            <img
-                              src={otherParticipant.avatarUrl}
-                              alt={otherParticipant?.name}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="h-full w-full rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-medium">
-                              {initial}
-                            </span>
-                          )}
+                    <span className="h-5 w-5 rounded-full overflow-hidden flex items-center justify-center">
+                      {activeThreadData?.otherParticipant?.avatarUrl ? (
+                        <img
+                          src={activeThreadData.otherParticipant.avatarUrl}
+                          alt={activeThreadData.otherParticipant.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="h-full w-full rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] font-medium">
+                          {activeThreadData?.initial}
                         </span>
-                      );
-                    })()}
+                      )}
+                    </span>
                   </div>
-                  {(() => {
-                    const th = threads.find((t) => t.id === activeThreadId);
-                    return (
-                      <div className="min-w-0 text-center">
-                        <span className="block text-sm font-semibold text-gray-900 truncate whitespace-nowrap">
-                          {th?.title || "Conversation"}
-                        </span>
-                      </div>
-                    );
-                  })()}
+                  <div className="min-w-0 text-center">
+                    <span className="block text-sm font-semibold text-gray-900 truncate whitespace-nowrap">
+                      {activeThreadData?.thread.title || "Conversation"}
+                    </span>
+                  </div>
                   <div className="flex justify-end">
                     <button
                       type="button"
