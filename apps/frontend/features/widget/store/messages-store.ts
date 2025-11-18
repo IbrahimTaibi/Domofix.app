@@ -31,8 +31,8 @@ interface MessagesState {
   setActiveThread: (threadId: string, currentUserId: string) => Promise<void>
   backToList: () => void
   sendMessage: (text: string) => Promise<boolean>
-  addIncomingMessage: (payload: { threadId: string; message: ChatMessage }) => void
-  markAsRead: (threadId: string, userId: string) => void
+  addIncomingMessage: (payload: { threadId: string; message: ChatMessage }, currentUserId: string | null) => void
+  markAsRead: (payload: { threadId: string; userId: string }) => void
 
   // Auto-open functionality
   openThreadForOrder: (
@@ -187,39 +187,62 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
   addIncomingMessage: (payload: {
     threadId: string
     message: ChatMessage
-  }) => {
+  }, currentUserId: string | null) => {
     const { threadId, message } = payload
     const widgetMessage = toWidgetMessage(message)
 
-    // Get current user ID from auth store
-    let currentUserId: string | null = null
-    if (typeof window !== 'undefined') {
-      try {
-        const { useAuthStore } = require('@/features/auth/store/auth-store')
-        currentUserId = useAuthStore.getState().user?.id || null
-      } catch {}
-    }
+    // Normalize IDs to strings for comparison
+    const normalizedCurrentUserId = currentUserId ? String(currentUserId) : null
+    const normalizedSenderId = message.senderId ? String(message.senderId) : null
+
+    console.log('[MessagesStore] Incoming message:', {
+      threadId,
+      messageId: message.id,
+      senderId: normalizedSenderId,
+      currentUserId: normalizedCurrentUserId,
+      isFromMe: normalizedCurrentUserId === normalizedSenderId,
+    })
 
     set((state) => {
       // Add message to thread
       const existingMessages = state.messagesByThread[threadId] || []
       const messageExists = existingMessages.some((m) => m.id === message.id)
 
-      if (messageExists) return state
+      if (messageExists) {
+        console.log('[MessagesStore] Message already exists, skipping:', message.id)
+        return state
+      }
 
-      // Play notification sound if:
-      // 1. Message is not from current user
-      // 2. Either widget is closed OR message is in a different thread
-      const isFromMe = currentUserId && message.senderId === currentUserId
+      // Determine if this message is from the current user
+      const isFromMe = normalizedCurrentUserId && normalizedCurrentUserId === normalizedSenderId
       const isInActiveThread = threadId === state.activeThreadId
 
-      if (!isFromMe && !isInActiveThread) {
-        // Play notification sound
+      console.log('[MessagesStore] Notification check:', {
+        isFromMe,
+        isInActiveThread,
+        activeThreadId: state.activeThreadId,
+        shouldNotify: !isFromMe,
+        windowDefined: typeof window !== 'undefined',
+      })
+
+      // Play notification sound if message is not from current user
+      // Note: We play sound even if thread is active, because the user might not be focused
+      if (!isFromMe) {
+        console.log('[MessagesStore] 🔊 TRIGGERING NOTIFICATION SOUND for message from:', normalizedSenderId)
         if (typeof window !== 'undefined') {
+          console.log('[MessagesStore] Window is defined, importing sound module...')
           import('@/shared/utils/sound').then(({ playNotificationAudioFile }) => {
+            console.log('[MessagesStore] Sound module loaded, calling playNotificationAudioFile()')
             playNotificationAudioFile()
+            console.log('[MessagesStore] playNotificationAudioFile() called successfully')
+          }).catch((err) => {
+            console.error('[MessagesStore] ❌ FAILED to import or play notification sound:', err)
           })
+        } else {
+          console.warn('[MessagesStore] ❌ Window is not defined, cannot play sound')
         }
+      } else {
+        console.log('[MessagesStore] 🔇 NOT playing sound - message is from current user')
       }
 
       return {
@@ -228,11 +251,24 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           [threadId]: [...existingMessages, widgetMessage],
         },
         // Update unread count if not active thread and not from current user
-        threads: state.threads.map((t) =>
-          t.id === threadId && threadId !== state.activeThreadId && !isFromMe
-            ? { ...t, unreadCount: t.unreadCount + 1 }
-            : t
-        ),
+        threads: state.threads.map((t) => {
+          if (t.id === threadId) {
+            const shouldIncrement = threadId !== state.activeThreadId && !isFromMe
+            console.log('[MessagesStore] Thread unread check:', {
+              threadId: t.id,
+              currentUnread: t.unreadCount,
+              isActiveThread: threadId === state.activeThreadId,
+              isFromMe,
+              willIncrement: shouldIncrement,
+            })
+            if (shouldIncrement) {
+              const newCount = t.unreadCount + 1
+              console.log('[MessagesStore] 🔴 INCREMENTING unread count:', t.unreadCount, '→', newCount)
+              return { ...t, unreadCount: newCount }
+            }
+          }
+          return t
+        }),
       }
     })
   },
@@ -240,7 +276,8 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
   /**
    * Mark messages as read from Socket.IO event
    */
-  markAsRead: (threadId: string, userId: string) => {
+  markAsRead: (payload: { threadId: string; userId: string }) => {
+    const { threadId } = payload
     // Update message status in the thread
     set((state) => ({
       messagesByThread: {

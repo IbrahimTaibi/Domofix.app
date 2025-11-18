@@ -33,6 +33,7 @@ export function useWidgetSocket(options: UseWidgetSocketOptions = {}) {
   const onNewMessageRef = useRef(onNewMessage)
   const onMessageReadRef = useRef(onMessageRead)
   const onStatusChangeRef = useRef(onStatusChange)
+  const joinedThreadsRef = useRef<Set<string>>(new Set())
 
   // Update refs when callbacks change
   useEffect(() => {
@@ -72,14 +73,26 @@ export function useWidgetSocket(options: UseWidgetSocketOptions = {}) {
 
       // Connection events
       socket.on('connect', () => {
+        console.log('[WidgetSocket] Connected to Socket.IO server')
         onStatusChangeRef.current?.('connected')
+
+        // Re-join all previously joined threads on reconnection
+        const threadsToRejoin = Array.from(joinedThreadsRef.current)
+        if (threadsToRejoin.length > 0) {
+          console.log('[WidgetSocket] Re-joining threads after reconnection:', threadsToRejoin)
+          threadsToRejoin.forEach((threadId) => {
+            socket.emit('thread:join', { threadId })
+          })
+        }
       })
 
-      socket.on('connect_error', () => {
+      socket.on('connect_error', (error) => {
+        console.error('[WidgetSocket] Connection error:', error)
         onStatusChangeRef.current?.('error')
       })
 
-      socket.on('disconnect', () => {
+      socket.on('disconnect', (reason) => {
+        console.log('[WidgetSocket] Disconnected:', reason)
         onStatusChangeRef.current?.('disconnected')
       })
 
@@ -87,6 +100,11 @@ export function useWidgetSocket(options: UseWidgetSocketOptions = {}) {
       socket.on(
         'message:new',
         (payload: { threadId: string; message: ChatMessage }) => {
+          console.log('[WidgetSocket] Received message:new event:', {
+            threadId: payload.threadId,
+            messageId: payload.message.id,
+            senderId: payload.message.senderId,
+          })
           onNewMessageRef.current?.(payload)
         }
       )
@@ -94,6 +112,7 @@ export function useWidgetSocket(options: UseWidgetSocketOptions = {}) {
       socket.on(
         'message:read',
         (payload: { threadId: string; userId: string }) => {
+          console.log('[WidgetSocket] Received message:read event:', payload)
           onMessageReadRef.current?.(payload)
         }
       )
@@ -112,14 +131,26 @@ export function useWidgetSocket(options: UseWidgetSocketOptions = {}) {
    * Join a thread room to receive real-time updates
    */
   const joinThread = useCallback((threadId: string) => {
-    socketRef.current?.emit('thread:join', { threadId })
+    if (socketRef.current?.connected) {
+      console.log('[WidgetSocket] Joining thread room:', threadId)
+      socketRef.current.emit('thread:join', { threadId })
+      joinedThreadsRef.current.add(threadId)
+    } else {
+      console.warn('[WidgetSocket] Cannot join thread - socket not connected:', threadId)
+      // Still track it so we can join on reconnection
+      joinedThreadsRef.current.add(threadId)
+    }
   }, [])
 
   /**
    * Leave a thread room
    */
   const leaveThread = useCallback((threadId: string) => {
-    socketRef.current?.emit('thread:leave', { threadId })
+    if (socketRef.current?.connected) {
+      console.log('[WidgetSocket] Leaving thread room:', threadId)
+      socketRef.current.emit('thread:leave', { threadId })
+    }
+    joinedThreadsRef.current.delete(threadId)
   }, [])
 
   return {

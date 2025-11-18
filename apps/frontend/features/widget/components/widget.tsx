@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useWidgetStore } from "@/features/widget/store/widget-store";
 import { useMessagesStore } from "@/features/widget/store/messages-store";
 import { useAuthStore } from "@/features/auth/store/auth-store";
@@ -33,9 +33,20 @@ export default function Widget() {
   const isSending = useMessagesStore((s) => s.isSending);
 
   // Socket.IO for real-time updates
+  // Wrap addIncomingMessage to pass current user ID
+  const handleNewMessage = useCallback((payload: { threadId: string; message: any }) => {
+    console.log('[Widget] 📨 handleNewMessage called:', {
+      threadId: payload.threadId,
+      messageId: payload.message.id,
+      senderId: payload.message.senderId,
+      currentUserId: user?.id,
+    });
+    addIncomingMessage(payload, user?.id || null);
+  }, [addIncomingMessage, user?.id]);
+
   const { joinThread, leaveThread } = useWidgetSocket({
     enabled: !!user,
-    onNewMessage: addIncomingMessage,
+    onNewMessage: handleNewMessage,
     onMessageRead: markAsRead,
   });
 
@@ -46,18 +57,28 @@ export default function Widget() {
     }
   }, [user?.id, loadThreads]);
 
+  // Clear active thread when widget is closed to allow badge updates
+  useEffect(() => {
+    if (!open && activeThreadId) {
+      console.log('[Widget] Widget closed - clearing active thread to enable badge updates');
+      backToList();
+    }
+  }, [open, activeThreadId, backToList]);
+
   // Join active thread room when it changes
+  // Note: We don't leave the thread room when it becomes inactive
+  // because we want to stay in all thread rooms to receive notifications
   useEffect(() => {
     if (activeThreadId) {
       joinThread(activeThreadId);
-      return () => leaveThread(activeThreadId);
     }
-  }, [activeThreadId, joinThread, leaveThread]);
+  }, [activeThreadId, joinThread]);
 
   // Join ALL thread rooms to receive notifications (even when widget is closed)
   useEffect(() => {
     if (!user?.id || threads.length === 0) return;
 
+    console.log('[Widget] 📡 Joining all thread rooms:', threads.map(t => t.id));
     // Join all thread rooms
     threads.forEach((thread) => {
       joinThread(thread.id);
@@ -65,6 +86,7 @@ export default function Widget() {
 
     // Leave all thread rooms on unmount
     return () => {
+      console.log('[Widget] 📡 Leaving all thread rooms (unmount)');
       threads.forEach((thread) => {
         leaveThread(thread.id);
       });
@@ -94,13 +116,21 @@ export default function Widget() {
     return () => unsubscribe();
   }, [user?.id, setOpen]);
 
+  // Calculate total unread count
+  const totalUnread = threads.reduce((sum, thread) => sum + thread.unreadCount, 0);
+
+  // Debug: Log when totalUnread changes
+  useEffect(() => {
+    console.log('[Widget] 🔴 Total unread count updated:', totalUnread, 'threads:', threads.length);
+    if (totalUnread > 0) {
+      console.log('[Widget] 🔴 BADGE SHOULD BE VISIBLE with count:', totalUnread);
+    }
+  }, [totalUnread, threads.length]);
+
   // Don't render widget if not authenticated
   if (!user || isLoading) {
     return null;
   }
-
-  // Calculate total unread count
-  const totalUnread = threads.reduce((sum, thread) => sum + thread.unreadCount, 0);
 
   return (
     <>
