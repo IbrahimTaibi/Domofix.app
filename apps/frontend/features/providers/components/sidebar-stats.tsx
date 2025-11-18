@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Users } from 'lucide-react'
+import { Users, TrendingDown } from 'lucide-react'
 
 export interface SidebarStatsProps {
   providerCount: number
@@ -10,29 +10,27 @@ export interface SidebarStatsProps {
   earliestEts?: number | null
 }
 
-export default function SidebarStats({ providerCount, avgPrice, minPrice, earliestEts }: SidebarStatsProps) {
+export default function SidebarStats({ providerCount, minPrice }: SidebarStatsProps) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <h2 className="text-sm font-semibold text-gray-900">Résumé</h2>
-      <div className="mt-3 space-y-2 text-sm text-gray-700">
+      <h2 className="text-sm font-semibold text-gray-900 mb-3">Résumé</h2>
+      <div className="space-y-3 text-sm text-gray-700">
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary-600" /> Prestataires
+          <span className="flex items-center gap-2 text-gray-600">
+            <Users className="h-4 w-4 text-blue-600" />
+            <span>Prestataires</span>
           </span>
-          <span className="font-medium">{providerCount}</span>
+          <span className="font-semibold text-gray-900">{providerCount}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span>Prix moyen</span>
-          <span className="font-medium">{avgPrice != null ? `${Math.round(avgPrice)} DT` : '—'}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Prix minimum</span>
-          <span className="font-medium">{minPrice != null ? `${minPrice} DT` : '—'}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>ETS le plus tôt</span>
-          <span className="font-medium">{earliestEts ? new Date(earliestEts).toLocaleString() : '—'}</span>
-        </div>
+        {minPrice != null && (
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-gray-600">
+              <TrendingDown className="h-4 w-4 text-green-600" />
+              <span>À partir de</span>
+            </span>
+            <span className="font-semibold text-green-700">{minPrice} DT</span>
+          </div>
+        )}
       </div>
     </div>
   )
