@@ -189,19 +189,9 @@ export class MessagingService {
       thread.unreadCounts[key] = (thread.unreadCounts[key] || 0) + 1;
     }
     await thread.save();
-    try {
-      await this.notifications.create({
-        userId: String(other?.userId || ''),
-        title: 'Nouveau message',
-        message:
-          dto.kind === 'text'
-            ? dto.text?.slice(0, 80) || 'Message'
-            : 'Pièce jointe',
-        severity: 'info',
-        type: 'system.message',
-        data: { threadId: String(thread._id), orderId: String(thread.orderId) },
-      });
-    } catch {}
+    // Note: System notifications removed to prevent notification spam
+    // Real-time Socket.IO events and badge counts provide sufficient notification
+    // System notifications should only be used for important alerts, not every chat message
     this.logger.info('MessageSent', { threadId: String(thread._id), senderId });
     const payload = {
       id: String(msg._id),

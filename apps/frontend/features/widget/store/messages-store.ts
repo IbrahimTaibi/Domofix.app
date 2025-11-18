@@ -221,13 +221,13 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
         isFromMe,
         isInActiveThread,
         activeThreadId: state.activeThreadId,
-        shouldNotify: !isFromMe,
+        shouldNotify: !isFromMe && !isInActiveThread,
         windowDefined: typeof window !== 'undefined',
       })
 
-      // Play notification sound if message is not from current user
-      // Note: We play sound even if thread is active, because the user might not be focused
-      if (!isFromMe) {
+      // Play notification sound only if message is not from current user AND thread is not active
+      // This prevents annoying sounds during active conversations
+      if (!isFromMe && !isInActiveThread) {
         console.log('[MessagesStore] 🔊 TRIGGERING NOTIFICATION SOUND for message from:', normalizedSenderId)
         if (typeof window !== 'undefined') {
           console.log('[MessagesStore] Window is defined, importing sound module...')
@@ -242,7 +242,7 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
           console.warn('[MessagesStore] ❌ Window is not defined, cannot play sound')
         }
       } else {
-        console.log('[MessagesStore] 🔇 NOT playing sound - message is from current user')
+        console.log('[MessagesStore] 🔇 NOT playing sound - message is from current user or thread is active')
       }
 
       return {
