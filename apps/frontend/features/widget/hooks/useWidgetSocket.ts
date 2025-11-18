@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
-import type { ChatMessage } from '@darigo/shared-types'
+import type { ChatMessage } from '@domofix/shared-types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 

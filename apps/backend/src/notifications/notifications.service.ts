@@ -5,7 +5,7 @@ import {
   Notification as NotificationModel,
   NotificationDocument,
 } from './schemas/notification.schema';
-import type { Notification as NotificationDTO } from '@darigo/shared-types';
+import type { Notification as NotificationDTO } from '@domofix/shared-types';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AppLogger } from '@/common/logging/logger.service';
 

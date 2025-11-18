@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useProfile } from '@/features/profile/hooks/use-profile';
 import { Button, Input } from '@/shared/components';
 import { apiClient } from '@/shared/utils/api';
-import type { UpdatePasswordRequest } from '@darigo/shared-types';
+import type { UpdatePasswordRequest } from '@domofix/shared-types';
 
 interface ChangePasswordModalProps {
   onClose: () => void;

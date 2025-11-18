@@ -1,13 +1,13 @@
 # Project Structure
 
-This document provides a detailed overview of the Darigo project structure and organization principles.
+This document provides a detailed overview of the domofix project structure and organization principles.
 
 ## 🏗️ Monorepo Architecture
 
-Darigo uses a monorepo structure with npm workspaces to manage multiple applications and shared packages.
+domofix uses a monorepo structure with npm workspaces to manage multiple applications and shared packages.
 
 ```
-Darigo/
+domofix/
 ├── apps/                  # Applications
 ├── packages/              # Shared packages
 ├── docs/                  # Documentation
@@ -238,8 +238,8 @@ import { useAuth } from '@/features/auth/hooks'
 import { UserProfile } from '@/features/profile/components'
 
 // Shared package imports
-import { User } from '@darigo/shared-types'
-import { validateEmail } from '@darigo/shared-utils'
+import { User } from '@domofix/shared-types'
+import { validateEmail } from '@domofix/shared-utils'
 ```
 
 ### Import Organization
@@ -258,7 +258,7 @@ import React from 'react'
 import { NextPage } from 'next'
 
 // Shared packages
-import { User } from '@darigo/shared-types'
+import { User } from '@domofix/shared-types'
 
 // Shared resources
 import { Button } from '@/shared/components'

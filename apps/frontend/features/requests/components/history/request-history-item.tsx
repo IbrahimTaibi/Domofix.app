@@ -1,6 +1,6 @@
 import React from 'react'
-import type { Request } from '@darigo/shared-types'
-import { RequestStatus } from '@darigo/shared-types'
+import type { Request } from '@domofix/shared-types'
+import { RequestStatus } from '@domofix/shared-types'
 import { CalendarClock, Phone, MapPin, ClipboardList } from 'lucide-react'
 import { format } from 'date-fns'
 import RequestStatusBadge from './request-status-badge'

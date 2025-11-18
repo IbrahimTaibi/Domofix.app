@@ -1,6 +1,6 @@
 'use client'
 
-import { User } from '@darigo/shared-types'
+import { User } from '@domofix/shared-types'
 import { formatDate, formatTimeAgo } from '@/shared/utils'
 
 type SummaryCardProps = {

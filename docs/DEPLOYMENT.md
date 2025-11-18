@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deployment strategies and environment setup for the Darigo platform.
+This guide covers deployment strategies and environment setup for the domofix platform.
 
 ## 🚀 Quick Deployment
 
@@ -19,7 +19,7 @@ This guide covers deployment strategies and environment setup for the Darigo pla
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd Darigo
+cd domofix
 
 # Install dependencies
 npm run install:all
@@ -31,8 +31,8 @@ npm run install:all
 
 ```env
 # Database Configuration
-MONGODB_URI=mongodb://localhost:27017/darigo
-MONGODB_TEST_URI=mongodb://localhost:27017/darigo_test
+MONGODB_URI=mongodb://localhost:27017/domofix
+MONGODB_TEST_URI=mongodb://localhost:27017/domofix_test
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -155,7 +155,7 @@ npm run dev:backend   # http://localhost:3001
 
 2. **Environment Variables**
    ```env
-   MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/darigo
+   MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/domofix
    JWT_SECRET=production-jwt-secret-very-long-and-secure
    NODE_ENV=production
    PORT=3001
@@ -241,7 +241,7 @@ RUN npm run build:backend
 EXPOSE 3001
 
 # Start the application
-CMD ["npm", "run", "start:prod", "--workspace=@darigo/backend"]
+CMD ["npm", "run", "start:prod", "--workspace=@domofix/backend"]
 ```
 
 #### 2. Docker Compose
@@ -254,12 +254,12 @@ version: '3.8'
 services:
   mongodb:
     image: mongo:6.0
-    container_name: darigo-mongodb
+    container_name: domofix-mongodb
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: darigo
+      MONGO_INITDB_DATABASE: domofix
     ports:
       - "27017:27017"
     volumes:
@@ -269,11 +269,11 @@ services:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-    container_name: darigo-backend
+    container_name: domofix-backend
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/darigo?authSource=admin
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/domofix?authSource=admin
       - JWT_SECRET=your-production-jwt-secret
       - PORT=3001
     ports:
@@ -285,7 +285,7 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-    container_name: darigo-frontend
+    container_name: domofix-frontend
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -341,8 +341,8 @@ sudo apt-get install -y mongodb-org
 
 ```bash
 # Clone repository
-git clone <repository-url> /var/www/darigo
-cd /var/www/darigo
+git clone <repository-url> /var/www/domofix
+cd /var/www/domofix
 
 # Install dependencies
 npm run install:all
@@ -359,8 +359,8 @@ npm run build
 module.exports = {
   apps: [
     {
-      name: 'darigo-backend',
-      cwd: '/var/www/darigo/apps/backend',
+      name: 'domofix-backend',
+      cwd: '/var/www/domofix/apps/backend',
       script: 'dist/main.js',
       env: {
         NODE_ENV: 'production',
@@ -368,8 +368,8 @@ module.exports = {
       }
     },
     {
-      name: 'darigo-frontend',
-      cwd: '/var/www/darigo/apps/frontend',
+      name: 'domofix-frontend',
+      cwd: '/var/www/domofix/apps/frontend',
       script: 'node_modules/next/dist/bin/next',
       args: 'start',
       env: {
@@ -390,7 +390,7 @@ pm2 startup
 
 #### 3. Nginx Configuration
 
-**/etc/nginx/sites-available/darigo**
+**/etc/nginx/sites-available/domofix**
 
 ```nginx
 server {
@@ -427,7 +427,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/darigo /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/domofix /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -477,8 +477,8 @@ sudo crontab -e
 pm2 monit
 
 # View logs
-pm2 logs darigo-backend
-pm2 logs darigo-frontend
+pm2 logs domofix-backend
+pm2 logs domofix-frontend
 
 # Restart applications
 pm2 restart all
@@ -570,10 +570,10 @@ add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 
 4. **Permission Issues**
    ```bash
    # Fix ownership
-   sudo chown -R $USER:$USER /var/www/darigo
+   sudo chown -R $USER:$USER /var/www/domofix
    
    # Fix permissions
-   chmod -R 755 /var/www/darigo
+   chmod -R 755 /var/www/domofix
    ```
 
 ### Performance Optimization

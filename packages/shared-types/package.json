@@ -1,7 +1,7 @@
 {
-  "name": "@darigo/shared-types",
+  "name": "@domofix/shared-types",
   "version": "0.1.0",
-  "description": "Shared TypeScript types for the Darigo monorepo",
+  "description": "Shared TypeScript types for the Domofix monorepo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "keywords": ["types", "typescript", "shared"],
-  "author": "Darigo Team",
+  "author": "Domofix Team",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.0.0",

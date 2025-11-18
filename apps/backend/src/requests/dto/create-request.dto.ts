@@ -1,5 +1,5 @@
-import type { CreateRequestRequest, Address } from '@darigo/shared-types';
-import { ServiceCategory } from '@darigo/shared-types';
+import type { CreateRequestRequest, Address } from '@domofix/shared-types';
+import { ServiceCategory } from '@domofix/shared-types';
 import {
   IsEnum,
   IsOptional,

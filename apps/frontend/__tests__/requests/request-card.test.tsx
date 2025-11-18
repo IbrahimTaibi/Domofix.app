@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import RequestCard from '@/shared/components/requests/request-card'
-import { RequestStatus, type Request } from '@darigo/shared-types'
+import { RequestStatus, type Request } from '@domofix/shared-types'
 
 function makeRequest(overrides: Partial<Request> = {}): any {
   return {

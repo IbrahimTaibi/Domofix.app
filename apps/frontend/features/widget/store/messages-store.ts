@@ -6,7 +6,7 @@
 "use client"
 
 import { create } from 'zustand'
-import type { ChatMessage } from '@darigo/shared-types'
+import type { ChatMessage } from '@domofix/shared-types'
 import type { WidgetThread, WidgetMessage } from '../types'
 import { toWidgetThread, toWidgetMessage, createSystemMessage } from '../types'
 import * as widgetMessagingService from '../services/widget-messaging-service'

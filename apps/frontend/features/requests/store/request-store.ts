@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CreateRequestRequest, Request } from "@darigo/shared-types";
+import type { CreateRequestRequest, Request } from "@domofix/shared-types";
 
 interface RequestDraftState {
   draft: Partial<CreateRequestRequest>;

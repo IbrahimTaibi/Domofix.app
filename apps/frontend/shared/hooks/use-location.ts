@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Location } from '@darigo/shared-types'
+import { Location } from '@domofix/shared-types'
 
 export function useLocation() {
   const [location, setLocation] = useState<Location | null>(null)

@@ -1,6 +1,6 @@
 import { httpRequest } from '@/shared/utils/http'
 import { useAuthStore } from '@/features/auth/store/auth-store'
-import { ServiceCategory, CreateRequestRequest, ApplyForRequestRequest, AcceptProviderRequest, Request, RequestStatus } from '@darigo/shared-types'
+import { ServiceCategory, CreateRequestRequest, ApplyForRequestRequest, AcceptProviderRequest, Request, RequestStatus } from '@domofix/shared-types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react'
-import type { Notification } from '@darigo/shared-types'
+import type { Notification } from '@domofix/shared-types'
 
 interface NotificationItemProps {
   notification: Notification

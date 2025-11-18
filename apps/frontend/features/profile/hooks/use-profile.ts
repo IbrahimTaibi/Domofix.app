@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react'
-import type { UpdateUserRequest, User } from '@darigo/shared-types'
+import type { UpdateUserRequest, User } from '@domofix/shared-types'
 import { useAuthStore } from '@/features/auth/store/auth-store'
 import { profileService } from '../services/profile-service'
 

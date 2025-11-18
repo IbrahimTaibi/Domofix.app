@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import FiltersBar from '@/shared/components/requests/filters-bar'
-import { RequestStatus, ServiceCategory } from '@darigo/shared-types'
+import { RequestStatus, ServiceCategory } from '@domofix/shared-types'
 
 describe('FiltersBar', () => {
   it('calls onChange when status changes', () => {

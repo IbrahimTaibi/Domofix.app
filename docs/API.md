@@ -1,8 +1,8 @@
-# Darigo API Documentation
+# domofix API Documentation
 
 ## Overview
 
-The Darigo backend API is built with NestJS and provides authentication, user management, and core platform functionality. The API follows RESTful conventions and uses JWT for authentication.
+The domofix backend API is built with NestJS and provides authentication, user management, and core platform functionality. The API follows RESTful conventions and uses JWT for authentication.
 
 **Base URL:** `http://localhost:3001` (development)
 

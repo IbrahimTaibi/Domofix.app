@@ -1,7 +1,7 @@
 {
-  "name": "@darigo/shared-utils",
+  "name": "@domofix/shared-utils",
   "version": "0.1.0",
-  "description": "Shared utilities for the Darigo monorepo",
+  "description": "Shared utilities for the Domofix monorepo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,7 +11,7 @@
     "type-check": "tsc --noEmit"
   },
   "keywords": ["utils", "utilities", "shared"],
-  "author": "Darigo Team",
+  "author": "Domofix Team",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.2"

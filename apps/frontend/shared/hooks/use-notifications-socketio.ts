@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useNotificationsStore } from '@/shared/store/notifications-store'
-import type { Notification } from '@darigo/shared-types'
+import type { Notification } from '@domofix/shared-types'
 import { playNotificationAudioFile } from '@/shared/utils/sound'
 import { io, Socket } from 'socket.io-client'
 

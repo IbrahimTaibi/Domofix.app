@@ -1,5 +1,5 @@
 import { IsEmail, IsString } from 'class-validator';
-import type { LoginRequest } from '@darigo/shared-types';
+import type { LoginRequest } from '@domofix/shared-types';
 
 export class LoginDto implements LoginRequest {
   @IsEmail()

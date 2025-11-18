@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { RequestStatus, ServiceCategory } from '@darigo/shared-types'
+import type { RequestStatus, ServiceCategory } from '@domofix/shared-types'
 
 interface RequestsUiState {
   status?: RequestStatus

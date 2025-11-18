@@ -3,7 +3,7 @@
  * Provides clean separation between backend API types and widget UI types
  */
 
-import type { ThreadSummary, ChatMessage } from '@darigo/shared-types'
+import type { ThreadSummary, ChatMessage } from '@domofix/shared-types'
 
 /**
  * Widget participant - simplified view of a thread participant

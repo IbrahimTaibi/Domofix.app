@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the testing strategy, guidelines, and best practices for the Darigo platform. Our testing approach ensures code quality, reliability, and maintainability across both frontend and backend applications.
+This document outlines the testing strategy, guidelines, and best practices for the domofix platform. Our testing approach ensures code quality, reliability, and maintainability across both frontend and backend applications.
 
 ## Table of Contents
 
@@ -946,7 +946,7 @@ test.describe('Search Functionality', () => {
 ```bash
 # .env.test
 NODE_ENV=test
-DATABASE_URL=mongodb://localhost:27017/darigo_test
+DATABASE_URL=mongodb://localhost:27017/domofix_test
 JWT_SECRET=test-jwt-secret
 JWT_EXPIRES_IN=1h
 ```

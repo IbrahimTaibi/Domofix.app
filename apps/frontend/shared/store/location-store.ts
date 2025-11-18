@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Location } from '@darigo/shared-types'
+import { Location } from '@domofix/shared-types'
 
 interface LocationState {
   currentLocation: Location | null

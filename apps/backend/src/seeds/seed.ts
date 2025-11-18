@@ -19,7 +19,7 @@ import { Review, ReviewSchema } from '../reviews/schemas/review.schema';
 import { Comment, CommentSchema } from '../reviews/schemas/comment.schema';
 import { Thread, ThreadSchema } from '../messaging/schemas/thread.schema';
 import { Message, MessageSchema } from '../messaging/schemas/message.schema';
-import { hashPassword } from '@darigo/shared-utils';
+import { hashPassword } from '@domofix/shared-utils';
 
 async function main() {
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/darigo';

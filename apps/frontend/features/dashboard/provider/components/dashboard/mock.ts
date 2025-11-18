@@ -1,5 +1,5 @@
-import type { ServiceCategory } from '@darigo/shared-types'
-import { BookingStatus } from '@darigo/shared-types'
+import type { ServiceCategory } from '@domofix/shared-types'
+import { BookingStatus } from '@domofix/shared-types'
 import type { TimePoint, OrdersStatusCount, RequestsCategoryCount, KPIItem, ActivityItem } from './types'
 
 function mulberry32(a: number) {

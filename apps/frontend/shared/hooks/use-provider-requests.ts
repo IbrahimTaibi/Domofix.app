@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Request, RequestStatus } from "@darigo/shared-types";
+import type { Request, RequestStatus } from "@domofix/shared-types";
 import {
   listProviderAllRequests,
   type ListRequestsParams,

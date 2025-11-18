@@ -1,4 +1,4 @@
-import type { AcceptProviderRequest } from '@darigo/shared-types';
+import type { AcceptProviderRequest } from '@domofix/shared-types';
 import { IsString, IsMongoId } from 'class-validator';
 
 export class AcceptProviderDto implements AcceptProviderRequest {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { hashPassword, comparePassword } from '@darigo/shared-utils';
+import { hashPassword, comparePassword } from '@domofix/shared-utils';
 import { User, UserDocument, Address } from './schemas/user.schema';
 import { GeocodingService } from '../common/geocoding/geocoding.service';
 

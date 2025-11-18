@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { getSession } from 'next-auth/react'
-import type { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@darigo/shared-types'
+import type { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@domofix/shared-types'
 import { apiClient } from '@/shared/utils/api'
 
 type AuthState = {

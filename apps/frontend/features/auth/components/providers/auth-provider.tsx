@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { signOut, useSession } from 'next-auth/react';
-import { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@darigo/shared-types';
+import { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@domofix/shared-types';
 import { apiClient } from '@/shared/utils/api';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/store/auth-store';

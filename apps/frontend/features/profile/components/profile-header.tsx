@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User } from "@darigo/shared-types";
+import { User } from "@domofix/shared-types";
 import { Button } from "@/shared/components";
 import ProfilePictureUpload from "./profile-picture-upload";
 

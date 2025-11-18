@@ -1,5 +1,5 @@
 import React from 'react'
-import type { RequestStatus } from '@darigo/shared-types'
+import type { RequestStatus } from '@domofix/shared-types'
 import clsx from 'clsx'
 
 export interface StatusBadgeProps {

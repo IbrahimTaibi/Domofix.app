@@ -1,4 +1,4 @@
-import type { UpdateUserRequest, User } from '@darigo/shared-types'
+import type { UpdateUserRequest, User } from '@domofix/shared-types'
 import { apiClient } from '@/shared/utils/api'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'

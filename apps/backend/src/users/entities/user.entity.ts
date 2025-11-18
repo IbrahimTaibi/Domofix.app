@@ -4,7 +4,7 @@ import {
   NotificationPreferences,
   SecuritySettings,
   PhoneVerification,
-} from '@darigo/shared-types';
+} from '@domofix/shared-types';
 
 export class User implements Omit<SharedUser, 'createdAt' | 'updatedAt'> {
   id: string;

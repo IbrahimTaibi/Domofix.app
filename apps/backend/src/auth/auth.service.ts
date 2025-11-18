@@ -12,7 +12,7 @@ import { OAuthLoginDto } from './dto';
 import { EmailService } from '../email/email.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as crypto from 'crypto';
-import { isValidPassword } from '@darigo/shared-utils';
+import { isValidPassword } from '@domofix/shared-utils';
 import { ConfigService } from '@nestjs/config';
 import { RefreshTokensService } from './refresh-tokens.service';
 

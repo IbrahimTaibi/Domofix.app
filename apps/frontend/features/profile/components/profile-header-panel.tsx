@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import type { User as UserType } from '@darigo/shared-types'
+import type { User as UserType } from '@domofix/shared-types'
 import { Button } from '@/shared/components'
 import { User as UserIcon } from 'lucide-react'
 

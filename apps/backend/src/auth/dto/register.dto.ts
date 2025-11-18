@@ -8,7 +8,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { RegisterRequest, Address } from '@darigo/shared-types';
+import type { RegisterRequest, Address } from '@domofix/shared-types';
 
 export class AddressDto implements Address {
   @IsOptional()
