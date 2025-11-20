@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useState } from 'react'
-import type { CreateRequestRequest, Request } from '@darigo/shared-types'
+import type { CreateRequestRequest, Request } from '@domofix/shared-types'
 import { createRequest, cacheLastRequest, getCachedLastRequest } from '../services/requests-service'
 
 export interface UseRequestServiceResult {

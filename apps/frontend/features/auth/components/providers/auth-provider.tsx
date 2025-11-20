@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { signOut, useSession } from 'next-auth/react';
-import { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@darigo/shared-types';
+import { User, RegisterRequest, LoginRequest, CreateProviderApplicationRequest, ProviderApplication } from '@domofix/shared-types';
 import { apiClient } from '@/shared/utils/api';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/store/auth-store';
@@ -58,7 +58,9 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
   // React to NextAuth session changes (e.g., after OAuth in a popup)
   useEffect(() => {
     const syncFromSession = async () => {
+      console.log('[AuthProvider] NextAuth session sync, status:', status)
       if (status === 'authenticated') {
+        console.log('[AuthProvider] NextAuth authenticated')
         const backendToken = (sessionData as any)?.backendAccessToken;
         if (backendToken) {
           apiClient.setAuthToken(backendToken);
@@ -114,8 +116,19 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
         }
         setLoading(false);
       } else if (status === 'unauthenticated') {
-        // No session; stop loading and clear user
-        setLoading(false);
+        console.log('[AuthProvider] NextAuth unauthenticated')
+        // IMPORTANT: Don't clear user if apiClient has valid auth
+        // User might have logged in via email/password (not OAuth)
+        if (apiClient.isAuthenticated()) {
+          console.log('[AuthProvider] API client is authenticated, keeping user')
+          setLoading(false);
+        } else {
+          console.log('[AuthProvider] No API auth, clearing user')
+          // No session and no backend auth; stop loading and clear user
+          setUser(null);
+          setBackendToken(null);
+          setLoading(false);
+        }
       }
     };
     syncFromSession();

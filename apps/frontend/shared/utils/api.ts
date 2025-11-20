@@ -1,4 +1,4 @@
-import { User, RegisterRequest, LoginRequest, AuthResponse, ApiError, ProviderApplication, CreateProviderApplicationRequest, UpdatePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest } from '@darigo/shared-types';
+import { User, RegisterRequest, LoginRequest, AuthResponse, ApiError, ProviderApplication, CreateProviderApplicationRequest, UpdatePasswordRequest, ForgotPasswordRequest, ResetPasswordRequest } from '@domofix/shared-types';
 import { httpRequest } from './http'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';

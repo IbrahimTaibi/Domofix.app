@@ -5,7 +5,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { isValidPhoneNumber } from '@darigo/shared-utils';
+import { isValidPhoneNumber } from '@domofix/shared-utils';
 
 @ValidatorConstraint({ async: false })
 @Injectable()

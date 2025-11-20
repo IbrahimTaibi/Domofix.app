@@ -6,7 +6,7 @@
 
 import { httpRequest } from '@/shared/utils/http'
 import { useAuthStore } from '@/features/auth/store/auth-store'
-import type { ThreadSummary, ChatMessage } from '@darigo/shared-types'
+import type { ThreadSummary, ChatMessage } from '@domofix/shared-types'
 import type { OrderStatus } from '../types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'

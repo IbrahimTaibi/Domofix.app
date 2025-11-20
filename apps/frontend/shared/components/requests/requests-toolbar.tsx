@@ -3,7 +3,7 @@
 import React from 'react'
 import { RefreshCw } from 'lucide-react'
 import FiltersBar from '@/shared/components/requests/filters-bar'
-import type { RequestStatus, ServiceCategory } from '@darigo/shared-types'
+import type { RequestStatus, ServiceCategory } from '@domofix/shared-types'
 
 export interface RequestsToolbarProps {
   status?: RequestStatus

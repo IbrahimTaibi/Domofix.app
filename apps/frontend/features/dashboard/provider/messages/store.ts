@@ -1,7 +1,7 @@
 "use client"
 import { create } from 'zustand'
 import type { ThreadSummary, Message, Participant } from './types'
-import type { ChatMessage, ThreadSummary as BackendThread } from '@darigo/shared-types'
+import type { ChatMessage, ThreadSummary as BackendThread } from '@domofix/shared-types'
 import { listThreads, listMessages, sendMessage as sendMessageApi } from './svc/messages-service'
 
 interface MessagesState {

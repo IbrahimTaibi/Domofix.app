@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Notification } from '@darigo/shared-types'
+import type { Notification } from '@domofix/shared-types'
 
 interface NotificationsState {
   notifications: Notification[]

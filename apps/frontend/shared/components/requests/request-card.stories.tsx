@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import RequestCard from './request-card'
-import { RequestStatus } from '@darigo/shared-types'
+import { RequestStatus } from '@domofix/shared-types'
 
 const meta: Meta<typeof RequestCard> = {
   title: 'Requests/RequestCard',

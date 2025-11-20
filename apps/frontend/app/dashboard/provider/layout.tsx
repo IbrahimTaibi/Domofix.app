@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import ProviderHeader from "@/features/dashboard/provider/components/header"
 import ProviderSidebar from "@/features/dashboard/provider/components/sidebar"
+// import ProviderGuard from "@/features/auth/components/guards/provider-guard"
 
 export default function ProviderDashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)

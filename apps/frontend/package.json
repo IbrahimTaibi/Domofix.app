@@ -1,5 +1,5 @@
 {
-  "name": "@darigo/frontend",
+  "name": "@domofix/frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@darigo/shared-types": "file:../../packages/shared-types",
+    "@domofix/shared-types": "file:../../packages/shared-types",
     "@hookform/resolvers": "^5.2.2",
     "@nivo/bar": "^0.85.0",
     "@nivo/core": "^0.85.0",

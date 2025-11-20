@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import type { NotificationType } from '@darigo/shared-types';
+import type { NotificationType } from '@domofix/shared-types';
 
 export type NotificationDocument = Notification & Document;
 

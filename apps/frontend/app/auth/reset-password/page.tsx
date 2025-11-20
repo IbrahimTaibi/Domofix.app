@@ -5,7 +5,7 @@ import Input from '@/shared/components/input'
 import Button from '@/shared/components/button'
 import { Lock } from 'lucide-react'
 import { apiClient } from '@/shared/utils/api'
-import { isValidPassword } from '@darigo/shared-utils'
+import { isValidPassword } from '@domofix/shared-utils'
 
 interface ResetPasswordPageProps {
   searchParams?: { [key: string]: string | string[] | undefined }

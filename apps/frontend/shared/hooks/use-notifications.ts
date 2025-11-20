@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useNotificationsStore } from '@/shared/store/notifications-store'
 import { playNotificationChime } from '@/shared/utils/sound'
-import type { Notification } from '@darigo/shared-types'
+import type { Notification } from '@domofix/shared-types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 

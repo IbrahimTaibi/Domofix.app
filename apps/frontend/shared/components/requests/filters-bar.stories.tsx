@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import FiltersBar from './filters-bar'
-import { RequestStatus, ServiceCategory } from '@darigo/shared-types'
+import { RequestStatus, ServiceCategory } from '@domofix/shared-types'
 
 const meta: Meta<typeof FiltersBar> = {
   title: 'Requests/FiltersBar',

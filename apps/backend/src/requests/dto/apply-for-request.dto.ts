@@ -1,4 +1,4 @@
-import type { ApplyForRequestRequest } from '@darigo/shared-types';
+import type { ApplyForRequestRequest } from '@domofix/shared-types';
 import {
   IsOptional,
   IsString,

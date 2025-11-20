@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Darigo frontend is built with Next.js 14 and follows a feature-based architecture. Components are organized into shared components (reusable across the app) and feature-specific components.
+The domofix frontend is built with Next.js 14 and follows a feature-based architecture. Components are organized into shared components (reusable across the app) and feature-specific components.
 
 ## Architecture
 

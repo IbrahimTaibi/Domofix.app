@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Request } from '@darigo/shared-types'
+import type { Request } from '@domofix/shared-types'
 import { motion, AnimatePresence } from 'framer-motion'
 import RequestCard from '@/shared/components/requests/request-card'
 

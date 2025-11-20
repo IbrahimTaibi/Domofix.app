@@ -1,4 +1,4 @@
-import { ServiceCategory } from '@darigo/shared-types'
+import { ServiceCategory } from '@domofix/shared-types'
 
 export const APP_NAME = 'Domofix'
 export const APP_DESCRIPTION = 'Your city\'s services platform'

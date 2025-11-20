@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { RequestStatus, ServiceCategory } from '@darigo/shared-types'
+import { RequestStatus, ServiceCategory } from '@domofix/shared-types'
 import clsx from 'clsx'
 
 export interface FiltersBarProps {

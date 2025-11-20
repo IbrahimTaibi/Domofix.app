@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Request } from '@darigo/shared-types'
+import type { Request } from '@domofix/shared-types'
 import StatusBadge from '@/shared/components/requests/status-badge'
 import Button from '@/shared/components/button'
 import { CalendarClock, MapPin } from 'lucide-react'

@@ -1,4 +1,4 @@
-import type { ServiceCategory } from '@darigo/shared-types'
+import type { ServiceCategory } from '@domofix/shared-types'
 
 export interface TimePoint {
   date: string

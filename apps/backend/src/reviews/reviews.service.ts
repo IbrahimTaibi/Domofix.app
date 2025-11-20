@@ -11,7 +11,7 @@ import { ListCommentsQueryDto } from './dto/list-comments.query';
 import type {
   Review as ReviewDTO,
   Comment as CommentDTO,
-} from '@darigo/shared-types';
+} from '@domofix/shared-types';
 import {
   NotFoundError,
   AuthorizationError,

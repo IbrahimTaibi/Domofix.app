@@ -1,8 +1,8 @@
-# Darigo - Service Provider Platform
+# domofix - Service Provider Platform
 
-![Darigo Logo](https://via.placeholder.com/200x80/0ea5e9/ffffff?text=Darigo)
+![domofix Logo](https://via.placeholder.com/200x80/0ea5e9/ffffff?text=domofix)
 
-Darigo is a modern service provider platform that connects customers with service providers across various categories. Built with a scalable monorepo architecture using Next.js 14 and NestJS.
+domofix is a modern service provider platform that connects customers with service providers across various categories. Built with a scalable monorepo architecture using Next.js 14 and NestJS.
 
 ## 🚀 Quick Start
 
@@ -17,7 +17,7 @@ Darigo is a modern service provider platform that connects customers with servic
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd Darigo
+cd domofix
 
 # Install all dependencies
 npm run install:all
@@ -41,7 +41,7 @@ npm run dev:backend   # Starts NestJS on http://localhost:3001
 ## 📁 Project Structure
 
 ```
-Darigo/
+domofix/
 ├── apps/
 │   ├── frontend/          # Next.js 14 application
 │   └── backend/           # NestJS API server
@@ -127,7 +127,7 @@ npm run test:e2e         # End-to-end tests
 ### Backend (.env)
 ```env
 # Database
-MONGODB_URI=mongodb://localhost:27017/darigo
+MONGODB_URI=mongodb://localhost:27017/domofix
 
 # JWT
 JWT_SECRET=your-jwt-secret

@@ -1,6 +1,6 @@
-# Contributing to Darigo
+# Contributing to domofix
 
-Welcome to the Darigo project! This guide will help you understand our development workflow, coding standards, and contribution process.
+Welcome to the domofix project! This guide will help you understand our development workflow, coding standards, and contribution process.
 
 ## Table of Contents
 
@@ -31,8 +31,8 @@ Before contributing, ensure you have:
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/your-username/darigo.git
-   cd darigo
+   git clone https://github.com/your-username/domofix.git
+   cd domofix
    ```
 
 2. **Install Dependencies**
@@ -129,7 +129,7 @@ We use **Git Flow** with the following branches:
 Our project uses a monorepo structure with the following workspaces:
 
 ```
-darigo/
+domofix/
 ├── apps/
 │   ├── frontend/          # Next.js application
 │   └── backend/           # NestJS application
@@ -847,8 +847,8 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## License
 
-By contributing to Darigo, you agree that your contributions will be licensed under the same license as the project.
+By contributing to domofix, you agree that your contributions will be licensed under the same license as the project.
 
 ---
 
-Thank you for contributing to Darigo! Your efforts help make this platform better for everyone.
+Thank you for contributing to domofix! Your efforts help make this platform better for everyone.

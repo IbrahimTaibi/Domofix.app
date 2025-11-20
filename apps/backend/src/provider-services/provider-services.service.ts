@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { Model, Connection, Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   ProviderService,
@@ -32,7 +32,6 @@ export class ProviderServicesService {
   constructor(
     @InjectModel(ProviderService.name)
     private serviceModel: Model<ProviderServiceDocument>,
-    @InjectConnection() private readonly connection: Connection,
     private readonly events: EventEmitter2,
     private readonly logger: AppLogger,
   ) {}
@@ -74,7 +73,7 @@ export class ProviderServicesService {
       this.logger.error(
         'Failed to create provider service',
         { providerId, category: dto.category },
-        error?.stack,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -133,7 +132,7 @@ export class ProviderServicesService {
       this.logger.error(
         'Failed to fetch provider services',
         { providerId },
-        error?.stack,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -188,7 +187,7 @@ export class ProviderServicesService {
       this.logger.error(
         'Failed to fetch services by category',
         { category },
-        error?.stack,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -216,7 +215,7 @@ export class ProviderServicesService {
       if (error instanceof NotFoundError || error instanceof ValidationError) {
         throw error;
       }
-      this.logger.error('Failed to fetch service', { id }, error?.stack);
+      this.logger.error('Failed to fetch service', { id }, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -240,13 +239,14 @@ export class ProviderServicesService {
       }
 
       // Validate pricing if being updated
-      if (dto.pricingType || dto.basePrice !== undefined || dto.minPrice !== undefined || dto.maxPrice !== undefined) {
+      const updateDto = dto as Partial<CreateProviderServiceDto>;
+      if (updateDto.pricingType || updateDto.basePrice !== undefined || updateDto.minPrice !== undefined || updateDto.maxPrice !== undefined) {
         this.validatePricing({
-          pricingType: dto.pricingType || service.pricingType,
-          basePrice: dto.basePrice !== undefined ? dto.basePrice : service.basePrice,
-          minPrice: dto.minPrice !== undefined ? dto.minPrice : service.minPrice,
-          maxPrice: dto.maxPrice !== undefined ? dto.maxPrice : service.maxPrice,
-        } as any);
+          pricingType: updateDto.pricingType || service.pricingType,
+          basePrice: updateDto.basePrice !== undefined ? updateDto.basePrice : service.basePrice,
+          minPrice: updateDto.minPrice !== undefined ? updateDto.minPrice : service.minPrice,
+          maxPrice: updateDto.maxPrice !== undefined ? updateDto.maxPrice : service.maxPrice,
+        } as CreateProviderServiceDto);
       }
 
       Object.assign(service, dto);
@@ -272,7 +272,7 @@ export class ProviderServicesService {
       ) {
         throw error;
       }
-      this.logger.error('Failed to update service', { id, providerId }, error?.stack);
+      this.logger.error('Failed to update service', { id, providerId }, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -310,7 +310,7 @@ export class ProviderServicesService {
       ) {
         throw error;
       }
-      this.logger.error('Failed to delete service', { id, providerId }, error?.stack);
+      this.logger.error('Failed to delete service', { id, providerId }, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -359,7 +359,7 @@ export class ProviderServicesService {
       this.logger.error(
         'Failed to update service status',
         { id, providerId, status },
-        error?.stack,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }
@@ -482,7 +482,7 @@ export class ProviderServicesService {
       this.logger.error(
         'Failed to fetch provider stats',
         { providerId },
-        error?.stack,
+        error instanceof Error ? error.stack : undefined,
       );
       throw error;
     }

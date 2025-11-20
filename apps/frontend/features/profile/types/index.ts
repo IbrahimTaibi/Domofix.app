@@ -1,4 +1,4 @@
-export type { UpdateUserRequest, UpdatePasswordRequest, User } from '@darigo/shared-types'
+export type { UpdateUserRequest, UpdatePasswordRequest, User } from '@domofix/shared-types'
 
 // UI-facing form shape for editing profile
 export type UpdateProfileForm = {

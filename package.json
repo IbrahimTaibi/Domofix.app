@@ -1,5 +1,5 @@
 {
-  "name": "darigo-monorepo",
+  "name": "domofix-monorepo",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
@@ -9,14 +9,14 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:all": "turbo run dev --parallel",
-    "dev:frontend": "npm run dev --workspace=@darigo/frontend",
-    "dev:backend": "npm run start:dev --workspace=@darigo/backend",
+    "dev:frontend": "npm run dev --workspace=@domofix/frontend",
+    "dev:backend": "npm run start:dev --workspace=@domofix/backend",
     "build": "npm run build --workspaces --if-present",
-    "build:frontend": "npm run build --workspace=@darigo/frontend",
-    "build:backend": "npm run build --workspace=@darigo/backend",
+    "build:frontend": "npm run build --workspace=@domofix/frontend",
+    "build:backend": "npm run build --workspace=@domofix/backend",
     "test": "npm run test --workspaces --if-present",
-    "test:frontend": "npm run test --workspace=@darigo/frontend",
-    "test:backend": "npm run test --workspace=@darigo/backend",
+    "test:frontend": "npm run test --workspace=@domofix/frontend",
+    "test:backend": "npm run test --workspace=@domofix/backend",
     "lint": "npm run lint --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present",
