@@ -28,7 +28,13 @@ export class OrdersService {
         ? { customerId: new Types.ObjectId(userId) }
         : { providerId: new Types.ObjectId(userId) };
     const query = filters.status ? { ...base, status: filters.status } : base;
-    let find = this.orderModel.find(query).sort({ acceptedAt: -1 });
+    let find = this.orderModel
+      .find(query)
+      .sort({ acceptedAt: -1 })
+      .populate('requestId', 'category details phone address location')
+      .populate('customerId', 'firstName lastName email avatar')
+      .populate('providerId', 'firstName lastName email avatar')
+      .populate('serviceId', 'title category');
     if (typeof filters.offset === 'number') find = find.skip(filters.offset);
     if (typeof filters.limit === 'number') find = find.limit(filters.limit);
     return find.exec();

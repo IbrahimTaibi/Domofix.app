@@ -3000,3 +3000,5 @@ npm run lint
 **Maintained by**: Domofix Team
 
 For questions or issues, please create an issue on GitHub or contact the development team.
+- always respect the architecture , write clean code , respect the overall design and ui , and always respect best Ui/UX
+- always modularized , maintainable scalable code.

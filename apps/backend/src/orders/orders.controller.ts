@@ -7,6 +7,7 @@ import {
   Req,
   Query,
   Body,
+  BadRequestException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -111,5 +112,28 @@ export class OrdersController {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
     const role = req.user?.role === 'admin' ? 'admin' : 'customer';
     return this.service.cancelOrder(userId, role, id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Patch(':id/status')
+  async updateStatus(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { status: string },
+  ) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role === 'provider' ? 'provider' : req.user?.role === 'admin' ? 'admin' : 'customer';
+    const status = body.status;
+
+    // Map status to corresponding methods
+    if (status === 'in_progress') {
+      return this.service.startOrder(userId, role, id);
+    } else if (status === 'completed') {
+      return this.service.completeOrder(userId, role, id);
+    } else if (status === 'canceled') {
+      return this.service.cancelOrder(userId, role, id);
+    } else {
+      throw new BadRequestException('Invalid status');
+    }
   }
 }

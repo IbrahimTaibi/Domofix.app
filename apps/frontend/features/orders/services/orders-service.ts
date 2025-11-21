@@ -13,15 +13,46 @@ function getAuthHeaders(): HeadersInit {
   return {}
 }
 
+export type OrderStatus = 'assigned' | 'in_progress' | 'completed' | 'canceled'
+
 export type Order = {
-  id: string
-  requestId: string
-  customerId: string
-  providerId: string
-  status: 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELED'
-  acceptedAt?: string
-  startedAt?: string
-  completedAt?: string
+  _id: string
+  status: OrderStatus
+  acceptedAt: string
+  startedAt?: string | null
+  completedAt?: string | null
+  canceledAt?: string | null
+  providerEts?: string | null
+  createdAt: string
+  updatedAt: string
+  // These can be either IDs or populated objects
+  requestId: string | {
+    _id: string
+    category: string
+    details?: string
+    phone: string
+    address?: any
+    location?: any
+  }
+  customerId: string | {
+    _id: string
+    firstName: string
+    lastName: string
+    email: string
+    avatar?: string
+  }
+  providerId: string | {
+    _id: string
+    firstName: string
+    lastName: string
+    email: string
+    avatar?: string
+  }
+  serviceId?: string | {
+    _id: string
+    title: string
+    category: string
+  } | null
 }
 
 export async function listMyOrders(params: { status?: string } = {}): Promise<Order[]> {
@@ -29,4 +60,18 @@ export async function listMyOrders(params: { status?: string } = {}): Promise<Or
   if (params.status) q.set('status', params.status)
   const url = `${API_BASE_URL}/orders${q.toString() ? `?${q.toString()}` : ''}`
   return httpRequest<Order[]>(url, { method: 'GET', headers: { ...getAuthHeaders() } })
+}
+
+export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order> {
+  const url = `${API_BASE_URL}/orders/${orderId}/status`
+  return httpRequest<Order>(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({ status })
+  })
+}
+
+export async function getOrderById(orderId: string): Promise<Order> {
+  const url = `${API_BASE_URL}/orders/${orderId}`
+  return httpRequest<Order>(url, { method: 'GET', headers: { ...getAuthHeaders() } })
 }
