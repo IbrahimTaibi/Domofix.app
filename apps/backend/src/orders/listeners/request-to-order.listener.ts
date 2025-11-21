@@ -34,6 +34,7 @@ export class RequestToOrderListener {
       if (existing) {
         // Idempotent update if provider changed
         existing.providerId = new Types.ObjectId(payload.providerId);
+        existing.serviceId = req.serviceId || null;
         existing.status = OrderStatusEnum.ASSIGNED;
         existing.acceptedAt = new Date();
         await existing.save();
@@ -64,6 +65,7 @@ export class RequestToOrderListener {
         requestId: req._id,
         customerId: req.customerId,
         providerId: new Types.ObjectId(payload.providerId),
+        serviceId: req.serviceId || null,
         status: OrderStatusEnum.ASSIGNED,
         acceptedAt: new Date(),
       });

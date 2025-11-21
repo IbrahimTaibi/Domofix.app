@@ -75,6 +75,7 @@ export class RequestsService {
 
     const doc = new this.requestModel({
       customerId: new Types.ObjectId(customerId),
+      serviceId: dto.serviceId ? new Types.ObjectId(dto.serviceId) : null,
       address,
       location: location
         ? {

@@ -62,6 +62,10 @@ export class Request {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   customerId: Types.ObjectId;
 
+  // Optional link to a specific provider service
+  @Prop({ type: Types.ObjectId, ref: 'ProviderService', default: null, index: true })
+  serviceId?: Types.ObjectId | null;
+
   // Address OR geolocation (address contains optional lat/long fields)
   @Prop({ type: Address, default: () => ({}) })
   address: Address;
@@ -144,4 +148,5 @@ RequestSchema.index({ customerId: 1, status: 1, createdAt: -1 });
 RequestSchema.index({ status: 1, createdAt: -1 });
 RequestSchema.index({ acceptedProviderId: 1, status: 1 });
 RequestSchema.index({ 'applications.providerId': 1 });
+RequestSchema.index({ serviceId: 1, status: 1 });
 RequestSchema.index({ locationPoint: '2dsphere' });
