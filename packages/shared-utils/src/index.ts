@@ -1,8 +1,8 @@
 // Authentication utilities
-export * from './auth';
+export * from './auth.js';
 
 // Validation utilities
-export * from './validation';
+export * from './validation.js';
 
 // Date utilities
-export * from './date';
+export * from './date.js';

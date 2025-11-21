@@ -4,11 +4,11 @@
   "description": "Shared utilities for the Domofix monorepo",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "commonjs",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },

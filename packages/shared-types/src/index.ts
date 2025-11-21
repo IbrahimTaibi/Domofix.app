@@ -1,15 +1,15 @@
 // Authentication types
-export * from './auth';
+export * from './auth.js';
 
 // API types
-export * from './api';
+export * from './api.js';
 
 // Service types
-export * from './service';
+export * from './service.js';
 
 // Request types
-export * from './request';
+export * from './request.js';
 
 // Notification types
-export * from './notifications';
-export * from './messaging';
+export * from './notifications.js';
+export * from './messaging.js';
