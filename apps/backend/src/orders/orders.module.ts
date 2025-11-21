@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { Order, OrderSchema } from './schemas/order.schema';
@@ -18,6 +19,7 @@ import { MessagingModule } from '../messaging/messaging.module';
       { name: RequestEntity.name, schema: RequestSchema },
     ]),
     MessagingModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [OrdersController],
   providers: [OrdersService, RequestToOrderListener, AppLogger],

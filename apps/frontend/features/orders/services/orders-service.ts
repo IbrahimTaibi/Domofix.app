@@ -13,13 +13,14 @@ function getAuthHeaders(): HeadersInit {
   return {}
 }
 
-export type OrderStatus = 'assigned' | 'in_progress' | 'completed' | 'canceled'
+export type OrderStatus = 'assigned' | 'in_progress' | 'pending_completion' | 'completed' | 'canceled'
 
 export type Order = {
   _id: string
   status: OrderStatus
   acceptedAt: string
   startedAt?: string | null
+  completionRequestedAt?: string | null
   completedAt?: string | null
   canceledAt?: string | null
   providerEts?: string | null

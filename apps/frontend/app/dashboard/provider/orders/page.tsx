@@ -72,6 +72,7 @@ export default function ProviderOrdersPage() {
           all: orders.length,
           assigned: orders.filter(o => o.status === "assigned").length,
           in_progress: orders.filter(o => o.status === "in_progress").length,
+          pending_completion: orders.filter(o => o.status === "pending_completion").length,
           completed: orders.filter(o => o.status === "completed").length,
           canceled: orders.filter(o => o.status === "canceled").length,
         }}

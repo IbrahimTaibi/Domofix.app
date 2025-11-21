@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Order, OrderDocument, OrderStatusEnum } from './schemas/order.schema';
 import { AppLogger } from '@/common/logging/logger.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -81,16 +82,32 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order not found');
     const isCustomer = (order.customerId as any).toString() === userId;
     const isProvider = (order.providerId as any).toString() === userId;
-    if (!isCustomer && !isProvider && role !== 'admin')
-      throw new ForbiddenException('Only customer or provider can complete');
-    if (order.status !== OrderStatusEnum.IN_PROGRESS)
-      throw new BadRequestException('Only in-progress orders can be completed');
-    order.status = OrderStatusEnum.COMPLETED;
-    order.completedAt = new Date();
-    const updated = await order.save();
-    this.logger.info('Order completed', { orderId: id, actorUserId: userId });
-    this.events.emit('order.completed', { orderId: id });
-    return updated;
+
+    // Provider requests completion → pending_completion
+    if (isProvider && role === 'provider') {
+      if (order.status !== OrderStatusEnum.IN_PROGRESS)
+        throw new BadRequestException('Only in-progress orders can be completed');
+      order.status = OrderStatusEnum.PENDING_COMPLETION;
+      order.completionRequestedAt = new Date();
+      const updated = await order.save();
+      this.logger.info('Order completion requested by provider', { orderId: id, providerId: userId });
+      this.events.emit('order.completion_requested', { orderId: id });
+      return updated;
+    }
+
+    // Customer or admin approves completion
+    if (isCustomer || role === 'admin') {
+      if (order.status !== OrderStatusEnum.PENDING_COMPLETION)
+        throw new BadRequestException('Order must be pending completion');
+      order.status = OrderStatusEnum.COMPLETED;
+      order.completedAt = new Date();
+      const updated = await order.save();
+      this.logger.info('Order completed', { orderId: id, actorUserId: userId });
+      this.events.emit('order.completed', { orderId: id });
+      return updated;
+    }
+
+    throw new ForbiddenException('Not authorized to complete this order');
   }
 
   async setProviderEts(
@@ -148,5 +165,40 @@ export class OrdersService {
     this.logger.info('Order canceled', { orderId: id, customerId: userId });
     this.events.emit('order.canceled', { orderId: id });
     return updated;
+  }
+
+  /**
+   * Auto-complete orders that have been pending completion for more than 3 days
+   * Runs daily at 2 AM
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async autoCompleteExpiredOrders() {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    const expiredOrders = await this.orderModel
+      .find({
+        status: OrderStatusEnum.PENDING_COMPLETION,
+        completionRequestedAt: { $lte: threeDaysAgo },
+      })
+      .exec();
+
+    if (expiredOrders.length === 0) {
+      this.logger.info('No expired orders to auto-complete');
+      return [];
+    }
+
+    const results = [];
+    for (const order of expiredOrders) {
+      order.status = OrderStatusEnum.COMPLETED;
+      order.completedAt = new Date();
+      const updated = await order.save();
+      this.logger.info('Order auto-completed after 3 days', { orderId: order._id.toString() });
+      this.events.emit('order.completed', { orderId: order._id.toString() });
+      results.push(updated);
+    }
+
+    this.logger.info(`Auto-completed ${results.length} expired orders`);
+    return results;
   }
 }

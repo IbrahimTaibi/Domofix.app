@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Package, PlayCircle, CheckCircle, XCircle } from "lucide-react"
+import { Package, PlayCircle, CheckCircle, XCircle, Clock } from "lucide-react"
 import { OrderStatus } from "../services/orders-service"
 
 interface OrdersFiltersProps {
@@ -11,6 +11,7 @@ interface OrdersFiltersProps {
     all: number
     assigned: number
     in_progress: number
+    pending_completion: number
     completed: number
     canceled: number
   }
@@ -34,6 +35,12 @@ const FILTER_CONFIG = [
     label: "En cours",
     icon: PlayCircle,
     color: "amber",
+  },
+  {
+    key: "pending_completion" as const,
+    label: "En attente",
+    icon: Clock,
+    color: "purple",
   },
   {
     key: "completed" as const,
@@ -61,6 +68,10 @@ const COLOR_CLASSES = {
   amber: {
     active: "bg-amber-600 text-white",
     inactive: "bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200",
+  },
+  purple: {
+    active: "bg-purple-600 text-white",
+    inactive: "bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200",
   },
   green: {
     active: "bg-green-600 text-white",

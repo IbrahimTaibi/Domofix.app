@@ -6,6 +6,7 @@ export type OrderDocument = Order & Document;
 export enum OrderStatusEnum {
   ASSIGNED = 'assigned',
   IN_PROGRESS = 'in_progress',
+  PENDING_COMPLETION = 'pending_completion',
   COMPLETED = 'completed',
   CANCELED = 'canceled',
 }
@@ -38,6 +39,9 @@ export class Order {
 
   @Prop({ default: null })
   startedAt?: Date | null;
+
+  @Prop({ default: null })
+  completionRequestedAt?: Date | null;
 
   @Prop({ default: null })
   completedAt?: Date | null;

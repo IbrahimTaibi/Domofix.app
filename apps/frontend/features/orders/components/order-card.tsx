@@ -45,6 +45,14 @@ const STATUS_CONFIG = {
     borderColor: "border-amber-200",
     icon: PlayCircle,
   },
+  pending_completion: {
+    label: "En attente d'approbation",
+    color: "purple",
+    bgColor: "bg-purple-50",
+    textColor: "text-purple-700",
+    borderColor: "border-purple-200",
+    icon: Clock,
+  },
   completed: {
     label: "Terminée",
     color: "green",
@@ -82,7 +90,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const StatusIcon = config.icon
 
   const canStartProgress = order.status === "assigned"
-  const canComplete = order.status === "in_progress"
+  const canRequestCompletion = order.status === "in_progress"
 
   // Widget store
   const setWidgetOpen = useWidgetStore((s) => s.setOpen)
@@ -248,6 +256,18 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
               </div>
             )}
 
+            {order.completionRequestedAt && (
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="w-4 h-4 text-purple-600 flex-shrink-0" aria-hidden="true" />
+                <div>
+                  <span className="text-gray-600">Terminaison demandée le : </span>
+                  <span className="font-semibold text-gray-900">
+                    {format(new Date(order.completionRequestedAt), "d MMMM yyyy", { locale: fr })}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {order.completedAt && (
               <div className="flex items-center gap-2 text-sm">
                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" aria-hidden="true" />
@@ -322,7 +342,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           </button>
         )}
 
-        {canComplete && (
+        {canRequestCompletion && (
           <button
             onClick={() => handleStatusUpdate("completed")}
             disabled={isUpdating}
