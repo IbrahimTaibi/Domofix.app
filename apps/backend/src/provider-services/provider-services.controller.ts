@@ -11,21 +11,26 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProviderServicesService } from './provider-services.service';
 import { CreateProviderServiceDto } from './dto/create-provider-service.dto';
 import { UpdateProviderServiceDto } from './dto/update-provider-service.dto';
 import { QueryProviderServicesDto } from './dto/query-provider-services.dto';
+import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ServiceStatus } from './schemas/provider-service.schema';
 import { AppLogger } from '../common/logging/logger.service';
+import { RequestsService } from '../requests/requests.service';
+import { ServiceCategory } from '@domofix/shared-types';
 
 @Controller('provider-services')
 export class ProviderServicesController {
   constructor(
     private readonly service: ProviderServicesService,
+    private readonly requestsService: RequestsService,
     private readonly logger: AppLogger,
   ) {}
 
@@ -140,6 +145,62 @@ export class ProviderServicesController {
     const providerId = req.user?.userId || req.user?.sub || req.user?.id;
     this.logger.info('Deleting provider service', { serviceId: id, providerId });
     await this.service.delete(id, providerId);
+  }
+
+  /**
+   * Create a request for a specific provider service
+   * POST /provider-services/:id/request
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('customer')
+  @Post(':id/request')
+  async createServiceRequest(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Body() dto: CreateServiceRequestDto,
+  ) {
+    const customerId = req.user?.userId || req.user?.sub || req.user?.id;
+    this.logger.info('Creating request for provider service', { serviceId: id, customerId });
+
+    // Fetch the service to validate it exists and is active
+    const providerService = await this.service.findById(id);
+
+    if (providerService.status !== ServiceStatus.ACTIVE) {
+      throw new BadRequestException('Ce service n\'est pas disponible actuellement');
+    }
+
+    // Map the service category to request category
+    const categoryMapping: Record<string, ServiceCategory> = {
+      'plumber': ServiceCategory.PLUMBER,
+      'electrician': ServiceCategory.ELECTRICIAN,
+      'cleaner': ServiceCategory.CLEANER,
+      'carpenter': ServiceCategory.CARPENTER,
+      'painter': ServiceCategory.PAINTER,
+      'gardener': ServiceCategory.GARDENER,
+      'barber': ServiceCategory.BARBER,
+      'tutor': ServiceCategory.TUTOR,
+      'delivery': ServiceCategory.DELIVERY,
+    };
+
+    const requestCategory = categoryMapping[providerService.category] || ServiceCategory.OTHER;
+
+    // Create the request with serviceId
+    const request = await this.requestsService.createRequest(customerId, {
+      serviceId: id,
+      category: requestCategory,
+      phone: dto.phone,
+      address: dto.address,
+      location: dto.location,
+      estimatedTimeOfService: dto.estimatedTimeOfService,
+      details: dto.details,
+    });
+
+    // Increment inquiry count for analytics
+    this.service.incrementInquiryCount(id).catch(() => {
+      // Silent fail
+    });
+
+    return request;
   }
 
   /**

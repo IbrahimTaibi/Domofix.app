@@ -21,6 +21,10 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   providerId: Types.ObjectId;
 
+  // Optional link to the provider service (if request was for a specific service)
+  @Prop({ type: Types.ObjectId, ref: 'ProviderService', default: null, index: true })
+  serviceId?: Types.ObjectId | null;
+
   @Prop({
     required: true,
     enum: Object.values(OrderStatusEnum),
@@ -55,3 +59,4 @@ export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.index({ customerId: 1, status: 1, acceptedAt: -1 });
 OrderSchema.index({ providerId: 1, status: 1, acceptedAt: -1 });
 OrderSchema.index({ requestId: 1 });
+OrderSchema.index({ serviceId: 1, status: 1 });
