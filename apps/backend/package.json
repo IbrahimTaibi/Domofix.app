@@ -1,7 +1,7 @@
 {
-  "name": "@domofix/backend",
+  "name": "@darigo/backend",
   "version": "0.0.1",
-  "description": "Domofix Backend API",
+  "description": "Darigo Backend API",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -24,8 +24,8 @@
     "seed:reset": "ts-node src/seeds/seed.ts --force"
   },
   "dependencies": {
-    "@domofix/shared-types": "file:../../packages/shared-types",
-    "@domofix/shared-utils": "file:../../packages/shared-utils",
+    "@darigo/shared-types": "file:../../packages/shared-types",
+    "@darigo/shared-utils": "file:../../packages/shared-utils",
     "@nestjs/cache-manager": "^2.2.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
