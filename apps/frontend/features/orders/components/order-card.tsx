@@ -83,7 +83,6 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
 
   const canStartProgress = order.status === "assigned"
   const canComplete = order.status === "in_progress"
-  const canCancel = order.status === "assigned" || order.status === "in_progress"
 
   // Widget store
   const setWidgetOpen = useWidgetStore((s) => s.setOpen)
@@ -316,7 +315,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           <button
             onClick={() => handleStatusUpdate("in_progress")}
             disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
           >
             <PlayCircle className="w-4 h-4" aria-hidden="true" />
             Démarrer
@@ -331,17 +330,6 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           >
             <CheckCircle className="w-4 h-4" aria-hidden="true" />
             Terminer
-          </button>
-        )}
-
-        {canCancel && (
-          <button
-            onClick={() => handleStatusUpdate("canceled")}
-            disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
-          >
-            <XCircle className="w-4 h-4" aria-hidden="true" />
-            Annuler
           </button>
         )}
 
