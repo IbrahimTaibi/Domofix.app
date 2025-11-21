@@ -2,7 +2,6 @@
 
 import React, { useState } from "react"
 import {
-  Package,
   User,
   Phone,
   MapPin,
@@ -12,6 +11,7 @@ import {
   XCircle,
   PlayCircle,
   Tag,
+  MessageCircle,
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
@@ -19,6 +19,9 @@ import { Order, OrderStatus, updateOrderStatus } from "../services/orders-servic
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { getCategoryLabel } from "@/shared/utils/category-labels"
+import { useWidgetStore } from "@/features/widget/store/widget-store"
+import { useMessagesStore as useWidgetMessagesStore } from "@/features/widget/store/messages-store"
+import { useAuthStore } from "@/features/auth/store/auth-store"
 
 interface OrderCardProps {
   order: Order
@@ -60,6 +63,17 @@ const STATUS_CONFIG = {
   },
 }
 
+function Package(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16.5 9.4 7.55 4.24"/>
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.29 7 12 12 20.71 7"/>
+      <line x1="12" x2="12" y1="22" y2="12"/>
+    </svg>
+  )
+}
+
 export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -70,6 +84,12 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   const canStartProgress = order.status === "assigned"
   const canComplete = order.status === "in_progress"
   const canCancel = order.status === "assigned" || order.status === "in_progress"
+
+  // Widget store
+  const setWidgetOpen = useWidgetStore((s) => s.setOpen)
+  const setWidgetTab = useWidgetStore((s) => s.setTab)
+  const openThreadForOrder = useWidgetMessagesStore((s) => s.openThreadForOrder)
+  const user = useAuthStore((s) => s.user)
 
   async function handleStatusUpdate(newStatus: OrderStatus) {
     if (isUpdating) return
@@ -84,6 +104,19 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
     } finally {
       setIsUpdating(false)
     }
+  }
+
+  function handleOpenChat() {
+    if (!user?.id) return
+
+    // Open widget and navigate to messages tab
+    setWidgetTab("messages")
+    setWidgetOpen(true)
+
+    // Open the thread for this order
+    const request = typeof order.requestId === 'object' ? order.requestId : null
+    const requestDisplayId = request?._id || order._id
+    openThreadForOrder(order._id, requestDisplayId, user.id)
   }
 
   const customer = typeof order.customerId === 'object' ? order.customerId : null
@@ -105,84 +138,100 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   }
 
   return (
-    <div className={`rounded-lg border ${config.borderColor} bg-white shadow-sm hover:shadow-md transition-shadow`}>
+    <div className="rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-200">
       {/* Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            {/* Customer Avatar */}
-            <div className="flex-shrink-0">
-              {customer?.avatar ? (
-                <img
-                  src={customer.avatar}
-                  alt={getCustomerName()}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold ring-2 ring-gray-100">
-                  {getCustomerInitials()}
+      <div className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Customer Avatar */}
+          <div className="flex-shrink-0">
+            {customer?.avatar ? (
+              <img
+                src={customer.avatar}
+                alt={getCustomerName()}
+                className="w-14 h-14 rounded-full object-cover ring-2 ring-white shadow-md"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-lg font-bold ring-2 ring-white shadow-md">
+                {getCustomerInitials()}
+              </div>
+            )}
+          </div>
+
+          {/* Order Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  {service?.title || (request?.category ? getCategoryLabel(request.category) : "Commande")}
+                </h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${config.bgColor} ${config.textColor}`}>
+                    <StatusIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                    {config.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {/* Chat Button */}
+                <button
+                  onClick={handleOpenChat}
+                  className="p-2 rounded-lg bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors"
+                  aria-label="Ouvrir le chat"
+                  title="Ouvrir le chat"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </button>
+
+                {/* Expand Button */}
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                  aria-label={isExpanded ? "Réduire" : "Développer"}
+                >
+                  {isExpanded ? (
+                    <ChevronUp className="w-5 h-5" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Info */}
+            <div className="flex items-center gap-4 flex-wrap text-sm text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <User className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                <span className="font-medium">{getCustomerName()}</span>
+              </div>
+              {request?.phone && (
+                <div className="flex items-center gap-1.5">
+                  <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  <span>{request.phone}</span>
+                </div>
+              )}
+              {request?.category && (
+                <div className="flex items-center gap-1.5">
+                  <Tag className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                  <span>{getCategoryLabel(request.category)}</span>
                 </div>
               )}
             </div>
-
-            {/* Order Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-semibold text-gray-900">
-                  {service?.title || (request?.category ? getCategoryLabel(request.category) : "Commande")}
-                </h3>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${config.bgColor} ${config.textColor}`}>
-                  <StatusIcon className="w-3 h-3" aria-hidden="true" />
-                  {config.label}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <User className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                  <span className="truncate">{getCustomerName()}</span>
-                </div>
-                {request?.phone && (
-                  <div className="flex items-center gap-1.5">
-                    <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                    <span>{request.phone}</span>
-                  </div>
-                )}
-                {request?.category && (
-                  <div className="flex items-center gap-1.5">
-                    <Tag className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                    <span>{getCategoryLabel(request.category)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
-
-          {/* Expand Button */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded transition-colors"
-            aria-label={isExpanded ? "Réduire" : "Développer"}
-          >
-            {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Expandable Content */}
+      {/* Expandable Details */}
       {isExpanded && (
-        <div className="p-4 space-y-4 border-b border-gray-100 bg-gray-50">
+        <div className="border-t border-gray-100 bg-gray-50 p-5 space-y-4">
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-gray-500 flex-shrink-0" aria-hidden="true" />
               <div>
                 <span className="text-gray-600">Acceptée le : </span>
-                <span className="font-medium text-gray-900">
+                <span className="font-semibold text-gray-900">
                   {format(new Date(order.acceptedAt), "d MMMM yyyy", { locale: fr })}
                 </span>
               </div>
@@ -193,7 +242,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <span className="text-gray-600">Démarrée le : </span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-semibold text-gray-900">
                     {format(new Date(order.startedAt), "d MMMM yyyy", { locale: fr })}
                   </span>
                 </div>
@@ -205,7 +254,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <span className="text-gray-600">Terminée le : </span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-semibold text-gray-900">
                     {format(new Date(order.completedAt), "d MMMM yyyy", { locale: fr })}
                   </span>
                 </div>
@@ -217,7 +266,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
                 <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <span className="text-gray-600">Annulée le : </span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-semibold text-gray-900">
                     {format(new Date(order.canceledAt), "d MMMM yyyy", { locale: fr })}
                   </span>
                 </div>
@@ -231,7 +280,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
               <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <span className="text-gray-600">Adresse : </span>
-                <span className="font-medium text-gray-900">
+                <span className="font-semibold text-gray-900">
                   {request.address.street}, {request.address.city}
                 </span>
               </div>
@@ -241,7 +290,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           {/* Details */}
           {request?.details && (
             <div className="p-3 bg-white rounded-lg border border-gray-200">
-              <p className="text-sm text-gray-600 font-medium mb-1">Détails de la demande :</p>
+              <p className="text-sm text-gray-600 font-semibold mb-1">Détails de la demande :</p>
               <p className="text-sm text-gray-900">{request.details}</p>
             </div>
           )}
@@ -252,7 +301,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
               <span className="text-gray-600">Email : </span>
               <a
                 href={`mailto:${customer.email}`}
-                className="font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                className="font-semibold text-primary-600 hover:text-primary-700 transition-colors"
               >
                 {customer.email}
               </a>
@@ -261,13 +310,13 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
         </div>
       )}
 
-      {/* Actions */}
-      <div className="p-4 flex items-center gap-3 flex-wrap">
+      {/* Action Buttons */}
+      <div className="border-t border-gray-100 px-5 py-4 bg-gray-50 flex items-center gap-3 flex-wrap rounded-b-xl">
         {canStartProgress && (
           <button
             onClick={() => handleStatusUpdate("in_progress")}
             disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
           >
             <PlayCircle className="w-4 h-4" aria-hidden="true" />
             Démarrer
@@ -278,7 +327,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           <button
             onClick={() => handleStatusUpdate("completed")}
             disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
           >
             <CheckCircle className="w-4 h-4" aria-hidden="true" />
             Terminer
@@ -289,7 +338,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           <button
             onClick={() => handleStatusUpdate("canceled")}
             disabled={isUpdating}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
           >
             <XCircle className="w-4 h-4" aria-hidden="true" />
             Annuler
@@ -297,7 +346,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
         )}
 
         {isUpdating && (
-          <span className="text-sm text-gray-500 ml-auto">Mise à jour...</span>
+          <span className="text-sm text-gray-500 ml-auto font-medium">Mise à jour...</span>
         )}
       </div>
     </div>

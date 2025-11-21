@@ -86,6 +86,7 @@ export const useMessagesStore = create<MessagesState>((set, get) => ({
       const custMeta = custId ? meta[custId] : undefined
       return {
         id: t.id,
+        orderId: typeof t.orderId === 'string' ? t.orderId : (t.orderId as any)?._id || (t.orderId as any)?.toString(),
         title: custMeta?.name || `Client ${custId.slice(-4)}`,
         avatarUrl: custMeta?.avatar || '',
         lastMessage: '',

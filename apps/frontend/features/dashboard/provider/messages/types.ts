@@ -1,5 +1,6 @@
 export interface ThreadSummary {
   id: string
+  orderId?: string
   title: string
   avatarUrl: string
   lastMessage: string
