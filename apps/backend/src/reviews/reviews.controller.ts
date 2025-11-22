@@ -29,6 +29,14 @@ export class ReviewsController {
     return this.service.create(userId, dto);
   }
 
+  @Get('stats')
+  getStats(@Req() req: any, @Query('providerId') providerId?: string) {
+    const userId = req.user?.id || req.user?._id?.toString?.();
+    // If no providerId is provided, use the current user's ID
+    const targetProviderId = providerId || userId;
+    return this.service.getProviderStats(targetProviderId);
+  }
+
   @Get()
   list(@Query() query: ListReviewsQueryDto) {
     return this.service.list(query);

@@ -13,6 +13,7 @@ import {
   List,
   Briefcase,
   ClipboardList,
+  Star,
 } from "lucide-react"
 import { SidebarMenuSections, type SidebarMenuSection } from "@/features/dashboard/provider/components/sidebar-menu-sections"
 
@@ -30,6 +31,7 @@ const sections: SidebarMenuSection[] = [
       { href: "/dashboard/provider/requests", label: "Demandes", icon: ClipboardList },
       { href: "/dashboard/provider/orders", label: "Commandes", icon: List },
       { href: "/dashboard/provider/services", label: "Mes services", icon: Briefcase },
+      { href: "/dashboard/provider/reviews", label: "Avis clients", icon: Star },
       { href: "/dashboard/provider/messages", label: "Messages", icon: MessageSquare },
       {
         href: "/dashboard/provider/billing",
