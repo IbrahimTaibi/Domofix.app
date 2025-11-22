@@ -79,6 +79,9 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
   },
   checkAuth: async () => {
     console.log('[AuthStore] checkAuth started')
+    // Keep loading state while we check
+    set({ isLoading: true })
+
     // 1) Try syncing NextAuth session-backed token to our backend client
     try {
       const session = await getSession()
@@ -128,17 +131,18 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       console.log('[AuthStore] API client is authenticated, fetching profile...')
       try {
         const userData = await apiClient.getProfile()
-        console.log('[AuthStore] Profile fetched:', userData.id, userData.role)
+        console.log('[AuthStore] Profile fetched:', userData.id, userData.role, userData.providerStatus)
         set({ user: userData })
       } catch (err) {
         console.error('[AuthStore] Error fetching profile:', err)
         const { trackError } = await import('@/shared/utils/error-tracking')
         trackError(err, { source: 'auth-store.checkAuth.getProfile' })
         apiClient.logout()
-        set({ backendToken: null })
+        set({ user: null, backendToken: null })
       }
     } else {
       console.log('[AuthStore] API client not authenticated')
+      set({ user: null })
     }
     console.log('[AuthStore] checkAuth complete, setting isLoading=false')
     set({ isLoading: false })
