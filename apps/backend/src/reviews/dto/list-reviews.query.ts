@@ -6,6 +6,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ListReviewsQueryDto {
   @IsOptional()
@@ -25,11 +26,13 @@ export class ListReviewsQueryDto {
   customerId?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   @Max(100)
