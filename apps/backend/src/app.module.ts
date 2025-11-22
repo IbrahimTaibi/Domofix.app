@@ -17,6 +17,7 @@ import { OrdersModule } from './orders/orders.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { InvoicesModule } from './invoices/invoices.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { MessagingModule } from './messaging/messaging.module';
     OrdersModule,
     ReviewsModule,
     MessagingModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [

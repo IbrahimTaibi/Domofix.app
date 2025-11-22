@@ -33,6 +33,7 @@ const sections: SidebarMenuSection[] = [
       { href: "/dashboard/provider/services", label: "Mes services", icon: Briefcase },
       { href: "/dashboard/provider/reviews", label: "Avis clients", icon: Star },
       { href: "/dashboard/provider/messages", label: "Messages", icon: MessageSquare },
+      { href: "/dashboard/provider/invoices", label: "Factures", icon: FileText },
       {
         href: "/dashboard/provider/billing",
         label: "Facturation",
