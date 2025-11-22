@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   User,
   Phone,
@@ -14,21 +14,22 @@ import {
   MessageCircle,
   ChevronDown,
   ChevronUp,
+  Star,
 } from "lucide-react"
 import { Order, OrderStatus, updateOrderStatus, approveOrderCompletion, declineOrderCompletion } from "../services/orders-service"
-import { createReview } from "../services/reviews-service"
+import { getReviewByBookingId, Review } from "../services/reviews-service"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { getCategoryLabel } from "@/shared/utils/category-labels"
 import { useWidgetStore } from "@/features/widget/store/widget-store"
 import { useMessagesStore as useWidgetMessagesStore } from "@/features/widget/store/messages-store"
 import { useAuthStore } from "@/features/auth/store/auth-store"
-import RatingModal from "./rating-modal"
 
 interface OrderCardProps {
   order: Order
   onStatusChange?: () => void
   autoExpand?: boolean
+  onApprovalSuccess?: () => void
 }
 
 const STATUS_CONFIG = {
@@ -85,10 +86,11 @@ function Package(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default function OrderCard({ order, onStatusChange, autoExpand = false }: OrderCardProps) {
+export default function OrderCard({ order, onStatusChange, autoExpand = false, onApprovalSuccess }: OrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(autoExpand)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [showRatingModal, setShowRatingModal] = useState(false)
+  const [existingReview, setExistingReview] = useState<Review | null>(null)
+  const [loadingReview, setLoadingReview] = useState(false)
 
   const config = STATUS_CONFIG[order.status]
   const StatusIcon = config.icon
@@ -109,6 +111,28 @@ export default function OrderCard({ order, onStatusChange, autoExpand = false }:
 
   // Customer actions for pending completion
   const canApproveOrDecline = order.status === "pending_completion" && isCustomer
+
+  // Customer can rate if order is completed and hasn't rated yet
+  const canRate = order.status === "completed" && isCustomer && !existingReview
+
+  // Load existing review if order is completed
+  useEffect(() => {
+    if (order.status === "completed" && isCustomer) {
+      loadExistingReview()
+    }
+  }, [order._id, order.status, isCustomer])
+
+  async function loadExistingReview() {
+    try {
+      setLoadingReview(true)
+      const review = await getReviewByBookingId(order._id)
+      setExistingReview(review)
+    } catch (error) {
+      console.error("Failed to load review:", error)
+    } finally {
+      setLoadingReview(false)
+    }
+  }
 
   async function handleStatusUpdate(newStatus: OrderStatus) {
     if (isUpdating) return
@@ -131,34 +155,15 @@ export default function OrderCard({ order, onStatusChange, autoExpand = false }:
     try {
       setIsUpdating(true)
       await approveOrderCompletion(order._id)
+      // Notify parent to show rating modal
+      onApprovalSuccess?.()
       onStatusChange?.()
-      // Show rating modal after successful approval
-      setShowRatingModal(true)
     } catch (error: any) {
       console.error("Failed to approve completion:", error)
       alert(error?.message || "Erreur lors de l'approbation")
     } finally {
       setIsUpdating(false)
     }
-  }
-
-  async function handleSubmitRating(rating: number, comment: string) {
-    if (!user?.id) {
-      throw new Error("User not authenticated")
-    }
-
-    const customerId = typeof order.customerId === 'object' ? order.customerId._id : order.customerId
-    const providerId = typeof order.providerId === 'object' ? order.providerId._id : order.providerId
-    const serviceId = order.serviceId && typeof order.serviceId === 'object' ? order.serviceId._id : order.serviceId || ''
-
-    await createReview({
-      bookingId: order._id,
-      customerId,
-      providerId,
-      serviceId,
-      rating,
-      comment: comment || undefined,
-    })
   }
 
   async function handleDeclineCompletion() {
@@ -400,6 +405,44 @@ export default function OrderCard({ order, onStatusChange, autoExpand = false }:
               </a>
             </div>
           )}
+
+          {/* Existing Review Display */}
+          {existingReview && (
+            <div className="p-4 bg-gradient-to-br from-primary-50 to-blue-50 rounded-lg border border-primary-200">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-bold text-gray-900">Votre évaluation</h4>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-5 h-5 ${
+                        star <= existingReview.rating
+                          ? "fill-amber-400 text-amber-400"
+                          : "fill-gray-200 text-gray-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              {existingReview.comment && (
+                <p className="text-sm text-gray-700 leading-relaxed">{existingReview.comment}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-2">
+                Évalué le {format(new Date(existingReview.createdAt), "d MMMM yyyy", { locale: fr })}
+              </p>
+            </div>
+          )}
+
+          {/* Rate Button in Details Section */}
+          {canRate && (
+            <button
+              onClick={() => onApprovalSuccess?.()}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all shadow-sm hover:shadow-md"
+            >
+              <Star className="w-4 h-4" />
+              Évaluer le prestataire
+            </button>
+          )}
         </div>
       )}
 
@@ -452,14 +495,6 @@ export default function OrderCard({ order, onStatusChange, autoExpand = false }:
           <span className="text-sm text-gray-500 ml-auto font-medium">Mise à jour...</span>
         )}
       </div>
-
-      {/* Rating Modal */}
-      <RatingModal
-        isOpen={showRatingModal}
-        onClose={() => setShowRatingModal(false)}
-        onSubmit={handleSubmitRating}
-        providerName={getProviderName()}
-      />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import {
   IsString,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateReviewDto {
@@ -18,8 +19,10 @@ export class CreateReviewDto {
   @IsMongoId()
   providerId: string;
 
+  @IsOptional()
+  @ValidateIf((o) => o.serviceId && o.serviceId !== '')
   @IsMongoId()
-  serviceId: string;
+  serviceId?: string;
 
   @IsInt()
   @Min(1)

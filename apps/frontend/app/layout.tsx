@@ -11,6 +11,7 @@ import Providers from '@/app/providers'
 import OfflineBanner from '@/shared/components/error/offline-banner'
 import ToastContainer from '@/shared/components/toast-container'
 import Widget from '@/features/widget/components/widget'
+import NotificationsProvider from '@/features/notifications/components/notifications-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,20 +36,22 @@ export default async function RootLayout({
     <html lang="fr">
       <body className={`${inter.className} overflow-x-hidden scrollbar-light`}>
         <Providers session={session} initialUser={initialUser} initialBackendToken={initialBackendToken}>
-          {/* Site chrome (navbar, secondary navbar, footer) hidden on /dashboard */}
-          <AppChrome />
-          {/* Main content area with conditional padding based on route */}
-          <RootMain>
-            {children}
-          </RootMain>
-          {/* Footer for site routes (hidden on /dashboard) */}
-          <AppFooter />
-          {/* Global toasts */}
-          <ToastContainer />
-          {/* Portal target for toasts to avoid hydration mismatch */}
-          <div id="toast-root" />
-          <OfflineBanner />
-          <Widget />
+          <NotificationsProvider>
+            {/* Site chrome (navbar, secondary navbar, footer) hidden on /dashboard */}
+            <AppChrome />
+            {/* Main content area with conditional padding based on route */}
+            <RootMain>
+              {children}
+            </RootMain>
+            {/* Footer for site routes (hidden on /dashboard) */}
+            <AppFooter />
+            {/* Global toasts */}
+            <ToastContainer />
+            {/* Portal target for toasts to avoid hydration mismatch */}
+            <div id="toast-root" />
+            <OfflineBanner />
+            <Widget />
+          </NotificationsProvider>
         </Providers>
       </body>
     </html>

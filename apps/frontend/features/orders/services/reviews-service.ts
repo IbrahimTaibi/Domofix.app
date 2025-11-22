@@ -23,6 +23,19 @@ export interface CreateReviewData {
   images?: string[]
 }
 
+export interface Review {
+  id: string
+  bookingId: string
+  customerId: string
+  providerId: string
+  serviceId: string
+  rating: number
+  comment?: string
+  images?: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
 export async function createReview(data: CreateReviewData): Promise<any> {
   const url = `${API_BASE_URL}/reviews`
   return httpRequest(url, {
@@ -30,4 +43,18 @@ export async function createReview(data: CreateReviewData): Promise<any> {
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(data)
   })
+}
+
+export async function getReviewByBookingId(bookingId: string): Promise<Review | null> {
+  const url = `${API_BASE_URL}/reviews?bookingId=${bookingId}`
+  const response = await httpRequest(url, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  })
+
+  // Returns { data: [], total: 0, page: 1, limit: 20 }
+  if (response.data && response.data.length > 0) {
+    return response.data[0]
+  }
+  return null
 }

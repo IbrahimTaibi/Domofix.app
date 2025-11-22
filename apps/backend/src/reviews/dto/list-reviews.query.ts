@@ -10,6 +10,10 @@ import {
 export class ListReviewsQueryDto {
   @IsOptional()
   @IsMongoId()
+  bookingId?: string;
+
+  @IsOptional()
+  @IsMongoId()
   providerId?: string;
 
   @IsOptional()

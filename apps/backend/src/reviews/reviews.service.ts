@@ -117,6 +117,8 @@ export class ReviewsService {
     const page = Math.max(1, Number(query.page || 1));
     const limit = Math.max(1, Math.min(100, Number(query.limit || 20)));
     const filter: any = {};
+    if (query.bookingId)
+      filter.bookingId = new Types.ObjectId(query.bookingId);
     if (query.providerId)
       filter.providerId = new Types.ObjectId(query.providerId);
     if (query.serviceId) filter.serviceId = new Types.ObjectId(query.serviceId);

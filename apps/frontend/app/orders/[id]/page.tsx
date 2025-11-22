@@ -4,17 +4,22 @@ import React, { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { ArrowLeft, AlertCircle } from "lucide-react"
 import { getOrderById, Order } from "@/features/orders/services/orders-service"
+import { createReview } from "@/features/orders/services/reviews-service"
 import OrderCard from "@/features/orders/components/order-card"
+import RatingModal from "@/features/orders/components/rating-modal"
 import { Spinner } from "@/shared/components/spinner"
+import { useAuthStore } from "@/features/auth/store/auth-store"
 
 export default function OrderDetailPage() {
   const params = useParams()
   const router = useRouter()
   const orderId = params.id as string
+  const user = useAuthStore((s) => s.user)
 
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showRatingModal, setShowRatingModal] = useState(false)
 
   useEffect(() => {
     loadOrder()
@@ -31,6 +36,43 @@ export default function OrderDetailPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleSubmitRating(rating: number, comment: string) {
+    if (!user?.id || !order) {
+      throw new Error("User not authenticated or order not found")
+    }
+
+    const customerId = typeof order.customerId === 'object' ? order.customerId._id : order.customerId
+    const providerId = typeof order.providerId === 'object' ? order.providerId._id : order.providerId
+    const serviceId = order.serviceId && typeof order.serviceId === 'object' ? order.serviceId._id : order.serviceId
+
+    const reviewData: any = {
+      bookingId: order._id,
+      customerId,
+      providerId,
+      rating,
+      comment: comment || undefined,
+    }
+
+    // Only include serviceId if it exists and is not empty
+    if (serviceId && serviceId !== '') {
+      reviewData.serviceId = serviceId
+    }
+
+    await createReview(reviewData)
+    setShowRatingModal(false)
+
+    // Reload the order to refresh the review display in OrderCard
+    await loadOrder()
+  }
+
+  function getProviderName() {
+    if (order && typeof order.providerId === 'object') {
+      const provider = order.providerId
+      return `${provider.firstName} ${provider.lastName}`
+    }
+    return "Prestataire"
   }
 
   return (
@@ -74,7 +116,22 @@ export default function OrderDetailPage() {
           </div>
         </div>
       ) : order ? (
-        <OrderCard order={order} onStatusChange={loadOrder} autoExpand={true} />
+        <>
+          <OrderCard
+            order={order}
+            onStatusChange={loadOrder}
+            autoExpand={true}
+            onApprovalSuccess={() => setShowRatingModal(true)}
+          />
+
+          {/* Rating Modal */}
+          <RatingModal
+            isOpen={showRatingModal}
+            onClose={() => setShowRatingModal(false)}
+            onSubmit={handleSubmitRating}
+            providerName={getProviderName()}
+          />
+        </>
       ) : (
         <div className="rounded-lg bg-gray-50 border border-gray-200 p-8 text-center">
           <p className="text-gray-600">Commande introuvable</p>
