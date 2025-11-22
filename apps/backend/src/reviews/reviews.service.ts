@@ -108,6 +108,67 @@ export class ReviewsService {
     }
   }
 
+  async getProviderStats(providerId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    ratingDistribution: { [key: number]: number };
+    recentReviewsCount: number;
+  }> {
+    try {
+      const providerObjectId = new Types.ObjectId(providerId);
+
+      // Get all stats in parallel
+      const [totalReviews, ratingStats, recentCount] = await Promise.all([
+        // Total reviews count
+        this.reviewModel.countDocuments({ providerId: providerObjectId }),
+
+        // Average rating and distribution
+        this.reviewModel.aggregate([
+          { $match: { providerId: providerObjectId } },
+          {
+            $group: {
+              _id: null,
+              avgRating: { $avg: '$rating' },
+              ratings: { $push: '$rating' },
+            },
+          },
+        ]),
+
+        // Recent reviews (last 30 days)
+        this.reviewModel.countDocuments({
+          providerId: providerObjectId,
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        }),
+      ]);
+
+      // Calculate rating distribution
+      const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      if (ratingStats.length > 0 && ratingStats[0].ratings) {
+        ratingStats[0].ratings.forEach((rating: number) => {
+          ratingDistribution[rating] = (ratingDistribution[rating] || 0) + 1;
+        });
+      }
+
+      const averageRating =
+        ratingStats.length > 0 && ratingStats[0].avgRating
+          ? Math.round(ratingStats[0].avgRating * 10) / 10
+          : 0;
+
+      return {
+        totalReviews,
+        averageRating,
+        ratingDistribution,
+        recentReviewsCount: recentCount,
+      };
+    } catch (err) {
+      throw new DatabaseError(
+        'Failed to fetch provider stats',
+        undefined,
+        { cause: err },
+      );
+    }
+  }
+
   async list(query: ListReviewsQueryDto): Promise<{
     data: ReviewDTO[];
     total: number;
