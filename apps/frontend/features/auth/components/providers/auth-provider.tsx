@@ -49,9 +49,13 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
     }
   }, [initialBackendToken, initialUser, setBackendToken, setUser]);
 
+  const [hasInitialCheckRun, setHasInitialCheckRun] = React.useState(false)
+
   useEffect(() => {
     // Unified check via store
-    storeCheckAuth()
+    storeCheckAuth().finally(() => {
+      setHasInitialCheckRun(true)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -123,16 +127,23 @@ export function AuthProvider({ children, initialUser = null, initialBackendToken
           console.log('[AuthProvider] API client is authenticated, keeping user')
           setLoading(false);
         } else {
-          console.log('[AuthProvider] No API auth, clearing user')
-          // No session and no backend auth; stop loading and clear user
-          setUser(null);
-          setBackendToken(null);
-          setLoading(false);
+          // Only clear user if initial auth check has completed
+          // This prevents race condition where we clear user before checkAuth finishes
+          if (hasInitialCheckRun) {
+            console.log('[AuthProvider] No API auth and initial check complete, clearing user')
+            setUser(null);
+            setBackendToken(null);
+            setLoading(false);
+          } else {
+            console.log('[AuthProvider] No API auth but initial check still running, waiting...')
+            // Don't clear user yet, checkAuth is still running
+          }
         }
       }
     };
     syncFromSession();
-  }, [status, sessionData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, sessionData, hasInitialCheckRun]);
 
   const login = async (data: LoginRequest, redirectTo = '/profile') => {
     try {

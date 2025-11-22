@@ -76,3 +76,21 @@ export async function getOrderById(orderId: string): Promise<Order> {
   const url = `${API_BASE_URL}/orders/${orderId}`
   return httpRequest<Order>(url, { method: 'GET', headers: { ...getAuthHeaders() } })
 }
+
+export async function approveOrderCompletion(orderId: string): Promise<Order> {
+  const url = `${API_BASE_URL}/orders/${orderId}/complete`
+  return httpRequest<Order>(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({})
+  })
+}
+
+export async function declineOrderCompletion(orderId: string): Promise<Order> {
+  const url = `${API_BASE_URL}/orders/${orderId}/decline-completion`
+  return httpRequest<Order>(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+    body: JSON.stringify({})
+  })
+}

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Review, ReviewDocument } from './schemas/review.schema';
 import { Comment, CommentDocument } from './schemas/comment.schema';
+import { User, UserDocument } from '@/users/schemas/user.schema';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { ListReviewsQueryDto } from './dto/list-reviews.query';
@@ -27,6 +28,8 @@ export class ReviewsService {
     private readonly reviewModel: Model<ReviewDocument>,
     @InjectModel(Comment.name)
     private readonly commentModel: Model<CommentDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
     private readonly notifications: NotificationsService,
     private readonly logger: AppLogger,
   ) {}
@@ -47,6 +50,10 @@ export class ReviewsService {
         reviewId: entity.id,
         providerId: entity.providerId,
       });
+
+      // Update provider's average rating
+      await this.updateProviderRating(dto.providerId);
+
       await this.safeNotify(entity.providerId, {
         title: 'New review',
         message: 'A new review was submitted',
@@ -58,6 +65,45 @@ export class ReviewsService {
     } catch (err) {
       throw new DatabaseError('Failed to create review', undefined, {
         cause: err,
+      });
+    }
+  }
+
+  private async updateProviderRating(providerId: string): Promise<void> {
+    try {
+      // Calculate average rating for this provider
+      const result = await this.reviewModel.aggregate([
+        { $match: { providerId: new Types.ObjectId(providerId) } },
+        {
+          $group: {
+            _id: null,
+            averageRating: { $avg: '$rating' },
+            totalReviews: { $sum: 1 },
+          },
+        },
+      ]);
+
+      if (result.length > 0) {
+        const { averageRating, totalReviews } = result[0];
+        await this.userModel.updateOne(
+          { _id: new Types.ObjectId(providerId) },
+          {
+            $set: {
+              averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+              totalReviews,
+            },
+          },
+        );
+        this.logger.info('Provider rating updated', {
+          providerId,
+          averageRating,
+          totalReviews,
+        });
+      }
+    } catch (err) {
+      this.logger.error('Failed to update provider rating', {
+        providerId,
+        error: err,
       });
     }
   }

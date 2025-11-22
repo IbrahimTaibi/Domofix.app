@@ -103,6 +103,18 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('customer')
+  @Patch(':id/decline-completion')
+  async declineCompletion(
+    @Req() req: any,
+    @Param('id') id: string,
+  ) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role === 'admin' ? 'admin' : 'customer';
+    return this.service.declineCompletion(userId, role, id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('customer')
   @Patch(':id/cancel')
   async cancel(
     @Req() req: any,

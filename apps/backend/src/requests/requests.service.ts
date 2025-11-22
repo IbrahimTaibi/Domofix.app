@@ -389,10 +389,28 @@ export class RequestsService {
         avatar: u.avatar || undefined,
       };
     }
+
+    // Find orders for accepted requests
+    const requestIds = items.map((r: any) => r._id);
+    const orders = await this.orderModel
+      .find({
+        requestId: { $in: requestIds },
+      })
+      .select('requestId _id')
+      .lean()
+      .exec();
+
+    // Map requestId to orderId
+    const orderMap: Record<string, string> = {};
+    for (const order of orders as any[]) {
+      orderMap[String(order.requestId)] = String(order._id);
+    }
+
     return items.map((r: any) => ({
       ...r,
       _id: r._id,
       applicationsMeta: meta,
+      orderId: orderMap[String(r._id)] || null,
     }));
   }
 

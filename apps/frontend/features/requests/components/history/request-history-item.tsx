@@ -28,6 +28,11 @@ export function RequestHistoryItem({ request }: RequestHistoryItemProps) {
   const ets = request?.estimatedTimeOfService ? new Date(request.estimatedTimeOfService) : null
   const details = typeof request?.details === 'string' ? request.details : ''
   const applicationsMeta = (request as any)?.applicationsMeta || {}
+
+  // Check if request has been accepted (has an order)
+  const orderId = (request as any)?.orderId
+  const hasOrder = !!orderId
+
   function getInitials(name: string): string {
     const parts = String(name || '')
       .trim()
@@ -58,11 +63,16 @@ export function RequestHistoryItem({ request }: RequestHistoryItemProps) {
     })
     .slice(0, 3)
 
+  // Determine the correct link:
+  // - If has order (accepted) → go to order page
+  // - If no order (open/pending) → go to providers page to see applications
+  const linkHref = hasOrder ? `/orders/${orderId}` : `/services/${id}/providers`
+
   return (
     <Link
-      href={`/services/${id}/providers`}
+      href={linkHref}
       prefetch={false}
-      onClick={() => trackEvent('history_card_click', { requestId: id, category: String(request?.category) })}
+      onClick={() => trackEvent('history_card_click', { requestId: id, category: String(request?.category), hasOrder })}
     >
     <article
       className={clsx(

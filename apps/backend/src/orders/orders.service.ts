@@ -46,10 +46,26 @@ export class OrdersService {
     role: 'customer' | 'provider' | 'admin',
     id: string,
   ) {
-    const order = await this.orderModel.findById(id).exec();
+    const order = await this.orderModel
+      .findById(id)
+      .populate('requestId', 'category details phone address location')
+      .populate('customerId', 'firstName lastName email avatar')
+      .populate('providerId', 'firstName lastName email avatar')
+      .populate('serviceId', 'title category')
+      .exec();
     if (!order) throw new NotFoundException('Order not found');
-    const isCustomer = (order.customerId as any).toString() === userId;
-    const isProvider = (order.providerId as any).toString() === userId;
+
+    // Extract IDs from potentially populated fields
+    const customerIdStr = typeof order.customerId === 'object' && order.customerId
+      ? (order.customerId as any)._id?.toString()
+      : (order.customerId as any)?.toString();
+    const providerIdStr = typeof order.providerId === 'object' && order.providerId
+      ? (order.providerId as any)._id?.toString()
+      : (order.providerId as any)?.toString();
+
+    const isCustomer = customerIdStr === userId;
+    const isProvider = providerIdStr === userId;
+
     if (!isCustomer && !isProvider && role !== 'admin')
       throw new ForbiddenException('Not authorized to view this order');
     return order;
@@ -141,6 +157,28 @@ export class OrdersService {
       providerId: userId,
       ets: etsIso,
     });
+    return updated;
+  }
+
+  async declineCompletion(
+    userId: string,
+    role: 'customer' | 'admin',
+    id: string,
+  ) {
+    const order = await this.orderModel.findById(id).exec();
+    if (!order) throw new NotFoundException('Order not found');
+    const isCustomer = (order.customerId as any).toString() === userId;
+    if (!isCustomer && role !== 'admin')
+      throw new ForbiddenException('Only the customer can decline completion');
+    if (order.status !== OrderStatusEnum.PENDING_COMPLETION)
+      throw new BadRequestException('Order must be pending completion');
+
+    // Decline completion and set back to in_progress
+    order.status = OrderStatusEnum.IN_PROGRESS;
+    order.completionRequestedAt = null;
+    const updated = await order.save();
+    this.logger.info('Order completion declined', { orderId: id, customerId: userId });
+    this.events.emit('order.completion_declined', { orderId: id });
     return updated;
   }
 

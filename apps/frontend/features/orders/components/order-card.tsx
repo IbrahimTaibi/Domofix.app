@@ -15,17 +15,20 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react"
-import { Order, OrderStatus, updateOrderStatus } from "../services/orders-service"
+import { Order, OrderStatus, updateOrderStatus, approveOrderCompletion, declineOrderCompletion } from "../services/orders-service"
+import { createReview } from "../services/reviews-service"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { getCategoryLabel } from "@/shared/utils/category-labels"
 import { useWidgetStore } from "@/features/widget/store/widget-store"
 import { useMessagesStore as useWidgetMessagesStore } from "@/features/widget/store/messages-store"
 import { useAuthStore } from "@/features/auth/store/auth-store"
+import RatingModal from "./rating-modal"
 
 interface OrderCardProps {
   order: Order
   onStatusChange?: () => void
+  autoExpand?: boolean
 }
 
 const STATUS_CONFIG = {
@@ -82,21 +85,30 @@ function Package(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export default function OrderCard({ order, onStatusChange, autoExpand = false }: OrderCardProps) {
+  const [isExpanded, setIsExpanded] = useState(autoExpand)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [showRatingModal, setShowRatingModal] = useState(false)
 
   const config = STATUS_CONFIG[order.status]
   const StatusIcon = config.icon
-
-  const canStartProgress = order.status === "assigned"
-  const canRequestCompletion = order.status === "in_progress"
 
   // Widget store
   const setWidgetOpen = useWidgetStore((s) => s.setOpen)
   const setWidgetTab = useWidgetStore((s) => s.setTab)
   const openThreadForOrder = useWidgetMessagesStore((s) => s.openThreadForOrder)
   const user = useAuthStore((s) => s.user)
+
+  // Determine if current user is the customer
+  const customerId = typeof order.customerId === 'object' ? order.customerId._id : order.customerId
+  const isCustomer = user?.id === customerId
+
+  // Provider actions
+  const canStartProgress = order.status === "assigned" && !isCustomer
+  const canRequestCompletion = order.status === "in_progress" && !isCustomer
+
+  // Customer actions for pending completion
+  const canApproveOrDecline = order.status === "pending_completion" && isCustomer
 
   async function handleStatusUpdate(newStatus: OrderStatus) {
     if (isUpdating) return
@@ -108,6 +120,60 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
     } catch (error: any) {
       console.error("Failed to update order status:", error)
       alert(error?.message || "Erreur lors de la mise à jour du statut")
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  async function handleApproveCompletion() {
+    if (isUpdating) return
+
+    try {
+      setIsUpdating(true)
+      await approveOrderCompletion(order._id)
+      onStatusChange?.()
+      // Show rating modal after successful approval
+      setShowRatingModal(true)
+    } catch (error: any) {
+      console.error("Failed to approve completion:", error)
+      alert(error?.message || "Erreur lors de l'approbation")
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  async function handleSubmitRating(rating: number, comment: string) {
+    if (!user?.id) {
+      throw new Error("User not authenticated")
+    }
+
+    const customerId = typeof order.customerId === 'object' ? order.customerId._id : order.customerId
+    const providerId = typeof order.providerId === 'object' ? order.providerId._id : order.providerId
+    const serviceId = order.serviceId && typeof order.serviceId === 'object' ? order.serviceId._id : order.serviceId || ''
+
+    await createReview({
+      bookingId: order._id,
+      customerId,
+      providerId,
+      serviceId,
+      rating,
+      comment: comment || undefined,
+    })
+  }
+
+  async function handleDeclineCompletion() {
+    if (isUpdating) return
+
+    const confirmed = confirm("Êtes-vous sûr de vouloir refuser la terminaison ? Le prestataire devra continuer le travail.")
+    if (!confirmed) return
+
+    try {
+      setIsUpdating(true)
+      await declineOrderCompletion(order._id)
+      onStatusChange?.()
+    } catch (error: any) {
+      console.error("Failed to decline completion:", error)
+      alert(error?.message || "Erreur lors du refus")
     } finally {
       setIsUpdating(false)
     }
@@ -127,6 +193,7 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
   }
 
   const customer = typeof order.customerId === 'object' ? order.customerId : null
+  const provider = typeof order.providerId === 'object' ? order.providerId : null
   const request = typeof order.requestId === 'object' ? order.requestId : null
   const service = order.serviceId && typeof order.serviceId === 'object' ? order.serviceId : null
 
@@ -135,6 +202,13 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
       return `${customer.firstName} ${customer.lastName}`
     }
     return "Client"
+  }
+
+  function getProviderName() {
+    if (provider) {
+      return `${provider.firstName} ${provider.lastName}`
+    }
+    return "Prestataire"
   }
 
   function getCustomerInitials() {
@@ -353,10 +427,39 @@ export default function OrderCard({ order, onStatusChange }: OrderCardProps) {
           </button>
         )}
 
+        {canApproveOrDecline && (
+          <>
+            <button
+              onClick={handleApproveCompletion}
+              disabled={isUpdating}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
+            >
+              <CheckCircle className="w-4 h-4" aria-hidden="true" />
+              Approuver la terminaison
+            </button>
+            <button
+              onClick={handleDeclineCompletion}
+              disabled={isUpdating}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 text-white text-sm font-semibold rounded-lg transition-all hover:shadow-md disabled:cursor-not-allowed"
+            >
+              <XCircle className="w-4 h-4" aria-hidden="true" />
+              Refuser
+            </button>
+          </>
+        )}
+
         {isUpdating && (
           <span className="text-sm text-gray-500 ml-auto font-medium">Mise à jour...</span>
         )}
       </div>
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        onSubmit={handleSubmitRating}
+        providerName={getProviderName()}
+      />
     </div>
   )
 }

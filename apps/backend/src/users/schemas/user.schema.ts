@@ -178,6 +178,13 @@ export class User {
   @Prop({ default: 'en' })
   locale: string;
 
+  // Provider rating (for providers only)
+  @Prop({ default: 0, min: 0, max: 5 })
+  averageRating: number;
+
+  @Prop({ default: 0, min: 0 })
+  totalReviews: number;
+
   // These will be automatically added by Mongoose due to timestamps: true
   createdAt: Date;
   updatedAt: Date;
