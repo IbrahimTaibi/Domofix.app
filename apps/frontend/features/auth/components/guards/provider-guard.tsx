@@ -23,12 +23,17 @@ export default function ProviderGuard({ children }: ProviderGuardProps) {
     // Give auth system time to initialize (prevent race condition)
     const timer = setTimeout(() => {
       setHasMounted(true)
-    }, 100)
+    }, 300) // Increased from 100ms to 300ms
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
-    console.log('[ProviderGuard] Auth state:', { isLoading, isAuthenticated, user: user ? { id: user.id, role: user.role } : null, hasMounted })
+    console.log('[ProviderGuard] Auth state:', {
+      isLoading,
+      isAuthenticated,
+      user: user ? { id: user.id, role: user.role, providerStatus: user.providerStatus } : null,
+      hasMounted
+    })
 
     // Don't check auth until component has mounted
     if (!hasMounted) {
@@ -44,6 +49,7 @@ export default function ProviderGuard({ children }: ProviderGuardProps) {
     }
 
     console.log('[ProviderGuard] Auth loaded, checking authorization...')
+    console.log('[ProviderGuard] User details:', user)
     // Auth has finished loading, now check authorization
     setIsChecking(false)
 
