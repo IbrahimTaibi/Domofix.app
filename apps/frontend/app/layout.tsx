@@ -12,6 +12,7 @@ import OfflineBanner from '@/shared/components/error/offline-banner'
 import ToastContainer from '@/shared/components/toast-container'
 import Widget from '@/features/widget/components/widget'
 import NotificationsProvider from '@/features/notifications/components/notifications-provider'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -47,6 +48,7 @@ export default async function RootLayout({
             <AppFooter />
             {/* Global toasts */}
             <ToastContainer />
+            <Toaster position="top-right" />
             {/* Portal target for toasts to avoid hydration mismatch */}
             <div id="toast-root" />
             <OfflineBanner />

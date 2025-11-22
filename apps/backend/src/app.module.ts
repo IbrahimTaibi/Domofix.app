@@ -27,8 +27,8 @@ import { InvoicesModule } from './invoices/invoices.module';
     EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot([
       {
-        ttl: 60_000,
-        limit: 10,
+        ttl: 60_000, // 60 seconds
+        limit: 100, // 100 requests per minute (increased from 10)
       },
     ]),
     MongooseModule.forRootAsync({

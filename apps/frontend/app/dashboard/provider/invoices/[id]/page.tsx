@@ -3,75 +3,80 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Invoice } from '@/features/invoices/types/invoice.types';
-import { getInvoiceById, markInvoiceAsPaid, cancelInvoice } from '@/features/invoices/services/invoice-service';
-import { InvoiceTemplate } from '@/features/invoices/components/invoice-template';
+import { getInvoiceById, updateInvoice, cancelInvoice, deleteInvoice } from '@/features/invoices/services/invoice-service';
+import { InvoicePreview } from '@/features/invoices/components/invoice-preview';
+import { toast } from 'react-hot-toast';
+import { ArrowLeft, Edit, Trash2, XCircle, Send } from 'lucide-react';
 import Link from 'next/link';
 
 export default function InvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const invoiceId = params.id as string;
+
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     loadInvoice();
-  }, [params.id]);
+  }, [invoiceId]);
 
   const loadInvoice = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const data = await getInvoiceById(params.id as string);
+      const data = await getInvoiceById(invoiceId);
       setInvoice(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load invoice');
+      toast.error(err.message || 'Failed to load invoice');
+      router.push('/dashboard/provider/invoices');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleDownloadPDF = () => {
-    // You can implement PDF download using jspdf or html2canvas
-    alert('PDF download feature coming soon!');
-  };
-
-  const handleMarkAsPaid = async () => {
+  const handleSendInvoice = async () => {
     if (!invoice) return;
-
-    const paymentMethod = prompt('Enter payment method (cash, credit_card, bank_transfer, mobile_payment, other):');
-    if (!paymentMethod) return;
 
     try {
       setActionLoading(true);
-      await markInvoiceAsPaid(invoice._id, {
-        method: paymentMethod as any,
-        paidAt: new Date().toISOString(),
-      });
+      await updateInvoice(invoice._id, { status: 'sent' });
+      toast.success('Invoice sent successfully!');
       loadInvoice();
     } catch (err: any) {
-      alert(err.message || 'Failed to mark invoice as paid');
+      toast.error(err.message || 'Failed to send invoice');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleCancel = async () => {
+  const handleCancelInvoice = async () => {
     if (!invoice) return;
     if (!confirm('Are you sure you want to cancel this invoice?')) return;
 
     try {
       setActionLoading(true);
       await cancelInvoice(invoice._id);
+      toast.success('Invoice canceled successfully!');
       loadInvoice();
     } catch (err: any) {
-      alert(err.message || 'Failed to cancel invoice');
+      toast.error(err.message || 'Failed to cancel invoice');
     } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoice) return;
+    if (!confirm('Are you sure you want to delete this draft invoice? This action cannot be undone.')) return;
+
+    try {
+      setActionLoading(true);
+      await deleteInvoice(invoice._id);
+      toast.success('Invoice deleted successfully!');
+      router.push('/dashboard/provider/invoices');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete invoice');
       setActionLoading(false);
     }
   };
@@ -79,75 +84,81 @@ export default function InvoiceDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (error || !invoice) {
+  if (!invoice) {
     return (
-      <section className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-          {error || 'Invoice not found'}
+          Invoice not found
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-8">
-      {/* Action Bar */}
-      <div className="mb-6 flex justify-between items-center no-print">
-        <Link
-          href="/dashboard/provider/invoices"
-          className="text-blue-600 hover:text-blue-700"
-        >
-          ← Back to Invoices
-        </Link>
-        <div className="flex gap-2">
-          <button
-            onClick={handlePrint}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Print
-          </button>
-          <button
-            onClick={handleDownloadPDF}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Download PDF
-          </button>
-          {invoice.status === 'draft' && (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Actions */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <Link
-              href={`/dashboard/provider/invoices/${invoice._id}/edit`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              href="/dashboard/provider/invoices"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
-              Edit
+              <ArrowLeft className="w-4 h-4" />
+              Back to Invoices
             </Link>
-          )}
-          {(invoice.status === 'sent' || invoice.status === 'overdue') && (
-            <button
-              onClick={handleMarkAsPaid}
-              disabled={actionLoading}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-            >
-              Mark as Paid
-            </button>
-          )}
-          {invoice.status !== 'paid' && invoice.status !== 'canceled' && (
-            <button
-              onClick={handleCancel}
-              disabled={actionLoading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
-            >
-              Cancel
-            </button>
-          )}
+
+            <div className="flex items-center gap-3">
+              {invoice.status === 'draft' && (
+                <>
+                  <Link
+                    href={`/dashboard/provider/invoices/${invoice._id}/edit`}
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </Link>
+                  <button
+                    onClick={handleSendInvoice}
+                    disabled={actionLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    <Send className="w-4 h-4" />
+                    Send to Customer
+                  </button>
+                  <button
+                    onClick={handleDeleteInvoice}
+                    disabled={actionLoading}
+                    className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </button>
+                </>
+              )}
+
+              {(invoice.status === 'sent' || invoice.status === 'overdue') && (
+                <button
+                  onClick={handleCancelInvoice}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel Invoice
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Invoice Template */}
-      <InvoiceTemplate invoice={invoice} />
-    </section>
+      {/* Invoice Preview */}
+      <InvoicePreview invoice={invoice} showActions={false} />
+    </div>
   );
 }
