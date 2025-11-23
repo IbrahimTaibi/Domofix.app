@@ -16,6 +16,7 @@ import { getProviderRequestById } from '@/features/requests/services/requests-se
 import RequestDetails from '@/shared/components/requests/request-details'
 import { useRequestsUiStore } from '@/shared/store/requests-ui-store'
 import RequestsListRows from '@/shared/components/requests/requests-list-rows'
+import { RequestStatus } from '@domofix/shared-types'
 
 export default function ProviderRequestsPage() {
   const { items, loading, error, status, setStatus, page, setPage, refresh } = useProviderRequests()
@@ -64,7 +65,7 @@ export default function ProviderRequestsPage() {
       const hasRange = Number.isFinite(min) && Number.isFinite(max) && min > 0 && max >= min
       const proposedEts = applyEts ? new Date(applyEts).toISOString() : undefined
       addApplied(id)
-      if (String(applyFor?.status) === 'open') setStatusOverride(id, 'pending')
+      if (String(applyFor?.status) === 'open') setStatusOverride(id, RequestStatus.PENDING)
       await applyForRequest(id, {
         message: '',
         proposedEts,

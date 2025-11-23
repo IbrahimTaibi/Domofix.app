@@ -15,7 +15,8 @@ import {
   Image as ImageIcon,
   DollarSign,
 } from "lucide-react"
-import { getProviderRequestById, applyForRequest, Request, categoryOptions } from "@/features/requests/services/requests-service"
+import { getProviderRequestById, applyForRequest, categoryOptions } from "@/features/requests/services/requests-service"
+import { Request } from "@domofix/shared-types"
 import { Spinner } from "@/shared/components/spinner"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -279,10 +280,10 @@ export default function RequestDetailPage() {
                             <span className="font-medium">{app.proposedPrice} €</span>
                           </div>
                         )}
-                        {app.proposedPriceMin && app.proposedPriceMax && (
+                        {app.proposedPriceRange && (
                           <div className="flex items-center gap-2 text-sm">
                             <DollarSign className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium">{app.proposedPriceMin} € - {app.proposedPriceMax} €</span>
+                            <span className="font-medium">{app.proposedPriceRange.min} € - {app.proposedPriceRange.max} €</span>
                           </div>
                         )}
                         {app.proposedEts && (
@@ -298,7 +299,7 @@ export default function RequestDetailPage() {
                           </div>
                         )}
                         <p className="text-xs text-gray-500">
-                          Candidature déposée le {format(new Date(app.appliedAt), "dd MMM yyyy à HH:mm", { locale: fr })}
+                          Candidature déposée le {format(new Date(app.createdAt), "dd MMM yyyy à HH:mm", { locale: fr })}
                         </p>
                       </div>
                     </div>

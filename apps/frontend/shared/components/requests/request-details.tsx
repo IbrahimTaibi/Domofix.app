@@ -2,7 +2,7 @@
 
 import React from 'react'
 import type { Request, RequestStatus } from '@domofix/shared-types'
-import { ClipboardList, CalendarClock, Phone, MapPin, X, Images } from 'lucide-react'
+import { ClipboardList, CalendarClock, Phone, MapPin, X, Image as Images } from 'lucide-react'
 import { format } from 'date-fns'
 import StatusBadge from '@/shared/components/requests/status-badge'
 import Button from '@/shared/components/button'

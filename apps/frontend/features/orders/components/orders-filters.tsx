@@ -56,7 +56,7 @@ const FILTER_CONFIG = [
   },
 ]
 
-const COLOR_CLASSES = {
+const COLOR_CLASSES: Record<string, { active: string; inactive: string }> = {
   gray: {
     active: "bg-gray-600 text-white",
     inactive: "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200",

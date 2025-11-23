@@ -14,6 +14,7 @@ import { Type } from 'class-transformer';
 import {
   InvoiceStatusEnum,
   PaymentMethodEnum,
+  DocumentTypeEnum,
 } from '../schemas/invoice.schema';
 
 export class CreateInvoiceLineItemDto {
@@ -103,8 +104,16 @@ export class CreatePaymentInfoDto {
 
 export class CreateInvoiceDto {
   @IsMongoId()
-  @IsNotEmpty()
-  orderId: string;
+  @IsOptional()
+  orderId?: string;  // Optional for quotes
+
+  @IsMongoId()
+  @IsOptional()
+  customerId?: string;  // Can be used instead of orderId for quotes
+
+  @IsEnum(DocumentTypeEnum)
+  @IsOptional()
+  documentType?: DocumentTypeEnum;
 
   @ValidateNested()
   @Type(() => CreateBillingAddressDto)
@@ -123,6 +132,11 @@ export class CreateInvoiceDto {
   @Type(() => Date)
   @IsNotEmpty()
   dueDate: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
+  expiryDate?: Date; // Pour devis uniquement
 
   @IsArray()
   @ValidateNested({ each: true })

@@ -9,9 +9,10 @@ interface OrderSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectOrder: (order: Order) => void;
+  documentType?: 'invoice' | 'quote';
 }
 
-export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSelectionModalProps) {
+export function OrderSelectionModal({ isOpen, onClose, onSelectOrder, documentType = 'invoice' }: OrderSelectionModalProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,8 +59,8 @@ export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSel
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Select Order</h2>
-            <p className="text-sm text-gray-600 mt-1">Choose a completed order to create an invoice</p>
+            <h2 className="text-2xl font-bold text-gray-900">Sélectionner une commande</h2>
+            <p className="text-sm text-gray-600 mt-1">Choisissez une commande terminée pour créer une facture</p>
           </div>
           <button
             onClick={onClose}
@@ -82,8 +83,8 @@ export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSel
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">No completed orders found</p>
-              <p className="text-gray-500 text-sm mt-2">Complete an order first before creating an invoice</p>
+              <p className="text-gray-600 text-lg">Aucune commande terminée trouvée</p>
+              <p className="text-gray-500 text-sm mt-2">Terminez d'abord une commande avant de créer une facture</p>
             </div>
           ) : (
             <div className="grid gap-4">
@@ -110,7 +111,7 @@ export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSel
                       <div className="ml-11 space-y-1">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
-                          <span>Completed: {format(new Date(order.completedAt!), 'MMM dd, yyyy')}</span>
+                          <span>Terminée le : {format(new Date(order.completedAt!), 'dd MMM yyyy')}</span>
                         </div>
                         {typeof order.requestId === 'object' && order.requestId.details && (
                           <p className="text-sm text-gray-500 line-clamp-2">
@@ -122,7 +123,7 @@ export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSel
 
                     <div className="ml-4">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Completed
+                        Terminée
                       </span>
                     </div>
                   </div>
@@ -135,7 +136,7 @@ export function OrderSelectionModal({ isOpen, onClose, onSelectOrder }: OrderSel
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <p className="text-xs text-gray-600">
-            💡 Tip: Only completed orders can be invoiced. The invoice will auto-fill customer information from the order.
+            💡 Astuce : Seules les commandes terminées peuvent être facturées. La facture sera automatiquement remplie avec les informations client de la commande.
           </p>
         </div>
       </div>

@@ -45,6 +45,7 @@ export async function getInvoices(
   if (params.customerId) query.set('customerId', params.customerId);
   if (params.providerId) query.set('providerId', params.providerId);
   if (params.orderId) query.set('orderId', params.orderId);
+  if (params.documentType) query.set('documentType', params.documentType);
   if (params.status) query.set('status', params.status);
   if (params.issueDateFrom) query.set('issueDateFrom', params.issueDateFrom);
   if (params.issueDateTo) query.set('issueDateTo', params.issueDateTo);
@@ -139,6 +140,65 @@ export async function getInvoiceStatistics(): Promise<InvoiceStatistics> {
   const url = `${API_BASE_URL}/invoices/statistics`;
   return httpRequest<InvoiceStatistics>(url, {
     method: 'GET',
+    headers: { ...getAuthHeaders() },
+  });
+}
+
+/**
+ * Download invoice/quote PDF
+ */
+export async function downloadInvoicePdf(id: string, invoiceNumber: string): Promise<void> {
+  const url = `${API_BASE_URL}/invoices/${id}/pdf`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: { ...getAuthHeaders() },
+  });
+
+  if (!response.ok) {
+    throw new Error('Échec du téléchargement du PDF');
+  }
+
+  const blob = await response.blob();
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = `facture-${invoiceNumber}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
+/**
+ * Convert quote to invoice
+ */
+export async function convertQuoteToInvoice(quoteId: string): Promise<Invoice> {
+  const url = `${API_BASE_URL}/invoices/${quoteId}/convert-to-invoice`;
+  return httpRequest<Invoice>(url, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
+}
+
+/**
+ * Accept a quote (customer only)
+ */
+export async function acceptQuote(quoteId: string): Promise<Invoice> {
+  const url = `${API_BASE_URL}/invoices/${quoteId}/accept`;
+  return httpRequest<Invoice>(url, {
+    method: 'PATCH',
+    headers: { ...getAuthHeaders() },
+  });
+}
+
+/**
+ * Reject a quote (customer only)
+ */
+export async function rejectQuote(quoteId: string): Promise<Invoice> {
+  const url = `${API_BASE_URL}/invoices/${quoteId}/reject`;
+  return httpRequest<Invoice>(url, {
+    method: 'PATCH',
     headers: { ...getAuthHeaders() },
   });
 }

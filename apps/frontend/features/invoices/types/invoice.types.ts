@@ -1,10 +1,18 @@
+export enum DocumentType {
+  QUOTE = 'quote',
+  INVOICE = 'invoice',
+}
+
 export enum InvoiceStatus {
   DRAFT = 'draft',
   SENT = 'sent',
-  PAID = 'paid',
-  OVERDUE = 'overdue',
+  ACCEPTED = 'accepted',  // Pour devis seulement
+  REJECTED = 'rejected',  // Pour devis seulement
+  EXPIRED = 'expired',    // Pour devis seulement
+  PAID = 'paid',          // Pour facture seulement
+  OVERDUE = 'overdue',    // Pour facture seulement
   CANCELED = 'canceled',
-  REFUNDED = 'refunded',
+  REFUNDED = 'refunded',  // Pour facture seulement
 }
 
 export enum PaymentMethod {
@@ -46,6 +54,7 @@ export interface PaymentInfo {
 export interface Invoice {
   _id: string;
   invoiceNumber: string;
+  documentType: DocumentType;
   orderId: string;
   customerId: string | any;
   providerId: string | any;
@@ -54,7 +63,10 @@ export interface Invoice {
   billFrom: BillingAddress;
   issueDate: string;
   dueDate: string;
+  expiryDate?: string;  // Pour devis uniquement
   paidDate?: string;
+  acceptedDate?: string;  // Pour devis uniquement
+  convertedToInvoiceId?: string;  // Si devis converti en facture
   lineItems: InvoiceLineItem[];
   subtotal: number;
   taxAmount: number;
@@ -71,11 +83,14 @@ export interface Invoice {
 }
 
 export interface CreateInvoiceDto {
-  orderId: string;
+  orderId?: string;  // Optional for quotes
+  customerId?: string;  // Can be used instead of orderId for quotes
+  documentType?: DocumentType;
   billTo: BillingAddress;
   billFrom: BillingAddress;
   issueDate?: string;
   dueDate: string;
+  expiryDate?: string;  // Pour devis uniquement
   lineItems: InvoiceLineItem[];
   notes?: string;
   termsAndConditions?: string;
@@ -88,6 +103,7 @@ export interface UpdateInvoiceDto {
   billFrom?: BillingAddress;
   issueDate?: string;
   dueDate?: string;
+  expiryDate?: string;  // Pour devis uniquement
   lineItems?: InvoiceLineItem[];
   notes?: string;
   termsAndConditions?: string;
@@ -95,6 +111,8 @@ export interface UpdateInvoiceDto {
   status?: InvoiceStatus;
   paymentInfo?: PaymentInfo;
   paidDate?: string;
+  acceptedDate?: string;  // Pour devis uniquement
+  convertedToInvoiceId?: string;  // Si devis converti en facture
   pdfUrl?: string;
 }
 
@@ -102,6 +120,7 @@ export interface QueryInvoiceDto {
   customerId?: string;
   providerId?: string;
   orderId?: string;
+  documentType?: DocumentType;
   status?: InvoiceStatus;
   issueDateFrom?: string;
   issueDateTo?: string;

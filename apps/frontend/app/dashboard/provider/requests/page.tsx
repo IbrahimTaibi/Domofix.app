@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react"
 import { ClipboardList, AlertCircle } from "lucide-react"
-import { listProviderAllRequests, Request } from "@/features/requests/services/requests-service"
-import { RequestStatus } from "@domofix/shared-types"
+import { listProviderAllRequests } from "@/features/requests/services/requests-service"
+import { RequestStatus, Request } from "@domofix/shared-types"
 import { Spinner } from "@/shared/components/spinner"
 import RequestCard from "@/features/requests/components/request-card"
 
@@ -14,7 +14,7 @@ export default function ProviderRequestsPage() {
   const [filteredRequests, setFilteredRequests] = useState<Request[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeFilter, setActiveFilter] = useState<FilterStatus>("open")
+  const [activeFilter, setActiveFilter] = useState<FilterStatus>(RequestStatus.OPEN)
 
   useEffect(() => {
     loadRequests()
@@ -51,11 +51,11 @@ export default function ProviderRequestsPage() {
 
   const filterCounts = {
     all: requests.length,
-    open: requests.filter(r => r.status === "open").length,
-    pending: requests.filter(r => r.status === "pending").length,
-    accepted: requests.filter(r => r.status === "accepted").length,
-    completed: requests.filter(r => r.status === "completed").length,
-    closed: requests.filter(r => r.status === "closed").length,
+    open: requests.filter(r => r.status === RequestStatus.OPEN).length,
+    pending: requests.filter(r => r.status === RequestStatus.PENDING).length,
+    accepted: requests.filter(r => r.status === RequestStatus.ACCEPTED).length,
+    completed: requests.filter(r => r.status === RequestStatus.COMPLETED).length,
+    closed: requests.filter(r => r.status === RequestStatus.CLOSED).length,
   }
 
   return (
@@ -84,34 +84,34 @@ export default function ProviderRequestsPage() {
           onClick={() => handleFilterChange("all")}
         />
         <FilterButton
-          active={activeFilter === "open"}
+          active={activeFilter === RequestStatus.OPEN}
           count={filterCounts.open}
           label="Ouvertes"
-          onClick={() => handleFilterChange("open")}
+          onClick={() => handleFilterChange(RequestStatus.OPEN)}
         />
         <FilterButton
-          active={activeFilter === "pending"}
+          active={activeFilter === RequestStatus.PENDING}
           count={filterCounts.pending}
           label="En attente"
-          onClick={() => handleFilterChange("pending")}
+          onClick={() => handleFilterChange(RequestStatus.PENDING)}
         />
         <FilterButton
-          active={activeFilter === "accepted"}
+          active={activeFilter === RequestStatus.ACCEPTED}
           count={filterCounts.accepted}
           label="Acceptées"
-          onClick={() => handleFilterChange("accepted")}
+          onClick={() => handleFilterChange(RequestStatus.ACCEPTED)}
         />
         <FilterButton
-          active={activeFilter === "completed"}
+          active={activeFilter === RequestStatus.COMPLETED}
           count={filterCounts.completed}
           label="Terminées"
-          onClick={() => handleFilterChange("completed")}
+          onClick={() => handleFilterChange(RequestStatus.COMPLETED)}
         />
         <FilterButton
-          active={activeFilter === "closed"}
+          active={activeFilter === RequestStatus.CLOSED}
           count={filterCounts.closed}
           label="Fermées"
-          onClick={() => handleFilterChange("closed")}
+          onClick={() => handleFilterChange(RequestStatus.CLOSED)}
         />
       </div>
 
@@ -151,7 +151,7 @@ export default function ProviderRequestsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredRequests.map((request) => (
-            <RequestCard key={request._id} request={request} onRefresh={loadRequests} />
+            <RequestCard key={request.id} request={request} onRefresh={loadRequests} />
           ))}
         </div>
       )}

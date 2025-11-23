@@ -33,17 +33,7 @@ const sections: SidebarMenuSection[] = [
       { href: "/dashboard/provider/services", label: "Mes services", icon: Briefcase },
       { href: "/dashboard/provider/reviews", label: "Avis clients", icon: Star },
       { href: "/dashboard/provider/messages", label: "Messages", icon: MessageSquare },
-      { href: "/dashboard/provider/invoices", label: "Factures", icon: FileText },
-      {
-        href: "/dashboard/provider/billing",
-        label: "Facturation",
-        icon: CreditCard,
-        badge: "Pro",
-        children: [
-          { href: "/dashboard/provider/billing/revenus", label: "Revenus", icon: CreditCard },
-          { href: "/dashboard/provider/billing/devis", label: "Devis", icon: FileText },
-        ],
-      },
+      { href: "/dashboard/provider/invoices", label: "Factures & Devis", icon: FileText },
       { href: "/dashboard/provider/team", label: "Équipe", icon: Users, badge: "Pro" },
     ],
   },

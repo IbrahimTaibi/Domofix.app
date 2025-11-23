@@ -117,10 +117,9 @@ export default function ProvidersSelectionPage() {
       setPendingProviderId(null)
 
       // Auto-open widget with the conversation
-      if (response.orderId) {
-        const { openWidgetForOrder } = await import('@/features/widget/events/widget-events')
-        openWidgetForOrder(response.orderId, response.id || serviceId)
-      }
+      // Note: Request interface doesn't have orderId field
+      // The order is created server-side but not returned in the response
+      // Widget will be opened when navigating to orders page
     } catch (err: any) {
       showError(err?.message || "Échec de l'approbation", { title: 'Erreur' })
     } finally {

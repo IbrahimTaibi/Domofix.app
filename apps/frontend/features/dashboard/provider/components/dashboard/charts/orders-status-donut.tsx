@@ -34,7 +34,6 @@ export default function OrdersStatusDonut({ data }: { data: OrdersStatusCount[] 
           animate={true}
           activeOuterRadiusOffset={4}
           enableArcLabels={true}
-          arcLabelsRadius={0.78}
           arcLabelsSkipAngle={8}
           arcLabelsTextColor="#374151"
           theme={{ labels: { text: { fontSize: 11, fill: '#374151' } } }}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Invoice, InvoiceStatus } from '../types/invoice.types';
+import { Invoice, InvoiceStatus, DocumentType } from '../types/invoice.types';
 import { getInvoices } from '../services/invoice-service';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useInvoiceStore } from '../store/invoice-store';
 import { toast } from 'react-hot-toast';
+import { downloadInvoicePdf } from '../services/invoice-service';
 
 export function NewInvoiceList() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -19,25 +20,36 @@ export function NewInvoiceList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [documentTypeFilter, setDocumentTypeFilter] = useState<'all' | DocumentType>('all');
 
   const { statusFilter, searchQuery, setStatusFilter, setSearchQuery } = useInvoiceStore();
 
   useEffect(() => {
     loadInvoices();
-  }, [statusFilter, currentPage]);
+  }, [statusFilter, documentTypeFilter, currentPage]);
 
   const loadInvoices = async () => {
     try {
       setLoading(true);
-      const response = await getInvoices({
+      const queryParams = {
         status: statusFilter !== 'all' ? statusFilter : undefined,
+        documentType: documentTypeFilter !== 'all' ? documentTypeFilter : undefined,
         page: currentPage,
         limit: 10,
-      });
+      };
+      console.log('🔍 Loading invoices with params:', queryParams);
+      const response = await getInvoices(queryParams);
+      console.log('📦 Invoice response:', response);
+      console.log('📄 Invoices data:', response.data);
+      console.log('📊 Invoices by type:', response.data.reduce((acc: any, inv: Invoice) => {
+        acc[inv.documentType] = (acc[inv.documentType] || 0) + 1;
+        return acc;
+      }, {}));
       setInvoices(response.data);
       setTotalPages(response.totalPages);
       setTotal(response.total);
     } catch (err: any) {
+      console.error('❌ Failed to load invoices:', err);
       toast.error(err.message || 'Failed to load invoices');
     } finally {
       setLoading(false);
@@ -46,12 +58,15 @@ export function NewInvoiceList() {
 
   const getStatusBadge = (status: InvoiceStatus) => {
     const badges = {
-      draft: { icon: Edit, color: 'bg-gray-100 text-gray-800', label: 'Draft' },
-      sent: { icon: Send, color: 'bg-blue-100 text-blue-800', label: 'Sent' },
-      paid: { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Paid' },
-      overdue: { icon: Clock, color: 'bg-red-100 text-red-800', label: 'Overdue' },
-      canceled: { icon: XCircle, color: 'bg-gray-100 text-gray-600', label: 'Canceled' },
-      refunded: { icon: DollarSign, color: 'bg-purple-100 text-purple-800', label: 'Refunded' },
+      draft: { icon: Edit, color: 'bg-gray-100 text-gray-800', label: 'Brouillon' },
+      sent: { icon: Send, color: 'bg-blue-100 text-blue-800', label: 'Envoyée' },
+      accepted: { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Acceptée' },
+      rejected: { icon: XCircle, color: 'bg-red-100 text-red-800', label: 'Rejetée' },
+      expired: { icon: Clock, color: 'bg-orange-100 text-orange-800', label: 'Expirée' },
+      paid: { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Payée' },
+      overdue: { icon: Clock, color: 'bg-red-100 text-red-800', label: 'En retard' },
+      canceled: { icon: XCircle, color: 'bg-gray-100 text-gray-600', label: 'Annulée' },
+      refunded: { icon: DollarSign, color: 'bg-purple-100 text-purple-800', label: 'Remboursée' },
     };
 
     const badge = badges[status] || badges.draft;
@@ -66,7 +81,8 @@ export function NewInvoiceList() {
   };
 
   const getCustomerName = (invoice: Invoice) => {
-    if (typeof invoice.customerId === 'object') {
+    // For quotes without a linked customer, use billTo info
+    if (typeof invoice.customerId === 'object' && invoice.customerId !== null) {
       return `${invoice.customerId.firstName} ${invoice.customerId.lastName}`;
     }
     return invoice.billTo.fullName;
@@ -86,12 +102,12 @@ export function NewInvoiceList() {
   });
 
   const statusFilters: Array<{ label: string; value: InvoiceStatus | 'all'; count?: number }> = [
-    { label: 'All', value: 'all' },
-    { label: 'Draft', value: 'draft' },
-    { label: 'Sent', value: 'sent' },
-    { label: 'Paid', value: 'paid' },
-    { label: 'Overdue', value: 'overdue' },
-    { label: 'Canceled', value: 'canceled' },
+    { label: 'Toutes', value: 'all' },
+    { label: 'Brouillon', value: InvoiceStatus.DRAFT },
+    { label: 'Envoyée', value: InvoiceStatus.SENT },
+    { label: 'Payée', value: InvoiceStatus.PAID },
+    { label: 'En retard', value: InvoiceStatus.OVERDUE },
+    { label: 'Annulée', value: InvoiceStatus.CANCELED },
   ];
 
   if (loading && invoices.length === 0) {
@@ -105,42 +121,125 @@ export function NewInvoiceList() {
   return (
     <div className="space-y-6">
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Status Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {statusFilters.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => setStatusFilter(filter.value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                statusFilter === filter.value
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-4">
+        {/* Search Bar - Top Priority */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search invoices..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Rechercher par numéro, client, entreprise..."
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
           />
         </div>
+
+        {/* Tabs for Document Type */}
+        <div className="border-b border-gray-200">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setDocumentTypeFilter('all')}
+              className={`px-6 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                documentTypeFilter === 'all'
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Tous
+            </button>
+            <button
+              onClick={() => setDocumentTypeFilter(DocumentType.INVOICE)}
+              className={`px-6 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                documentTypeFilter === DocumentType.INVOICE
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Factures
+            </button>
+            <button
+              onClick={() => setDocumentTypeFilter(DocumentType.QUOTE)}
+              className={`px-6 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                documentTypeFilter === DocumentType.QUOTE
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Devis
+            </button>
+          </div>
+        </div>
+
+        {/* Status Filter Pills */}
+        <div>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+            Filtrer par statut
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {statusFilters.map((filter) => (
+              <button
+                key={filter.value}
+                onClick={() => setStatusFilter(filter.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  statusFilter === filter.value
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md scale-105'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Filters Display */}
+        {(documentTypeFilter !== 'all' || statusFilter !== 'all' || searchQuery) && (
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <span className="text-xs font-medium text-gray-500">Filtres actifs:</span>
+            <div className="flex flex-wrap gap-2">
+              {documentTypeFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  {documentTypeFilter === DocumentType.INVOICE ? 'Factures' : 'Devis'}
+                  <button
+                    onClick={() => setDocumentTypeFilter('all')}
+                    className="hover:bg-purple-200 rounded-full p-0.5"
+                  >
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {statusFilter !== 'all' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  {statusFilters.find(f => f.value === statusFilter)?.label}
+                  <button
+                    onClick={() => setStatusFilter('all')}
+                    className="hover:bg-blue-200 rounded-full p-0.5"
+                  >
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {searchQuery && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                  Recherche: "{searchQuery}"
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="hover:bg-gray-200 rounded-full p-0.5"
+                  >
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold">{filteredInvoices.length}</span> of{' '}
-          <span className="font-semibold">{total}</span> invoices
+          Affichage de <span className="font-semibold">{filteredInvoices.length}</span> sur{' '}
+          <span className="font-semibold">{total}</span> document(s)
         </p>
       </div>
 
@@ -148,9 +247,15 @@ export function NewInvoiceList() {
       {filteredInvoices.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-600 text-lg mb-2">No invoices found</p>
+          <p className="text-gray-600 text-lg mb-2">
+            {documentTypeFilter === DocumentType.QUOTE
+              ? 'Aucun devis trouvé'
+              : documentTypeFilter === DocumentType.INVOICE
+              ? 'Aucune facture trouvée'
+              : 'Aucun document trouvé'}
+          </p>
           <p className="text-gray-500 text-sm">
-            {searchQuery ? 'Try adjusting your search' : 'Create your first invoice to get started'}
+            {searchQuery ? 'Essayez d\'ajuster votre recherche' : 'Créez votre premier document pour commencer'}
           </p>
         </div>
       ) : (
@@ -159,22 +264,22 @@ export function NewInvoiceList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoice
+                  Document
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  Client
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
+                  Échéance/Expiration
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Montant
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -186,13 +291,13 @@ export function NewInvoiceList() {
                 <tr key={invoice._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <FileText className="w-5 h-5 text-blue-600" />
+                      <div className={`p-2 rounded-lg ${invoice.documentType === DocumentType.QUOTE ? 'bg-purple-50' : 'bg-blue-50'}`}>
+                        <FileText className={`w-5 h-5 ${invoice.documentType === DocumentType.QUOTE ? 'text-purple-600' : 'text-blue-600'}`} />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{invoice.invoiceNumber}</p>
                         <p className="text-xs text-gray-500">
-                          {format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
+                          {invoice.documentType === DocumentType.QUOTE ? 'Devis' : 'Facture'} • {format(new Date(invoice.createdAt), 'MMM dd, yyyy')}
                         </p>
                       </div>
                     </div>
@@ -209,10 +314,13 @@ export function NewInvoiceList() {
                     {format(new Date(invoice.issueDate), 'MMM dd, yyyy')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {format(new Date(invoice.dueDate), 'MMM dd, yyyy')}
+                    {invoice.documentType === DocumentType.QUOTE && invoice.expiryDate
+                      ? format(new Date(invoice.expiryDate), 'MMM dd, yyyy')
+                      : format(new Date(invoice.dueDate), 'MMM dd, yyyy')
+                    }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <p className="text-sm font-semibold text-gray-900">${invoice.totalAmount.toFixed(2)}</p>
+                    <p className="text-sm font-semibold text-gray-900">{invoice.totalAmount.toFixed(3)} DT</p>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(invoice.status)}
@@ -236,9 +344,16 @@ export function NewInvoiceList() {
                         </Link>
                       )}
                       <button
-                        onClick={() => toast.info('Download feature coming soon!')}
+                        onClick={async () => {
+                          try {
+                            await downloadInvoicePdf(invoice._id, invoice.invoiceNumber);
+                            toast.success('PDF téléchargé avec succès !');
+                          } catch (error) {
+                            toast.error('Échec du téléchargement du PDF');
+                          }
+                        }}
                         className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Download"
+                        title="Télécharger PDF"
                       >
                         <Download className="w-4 h-4" />
                       </button>
@@ -259,17 +374,17 @@ export function NewInvoiceList() {
             disabled={currentPage === 1}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm font-medium"
           >
-            Previous
+            Précédent
           </button>
           <span className="text-sm text-gray-600 px-4">
-            Page {currentPage} of {totalPages}
+            Page {currentPage} sur {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
             className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm font-medium"
           >
-            Next
+            Suivant
           </button>
         </div>
       )}

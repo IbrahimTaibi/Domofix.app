@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Invoice } from '@/features/invoices/types/invoice.types';
+import { Invoice, InvoiceStatus } from '@/features/invoices/types/invoice.types';
 import { getInvoiceById, updateInvoice, cancelInvoice, deleteInvoice } from '@/features/invoices/services/invoice-service';
 import { InvoicePreview } from '@/features/invoices/components/invoice-preview';
 import { toast } from 'react-hot-toast';
@@ -28,7 +28,7 @@ export default function InvoiceDetailPage() {
       const data = await getInvoiceById(invoiceId);
       setInvoice(data);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to load invoice');
+      toast.error(err.message || 'Échec du chargement de la facture');
       router.push('/dashboard/provider/invoices');
     } finally {
       setLoading(false);
@@ -40,11 +40,11 @@ export default function InvoiceDetailPage() {
 
     try {
       setActionLoading(true);
-      await updateInvoice(invoice._id, { status: 'sent' });
-      toast.success('Invoice sent successfully!');
+      await updateInvoice(invoice._id, { status: InvoiceStatus.SENT });
+      toast.success('Facture envoyée avec succès !');
       loadInvoice();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send invoice');
+      toast.error(err.message || 'Échec de l\'envoi de la facture');
     } finally {
       setActionLoading(false);
     }
@@ -52,15 +52,15 @@ export default function InvoiceDetailPage() {
 
   const handleCancelInvoice = async () => {
     if (!invoice) return;
-    if (!confirm('Are you sure you want to cancel this invoice?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette facture ?')) return;
 
     try {
       setActionLoading(true);
       await cancelInvoice(invoice._id);
-      toast.success('Invoice canceled successfully!');
+      toast.success('Facture annulée avec succès !');
       loadInvoice();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to cancel invoice');
+      toast.error(err.message || 'Échec de l\'annulation de la facture');
     } finally {
       setActionLoading(false);
     }
@@ -68,15 +68,15 @@ export default function InvoiceDetailPage() {
 
   const handleDeleteInvoice = async () => {
     if (!invoice) return;
-    if (!confirm('Are you sure you want to delete this draft invoice? This action cannot be undone.')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce brouillon de facture ? Cette action ne peut pas être annulée.')) return;
 
     try {
       setActionLoading(true);
       await deleteInvoice(invoice._id);
-      toast.success('Invoice deleted successfully!');
+      toast.success('Facture supprimée avec succès !');
       router.push('/dashboard/provider/invoices');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete invoice');
+      toast.error(err.message || 'Échec de la suppression de la facture');
       setActionLoading(false);
     }
   };
@@ -93,7 +93,7 @@ export default function InvoiceDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-          Invoice not found
+          Facture introuvable
         </div>
       </div>
     );
@@ -110,18 +110,18 @@ export default function InvoiceDetailPage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Invoices
+              Retour aux factures
             </Link>
 
             <div className="flex items-center gap-3">
-              {invoice.status === 'draft' && (
+              {invoice.status === InvoiceStatus.DRAFT && (
                 <>
                   <Link
                     href={`/dashboard/provider/invoices/${invoice._id}/edit`}
                     className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     <Edit className="w-4 h-4" />
-                    Edit
+                    Modifier
                   </Link>
                   <button
                     onClick={handleSendInvoice}
@@ -129,7 +129,7 @@ export default function InvoiceDetailPage() {
                     className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
-                    Send to Customer
+                    Envoyer au client
                   </button>
                   <button
                     onClick={handleDeleteInvoice}
@@ -137,19 +137,19 @@ export default function InvoiceDetailPage() {
                     className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete
+                    Supprimer
                   </button>
                 </>
               )}
 
-              {(invoice.status === 'sent' || invoice.status === 'overdue') && (
+              {(invoice.status === InvoiceStatus.SENT || invoice.status === InvoiceStatus.OVERDUE) && (
                 <button
                   onClick={handleCancelInvoice}
                   disabled={actionLoading}
                   className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                 >
                   <XCircle className="w-4 h-4" />
-                  Cancel Invoice
+                  Annuler la facture
                 </button>
               )}
             </div>

@@ -6,6 +6,7 @@ import {
   ValidateNested,
   IsDate,
   IsString,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InvoiceStatusEnum } from '../schemas/invoice.schema';
@@ -24,6 +25,15 @@ export class UpdateInvoiceDto extends PartialType(CreateInvoiceDto) {
   @Type(() => Date)
   @IsOptional()
   paidDate?: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  @IsOptional()
+  acceptedDate?: Date; // Pour devis uniquement
+
+  @IsMongoId()
+  @IsOptional()
+  convertedToInvoiceId?: string; // Si devis converti en facture
 
   @IsString()
   @IsOptional()

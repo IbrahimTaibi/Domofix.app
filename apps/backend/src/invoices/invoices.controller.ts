@@ -9,7 +9,9 @@ import {
   UseGuards,
   Req,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
@@ -58,6 +60,22 @@ export class InvoicesController {
     );
   }
 
+  @Get(':id/pdf')
+  async downloadPdf(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role || 'customer';
+
+    const pdfBuffer = await this.invoicesService.generatePdf(id, userId, role);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=invoice-${id}.pdf`);
+    res.send(pdfBuffer);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: any) {
     const userId = req.user?.userId || req.user?.sub || req.user?.id;
@@ -103,5 +121,29 @@ export class InvoicesController {
     const role = req.user?.role || 'provider';
     await this.invoicesService.remove(id, userId, role);
     return { message: 'Invoice deleted successfully' };
+  }
+
+  @Post(':id/convert-to-invoice')
+  @Roles('provider', 'admin')
+  async convertToInvoice(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role || 'provider';
+    return this.invoicesService.convertQuoteToInvoice(id, userId, role);
+  }
+
+  @Patch(':id/accept')
+  @Roles('customer', 'admin')
+  async acceptQuote(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role || 'customer';
+    return this.invoicesService.acceptQuote(id, userId, role);
+  }
+
+  @Patch(':id/reject')
+  @Roles('customer', 'admin')
+  async rejectQuote(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user?.userId || req.user?.sub || req.user?.id;
+    const role = req.user?.role || 'customer';
+    return this.invoicesService.rejectQuote(id, userId, role);
   }
 }

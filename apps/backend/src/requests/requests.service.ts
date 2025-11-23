@@ -408,7 +408,7 @@ export class RequestsService {
 
     return items.map((r: any) => ({
       ...r,
-      _id: r._id,
+      id: String(r._id),
       applicationsMeta: meta,
       orderId: orderMap[String(r._id)] || null,
     }));
@@ -455,7 +455,7 @@ export class RequestsService {
     }
     return items.map((r: any) => ({
       ...r,
-      _id: r._id,
+      id: String(r._id),
       applicationsMeta: meta,
     }));
   }

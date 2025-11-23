@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsMongoId, IsDateString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { InvoiceStatusEnum } from '../schemas/invoice.schema';
+import { InvoiceStatusEnum, DocumentTypeEnum } from '../schemas/invoice.schema';
 
 export class QueryInvoiceDto {
   @IsMongoId()
@@ -14,6 +14,10 @@ export class QueryInvoiceDto {
   @IsMongoId()
   @IsOptional()
   orderId?: string;
+
+  @IsEnum(DocumentTypeEnum)
+  @IsOptional()
+  documentType?: DocumentTypeEnum;
 
   @IsEnum(InvoiceStatusEnum)
   @IsOptional()

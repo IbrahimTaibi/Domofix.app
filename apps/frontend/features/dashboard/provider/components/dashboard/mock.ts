@@ -75,8 +75,8 @@ export function makeTopServices() {
 
 export function makePerformanceRadial() {
   return [
-    { name: 'Acceptation', value: rand(60, 95) },
-    { name: 'Achèvement', value: rand(70, 98) },
+    { name: 'Acceptation', value: randSeed(7001, 60, 95) },
+    { name: 'Achèvement', value: randSeed(7002, 70, 98) },
     { name: 'Satisfaction', value: Number((Math.random() * 1 + 4).toFixed(1)) * 20 },
   ]
 }

@@ -47,7 +47,7 @@ export async function createReview(data: CreateReviewData): Promise<any> {
 
 export async function getReviewByBookingId(bookingId: string): Promise<Review | null> {
   const url = `${API_BASE_URL}/reviews?bookingId=${bookingId}`
-  const response = await httpRequest(url, {
+  const response = await httpRequest<{ data: Review[]; total: number; page: number; limit: number }>(url, {
     method: 'GET',
     headers: getAuthHeaders()
   })

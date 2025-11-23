@@ -3,13 +3,21 @@ import { Document, Types } from 'mongoose';
 
 export type InvoiceDocument = Invoice & Document;
 
+export enum DocumentTypeEnum {
+  QUOTE = 'quote',        // Devis
+  INVOICE = 'invoice',    // Facture
+}
+
 export enum InvoiceStatusEnum {
   DRAFT = 'draft',
   SENT = 'sent',
-  PAID = 'paid',
-  OVERDUE = 'overdue',
+  ACCEPTED = 'accepted',  // Pour devis seulement
+  REJECTED = 'rejected',  // Pour devis seulement
+  EXPIRED = 'expired',    // Pour devis seulement
+  PAID = 'paid',          // Pour facture seulement
+  OVERDUE = 'overdue',    // Pour facture seulement
   CANCELED = 'canceled',
-  REFUNDED = 'refunded',
+  REFUNDED = 'refunded',  // Pour facture seulement
 }
 
 export enum PaymentMethodEnum {
@@ -91,11 +99,19 @@ export class Invoice {
   @Prop({ required: true, unique: true, index: true })
   invoiceNumber: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Order', required: true, index: true })
-  orderId: Types.ObjectId;
+  @Prop({
+    required: true,
+    enum: Object.values(DocumentTypeEnum),
+    default: DocumentTypeEnum.INVOICE,
+    index: true,
+  })
+  documentType: DocumentTypeEnum;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
-  customerId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Order', required: false, index: true })
+  orderId?: Types.ObjectId;  // Optional for quotes
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false, index: true })
+  customerId?: Types.ObjectId;  // Optional for standalone quotes
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, index: true })
   providerId: Types.ObjectId;
@@ -115,7 +131,7 @@ export class Invoice {
   @Prop({ type: BillingAddress, required: true })
   billFrom: BillingAddress;
 
-  // Invoice dates
+  // Invoice/Quote dates
   @Prop({ required: true, default: () => new Date() })
   issueDate: Date;
 
@@ -123,7 +139,16 @@ export class Invoice {
   dueDate: Date;
 
   @Prop({ default: null })
+  expiryDate?: Date; // Pour devis uniquement
+
+  @Prop({ default: null })
   paidDate?: Date;
+
+  @Prop({ default: null })
+  acceptedDate?: Date; // Pour devis uniquement
+
+  @Prop({ default: null })
+  convertedToInvoiceId?: Types.ObjectId; // Si devis converti en facture
 
   // Line items
   @Prop({ type: [InvoiceLineItem], required: true })
@@ -175,6 +200,8 @@ export const InvoiceSchema = SchemaFactory.createForClass(Invoice);
 // Indexes for efficient querying
 InvoiceSchema.index({ customerId: 1, status: 1, issueDate: -1 });
 InvoiceSchema.index({ providerId: 1, status: 1, issueDate: -1 });
+InvoiceSchema.index({ providerId: 1, documentType: 1, status: 1 });
 InvoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
 InvoiceSchema.index({ orderId: 1 });
 InvoiceSchema.index({ dueDate: 1, status: 1 });
+InvoiceSchema.index({ expiryDate: 1, documentType: 1 });

@@ -23,7 +23,7 @@ export default function ServiceCard({ service, onEdit, onDeleteSuccess }: Servic
   const [isDeleting, setIsDeleting] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const { showSuccess, showError } = useToast()
+  const { success, error } = useToast()
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -31,8 +31,8 @@ export default function ServiceCard({ service, onEdit, onDeleteSuccess }: Servic
       await deleteProviderService(service._id)
       setShowDeleteDialog(false)
       onDeleteSuccess()
-    } catch (error: any) {
-      showError(error?.message || 'Erreur lors de la suppression')
+    } catch (err: any) {
+      error(err?.message || 'Erreur lors de la suppression')
     } finally {
       setIsDeleting(false)
     }
@@ -43,10 +43,10 @@ export default function ServiceCard({ service, onEdit, onDeleteSuccess }: Servic
     try {
       const newStatus = service.status === ServiceStatus.ACTIVE ? ServiceStatus.INACTIVE : ServiceStatus.ACTIVE
       await updateServiceStatus(service._id, newStatus)
-      showSuccess(`Service ${newStatus === ServiceStatus.ACTIVE ? 'activé' : 'désactivé'}`)
+      success(`Service ${newStatus === ServiceStatus.ACTIVE ? 'activé' : 'désactivé'}`)
       onDeleteSuccess() // Refresh the list
-    } catch (error: any) {
-      showError(error?.message || 'Erreur lors de la mise à jour')
+    } catch (err: any) {
+      error(err?.message || 'Erreur lors de la mise à jour')
     } finally {
       setIsUpdatingStatus(false)
       setShowMenu(false)

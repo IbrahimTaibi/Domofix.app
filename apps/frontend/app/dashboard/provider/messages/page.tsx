@@ -46,7 +46,7 @@ export default function ProviderMessagesPage() {
           ) : (
             <div className="flex-1 bg-white" />
           )}
-          <ChatComposer onSend={(text) => { if (activeId) sendMessage(activeId, text) }} disabled={!activeId} />
+          <ChatComposer onSend={(text) => { if (activeId) sendMessage(activeId, text) }} />
         </div>
         <DetailsPanel participant={customer || { id: '', name: 'Client', avatarUrl: '', role: 'customer' }} messages={activeMessages} />
       </div>
